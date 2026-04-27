@@ -1,0 +1,39 @@
+# Visual Studio build outputs
+Debug/
+Release/
+x64/
+x86/
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.lib
+*.exp
+*.dll
+*.iobj
+*.ipdb
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.aps
+*.ncb
+*.sdf
+*.opensdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+*.pidb
+*.psess
+*.vsp
+*.vspx
+ipch/
+
+# NuGet
+packages/
+*.nupkg
+
+# CMake
+CMakeSettings.json
+out/
