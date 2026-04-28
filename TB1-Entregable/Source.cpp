@@ -28,7 +28,7 @@ void mostrarLogo() {
         "           YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY   ",
         "                                                               ",
         "  R W R                                                        ",
-        "  R W R    PERU - CORAZON DE LA AMAZONIA                       ",
+        "  R W R    Bienvenido a nuestra tienda Amazonas                ",
         "  R W R                                                        "
     };
 
