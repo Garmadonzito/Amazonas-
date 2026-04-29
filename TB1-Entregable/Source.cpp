@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <windows.h> // Necesario para habilitar colores ANSI en la consola de Windows
+#include <windows.h> 
 
 #include "Inventario.h"
 #include "Cliente.h"
@@ -9,10 +9,9 @@
 
 using namespace std;
 
-// Función que dibuja el logo en pantalla usando el mapa compacto
+
 void mostrarLogo() {
-    // Mapa de la matriz compacta (16 filas x 65 columnas)
-    // R=Rojo, G=Verde, B=Azul, Y=Amarillo, W=Blanco
+    // Mapa de la matriz 
     vector<string> mapa = {
         "                                                               ",
         "                                 GGG       GGG                 ",
@@ -42,9 +41,8 @@ void mostrarLogo() {
 
     cout << "\nCargando sistema Amazonas...\n\n";
 
-    // Recorremos el mapa y pintamos según la letra
     for (const string& fila : mapa) {
-        cout << "    "; // Pequeño margen izquierdo para centrar
+        cout << "    ";
         for (char c : fila) {
             if (c == 'R') cout << colorRojo << '#';
             else if (c == 'G') cout << colorVerde << '*';
@@ -52,7 +50,7 @@ void mostrarLogo() {
             else if (c == 'Y') cout << colorAmarillo << '@';
             else if (c == 'W') cout << colorBlanco << '#';
             else if (c == ' ') cout << ' ';
-            else cout << colorBlanco << c; // Para las letras del título
+            else cout << colorBlanco << c;
         }
         cout << reset << endl;
     }
@@ -63,18 +61,20 @@ void mostrarLogo() {
 }
 
 int main() {
-    // === CONFIGURACIÓN DE CONSOLA PARA HABILITAR COLORES ANSI ===
+
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
     SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     // ============================================================
 
-    limpiarPantalla(); // Función definida en tu Usuario.h
-    mostrarLogo();     // Muestra la matriz dibujada de forma compacta
+    limpiarPantalla(); 
+    mostrarLogo();
 
-    Inventario miInventario;
-    miInventario.cargarProductosIniciales();
+   
+    Inventario* miTienda = new Inventario();
+    Vendedor* admin = new Vendedor();
+    Cliente* user = new Cliente();
 
     int op;
     do {
@@ -84,28 +84,31 @@ int main() {
         cout << "========================================\n";
         cout << "Que tipo de usuario eres?\n";
         cout << "1. Cliente\n";
-        cout << "2. Vendedor\n";
+        cout << "2. Vendedor (Empieza por aqui para anadir stock)\n";
         cout << "3. Salir\n";
         cout << "Opcion: "; cin >> op;
 
         switch (op) {
         case 1: {
             limpiarPantalla();
-            Cliente clienteActivo;
-            clienteActivo.login();
-            clienteActivo.menu(miInventario);
+            user->login();
+            user->menu(*miTienda);
             break;
         }
         case 2: {
             limpiarPantalla();
-            Vendedor vendedorActivo;
-            if (vendedorActivo.login()) {
-                vendedorActivo.menu(miInventario);
+            if (admin->login()) {
+                admin->menu(*miTienda);
             }
             break;
         }
         }
     } while (op != 3);
+
+  
+    delete miTienda;
+    delete admin;
+    delete user;
 
     limpiarPantalla();
     cout << "\nHasta pronto!\n";

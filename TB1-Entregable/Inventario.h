@@ -1,10 +1,9 @@
 #pragma once
-#include "ListaDoble.h"
+#include "ListaEnlazada.h"
 #include <string>
 #include <iostream>
 #include <functional>
 
-// Estructura Producto - Base de los datos del Marketplace
 struct Producto {
     int id;
     std::string nombre;
@@ -14,105 +13,79 @@ struct Producto {
 
 class Inventario {
 private:
-    
-    ListaDoble<Producto>* listaProductos;
+    // Estructura dinámica usando Lista Enlazada
+    ListaEnlazada<Producto>* listaProductos;
 
-    // ---------------------------------------------------------
-    // MÉTODO RECURSIVO  - Rafael
-    // ---------------------------------------------------------
-    // Busca un producto por ID navegando por los punteros de los nodos
+    // MÉTODO RECURSIVO - Rafael
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
-
-        // Caso base 1: No se encontró el producto (final de lista)
         if (actual == nullptr) return nullptr;
-
-        // Caso base 2: Producto encontrado
         if (actual->dato.id == idBuscado) return actual;
-
-        // Paso recursivo: Se llama a sí misma con el siguiente nodo
         return buscarRecursivo(actual->siguiente, idBuscado);
     }
 
 public:
     Inventario() {
-        // Inicialización de la estructura dinámica en el heap
-        listaProductos = new ListaDoble<Producto>();
+        listaProductos = new ListaEnlazada<Producto>();
     }
 
     ~Inventario() {
-        // El destructor de ListaDoble se encarga de liberar los nodos
         delete listaProductos;
     }
 
-    // Agrega un nuevo producto creando un nodo dinámico
     void agregarProducto(int id, std::string nombre, float precio, int stock) {
         Producto nuevo = { id, nombre, precio, stock };
         listaProductos->agregar(nuevo);
     }
 
-    // Verifica existencia de un producto usando la función recursiva
     bool existeProducto(int id) {
-        Nodo<Producto>* encontrado = buscarRecursivo(listaProductos->getCabeza(), id);
-        return encontrado != nullptr;
+        return buscarRecursivo(listaProductos->getCabeza(), id) != nullptr;
     }
 
-    // Modifica los datos de un producto existente
+  
+    Producto* obtenerProducto(int id) {
+        Nodo<Producto>* encontrado = buscarRecursivo(listaProductos->getCabeza(), id);
+        if (encontrado != nullptr) {
+            return &(encontrado->dato);
+        }
+        return nullptr;
+    }
+
     void modificarProducto(int id, float nuevoPrecio, int nuevoStock) {
-        Nodo<Producto>* actual = buscarRecursivo(listaProductos->getCabeza(), id);
-        if (actual != nullptr) {
-            actual->dato.precio = nuevoPrecio;
-            actual->dato.stock = nuevoStock;
+        Producto* p = obtenerProducto(id);
+        if (p != nullptr) {
+            p->precio = nuevoPrecio;
+            p->stock = nuevoStock;
             std::cout << ">> Producto actualizado correctamente.\n";
         }
     }
 
-    // Muestra la información específica de un solo artículo
     void mostrarDetalle(int id) {
-        Nodo<Producto>* actual = buscarRecursivo(listaProductos->getCabeza(), id);
-        if (actual != nullptr) {
+        Producto* p = obtenerProducto(id);
+        if (p != nullptr) {
             std::cout << "\n--- DETALLE DEL PRODUCTO ---\n";
-            std::cout << "ID: " << actual->dato.id << "\n";
-            std::cout << "Nombre: " << actual->dato.nombre << "\n";
-            std::cout << "Precio: S/. " << actual->dato.precio << "\n";
-            std::cout << "Stock disponible: " << actual->dato.stock << "\n";
+            std::cout << "ID: " << p->id << "\n";
+            std::cout << "Nombre: " << p->nombre << "\n";
+            std::cout << "Precio: S/. " << p->precio << "\n";
+            std::cout << "Stock disponible: " << p->stock << "\n";
         }
     }
 
-    // Elimina un producto gestionando los enlaces de la lista doble
+  
     bool eliminarProducto(int id) {
-        Nodo<Producto>* actual = buscarRecursivo(listaProductos->getCabeza(), id);
-        if (actual == nullptr) return false; // El ID no existe
-
-       
-        if (actual->anterior != nullptr) {
-            actual->anterior->siguiente = actual->siguiente;
-        }
-        if (actual->siguiente != nullptr) {
-            actual->siguiente->anterior = actual->anterior;
-        }
-
-        // Liberamos la memoria del nodo para evitar memory leaks
-        delete actual;
-        return true;
+        return listaProductos->eliminarSi([id](Producto p) -> bool {
+            return p.id == id;
+            });
     }
 
-    // ---------------------------------------------------------
-    // USO DE FUNCIÓN LAMBDA -  Rafael
-    // ---------------------------------------------------------
-    // Filtra y muestra productos con stock 
+    // FUNCIÓN LAMBDA - Rafael
     void mostrarStockBajo(int limite) {
         std::cout << "\n========== ALERTAS DE STOCK (Limite: " << limite << ") ==========\n";
-
-        // Definición de la Lambda: Captura 'limite' por valor
         auto esCritico = [limite](Producto p) -> bool {
             return p.stock < limite;
             };
-
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool huboAlertas = false;
-
         while (actual != nullptr) {
-            // Aplicación de la función lambda
             if (esCritico(actual->dato)) {
                 std::cout << "[ID: " << actual->dato.id << "] "
                     << actual->dato.nombre << " - Unidades: "
@@ -121,21 +94,16 @@ public:
             }
             actual = actual->siguiente;
         }
-
-        if (!huboAlertas) {
-            std::cout << "Todo el inventario cuenta con stock suficiente.\n";
-        }
+        if (!huboAlertas) std::cout << "Todo el inventario cuenta con stock suficiente.\n";
         std::cout << "========================================================\n";
     }
 
-    // Método iterativo para mostrar todo el catálogo
     void listarTodo() {
         Nodo<Producto>* actual = listaProductos->getCabeza();
         if (actual == nullptr) {
             std::cout << "Inventario vacio.\n";
             return;
         }
-
         std::cout << "\n--- CATALOGO COMPLETO ---\n";
         while (actual != nullptr) {
             std::cout << "ID: " << actual->dato.id
@@ -144,5 +112,19 @@ public:
                 << " | Stock: " << actual->dato.stock << "\n";
             actual = actual->siguiente;
         }
+    }
+
+    void buscarPorNombre(std::string nom) {
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        bool encontrado = false;
+        std::cout << "\n--- RESULTADOS ---\n";
+        while (actual != nullptr) {
+            if (actual->dato.nombre.find(nom) != std::string::npos) {
+                std::cout << "ID: " << actual->dato.id << " | " << actual->dato.nombre << " | S/. " << actual->dato.precio << "\n";
+                encontrado = true;
+            }
+            actual = actual->siguiente;
+        }
+        if (!encontrado) std::cout << "No se encontraron productos.\n";
     }
 };
