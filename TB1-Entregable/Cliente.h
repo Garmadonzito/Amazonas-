@@ -1,6 +1,7 @@
 #pragma once
 #include "Usuario.h"
 #include "Inventario.h"
+#include "MetodoPago.h"
 
 class Cliente : public Usuario {
 private:
@@ -67,6 +68,26 @@ public:
         cout << ">> Item eliminado.\n";
     }
 
+    void seleccionarMetodoPago(double total) {
+        int op;
+        cout << "\n--- METODO DE PAGO ---\n";
+        cout << "1. Tarjeta\n";
+        cout << "2. Yape / Plin\n";
+        cout << "Opcion: "; cin >> op;
+
+        if (op == 1) {
+            Tarjeta t;
+            t.pagar(total);
+        }
+        else if (op == 2) {
+            YapePlin yp;
+            yp.pagar(total);
+        }
+        else {
+            cout << "Opcion invalida. Pago cancelado.\n";
+        }
+    }
+
     void comprarCarrito(Inventario& inv) {
         if (totalCarrito == 0) { cout << "Carrito vacio.\n"; return; }
         double total = 0;
@@ -76,7 +97,8 @@ public:
                 total += inv.getProducto(idx)->precio;
             }
         }
-        cout << "\n>> Compra realizada por S/. " << total << endl;
+        verCarrito(inv);
+        seleccionarMetodoPago(total);
         cout << ">> Gracias " << nombre << "!\n";
         totalCarrito = 0;
     }
