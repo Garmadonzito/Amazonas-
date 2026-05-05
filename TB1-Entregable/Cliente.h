@@ -6,7 +6,7 @@
 
 extern void mostrarFondo2();
 
-#define IZQ 12  // columna izquierda de la zona negra
+#define IZQ PANEL_COL  // columna izquierda de la zona negra
 
 class Cliente : public Usuario {
 private:

@@ -6,6 +6,14 @@
 #include <vector>
 #include <functional>
 
+inline void imprimirEnPanel(int fila, const std::string& texto, int color = 0) {
+    const int panelCol = 12;
+    std::cout << "\033[" << fila << ";" << panelCol << "H";
+    if (color != 0) std::cout << "\033[" << color << "m";
+    else std::cout << "\033[0m";
+    std::cout << texto << "\033[0m";
+}
+
 class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
@@ -105,13 +113,15 @@ public:
 
     void listarTodo() {
         if (listaProductos->getCabeza() == nullptr) {
-            std::cout << "Inventario vacio.\n";
+            imprimirEnPanel(10, "Inventario vacio.");
             return;
         }
 
-        std::cout << "\n\033[1;36m========================================================\033[0m\n";
-        std::cout << "\033[1;36m                  CATALOGO AMAZONAS                     \033[0m\n";
-        std::cout << "\033[1;36m========================================================\033[0m\n";
+        int fila = 10;
+        imprimirEnPanel(fila++, "========================================================", 96);
+        imprimirEnPanel(fila++, "                  CATALOGO AMAZONAS                     ", 96);
+        imprimirEnPanel(fila++, "========================================================", 96);
+        fila++;
 
         std::vector<std::string> categorias;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -131,33 +141,39 @@ public:
         }
 
         for (const std::string& cat : categorias) {
-            std::cout << "\n\033[1;33m>>> " << cat << " <<<\033[0m\n";
+            imprimirEnPanel(fila++, ">>> " + cat + " <<<", 93);
             actual = listaProductos->getCabeza();
             while (actual != nullptr) {
                 if (actual->dato.categoria == cat) {
-                    std::cout << "  [ID: " << actual->dato.id << "] "
-                        << actual->dato.nombre
-                        << " | Precio: S/. " << actual->dato.precio
-                        << " | Stock: " << actual->dato.stock << "\n";
+                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " +
+                        actual->dato.nombre +
+                        " | Precio: S/. " + std::to_string((int)actual->dato.precio) +
+                        " | Stock: " + std::to_string(actual->dato.stock);
+                    imprimirEnPanel(fila++, item);
                 }
                 actual = actual->siguiente;
             }
+            fila++;
         }
-        std::cout << "\033[1;36m========================================================\033[0m\n";
+        imprimirEnPanel(fila, "========================================================", 96);
     }
 
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool encontrado = false;
-        std::cout << "\n--- RESULTADOS ---\n";
+        int fila = 10;
+        imprimirEnPanel(fila++, "--- RESULTADOS ---");
+        fila++;
         while (actual != nullptr) {
             if (actual->dato.nombre.find(nom) != std::string::npos) {
-                std::cout << "[ID: " << actual->dato.id << "] (" << actual->dato.categoria << ") "
-                    << actual->dato.nombre << " | S/. " << actual->dato.precio << "\n";
+                std::string item = "[ID: " + std::to_string(actual->dato.id) + "] (" +
+                    actual->dato.categoria + ") " + actual->dato.nombre +
+                    " | S/. " + std::to_string((int)actual->dato.precio);
+                imprimirEnPanel(fila++, item);
                 encontrado = true;
             }
             actual = actual->siguiente;
         }
-        if (!encontrado) std::cout << "No se encontraron productos.\n";
+        if (!encontrado) imprimirEnPanel(fila, "No se encontraron productos.");
     }
 };
