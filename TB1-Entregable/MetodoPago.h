@@ -28,6 +28,10 @@ public:
 class YapePlin : public MetodoPago {
 public:
     void mostrarQR() {
+        // char 220 = lower half block (▄)
+        // Foreground = lower half color, Background = upper half color
+        // Procesamos 2 filas del QR por cada linea de terminal -> aspecto cuadrado
+
         const int QR_SIZE = 41;
         const char* QR_DATA[] = {
             "11111110001101100001111110100101001111111",
@@ -73,31 +77,56 @@ public:
             "10000010100010011011110100011010100111010",
         };
 
-        unsigned char bloque = 219;
-        cout << "\n   Escanea el QR con Yape o Plin:\n\n";
+        unsigned char halfBlock = 220; // ▄  lower half block
 
-        // Quiet zone superior (4 lineas blancas)
-        string margen(QR_SIZE + 8, ' ');
-        for (int i = 0; i < 4; i++) cout << "  " << margen << "\n";
+        // Negro = \033[40m   Blanco brillante = \033[107m
+        // char 220: fg = mitad inferior, bg = mitad superior
+        //   top=0 bot=0 -> blanco/blanco   -> \033[107;107m \033[0m
+        //   top=0 bot=1 -> fg negro bg bco -> \033[30;107m▄\033[0m
+        //   top=1 bot=0 -> fg bco bg negro -> \033[97;40m▄\033[0m
+        //   top=1 bot=1 -> negro/negro     -> \033[40;40m \033[0m
 
-        for (int row = 0; row < QR_SIZE; row++) {
-            cout << "  ";
-            // Quiet zone izquierdo (4 espacios)
-            cout << "    ";
+        cout << "\n   Escanea con Yape o Plin:\n\n";
+
+        // Quiet zone superior (2 lineas = 4 filas blancas)
+        int lineWidth = QR_SIZE + 8; // 4 quiet zone cada lado
+        for (int i = 0; i < 2; i++) {
+            cout << "  \033[107m";
+            for (int x = 0; x < lineWidth; x++) cout << ' ';
+            cout << "\033[0m\n";
+        }
+
+        // Renderizar QR: 2 filas por linea
+        for (int row = 0; row < QR_SIZE; row += 2) {
+            cout << "  \033[107m    \033[0m"; // quiet zone izquierdo
             for (int col = 0; col < QR_SIZE; col++) {
-                if (QR_DATA[row][col] == '1') {
-                    cout << "\033[40m" << bloque << bloque << "\033[0m";
+                bool top    = QR_DATA[row][col]          == '1';
+                bool bottom = (row + 1 < QR_SIZE) ?
+                              QR_DATA[row + 1][col] == '1' : false;
+
+                if (!top && !bottom) {
+                    // ambos blancos
+                    cout << "\033[107;107m " << "\033[0m";
+                } else if (!top && bottom) {
+                    // superior blanco, inferior negro
+                    cout << "\033[30;107m" << halfBlock << "\033[0m";
+                } else if (top && !bottom) {
+                    // superior negro, inferior blanco
+                    cout << "\033[97;40m" << halfBlock << "\033[0m";
                 } else {
-                    cout << "\033[47m  \033[0m";
+                    // ambos negros
+                    cout << "\033[40;40m " << "\033[0m";
                 }
             }
-            // Quiet zone derecho
-            cout << "\033[47m    \033[0m";
-            cout << "\n";
+            cout << "\033[107m    \033[0m\n"; // quiet zone derecho
         }
 
         // Quiet zone inferior
-        for (int i = 0; i < 4; i++) cout << "  " << margen << "\n";
+        for (int i = 0; i < 2; i++) {
+            cout << "  \033[107m";
+            for (int x = 0; x < lineWidth; x++) cout << ' ';
+            cout << "\033[0m\n";
+        }
 
         cout << "\n   Numero: 987-654-321\n";
     }
