@@ -28,7 +28,7 @@ public:
 
     void gestionarProductos(Inventario& inv) {
         int id, stock;
-        string nombre;
+        string nombre, categoria;
         float precio;
 
         cout << "--- NUEVO PRODUCTO ---\n";
@@ -38,10 +38,11 @@ public:
             return;
         }
         cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
+        cout << "Categoria: "; getline(cin, categoria);
         cout << "Precio: "; cin >> precio;
         cout << "Stock: "; cin >> stock;
 
-        inv.agregarProducto(id, nombre, precio, stock);
+        inv.agregarProducto(id, nombre, categoria, precio, stock);
         cout << ">> Producto guardado en la lista enlazada.\n";
     }
 
