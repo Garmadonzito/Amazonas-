@@ -10,12 +10,6 @@ class Cliente : public Usuario {
 private:
     ListaEnlazada<int>* carrito;
 
-    // Imprime una linea en la posicion indicada dentro del fondo
-    void linea(int fila, int col, const string& texto) {
-        irA(fila, col);
-        cout << "\033[0m" << texto;
-    }
-
 public:
     Cliente() {
         carrito = new ListaEnlazada<int>();
@@ -54,16 +48,19 @@ public:
     }
 
     void agregarAlCarrito(Inventario& inv) {
-        mostrarFondo2();
-        irA(11, 14);
+        limpiarZonaVerde();
+
+        // Mostrar catalogo en la zona verde
+        int fila = 10;
+        irA(fila++, 12); cout << "\033[0m";
         inv.listarTodo();
 
-        irA(30, 14);
-        cout << "\033[0m>> Ingrese ID y ENTER para agregar. ESC para terminar.";
+        irA(32, 12);
+        cout << "\033[0m>> Ingrese ID y ENTER para agregar. ESC para terminar.\n";
 
-        int filaInput = 31;
+        int filaMsg = 34;
         while (true) {
-            irA(filaInput, 14);
+            irA(filaMsg, 12);
             cout << "\033[0mID: ";
             string buf;
             bool salir = false;
@@ -81,27 +78,27 @@ public:
 
             int id = stoi(buf);
             Producto* p = inv.obtenerProducto(id);
-            irA(filaInput + 1, 14);
+            irA(filaMsg + 1, 12);
             cout << "\033[0m";
             if (p == nullptr) {
-                cout << ">> Producto no existe.                    ";
+                cout << ">> ID no encontrado.                          ";
             } else if (p->stock <= 0) {
-                cout << ">> Sin stock disponible.                  ";
+                cout << ">> Sin stock disponible.                      ";
             } else {
                 carrito->agregar(id);
                 p->stock--;
-                cout << ">> " << p->nombre << " agregado!          ";
-                filaInput += 2;
-                if (filaInput > 36) filaInput = 31;
+                cout << ">> '" << p->nombre << "' agregado al carrito! ";
             }
         }
     }
 
     void verCarrito(Inventario& inv) {
-        int fila = 13;
-        linea(fila++, 14, "--- TU CARRITO ---");
+        int fila = 14;
+        imprimirCentrado(fila++, "--- TU CARRITO ---");
+        fila++;
+
         if (carrito->getCabeza() == nullptr) {
-            linea(fila++, 14, "Vacio.            ");
+            imprimirCentrado(fila, "Carrito vacio.");
             return;
         }
 
@@ -111,29 +108,33 @@ public:
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
             if (p != nullptr) {
-                string item = to_string(i) + ". " + p->nombre + " - S/. " + to_string((int)p->precio);
-                linea(fila++, 14, item);
+                string item = to_string(i) + ". " + p->nombre +
+                              "  -  S/. " + to_string((int)p->precio);
+                imprimirCentrado(fila++, item);
                 total += p->precio;
             }
             actual = actual->siguiente;
             i++;
         }
-        linea(fila++, 14, "TOTAL: S/. " + to_string((int)total) + "      ");
+        fila++;
+        imprimirCentrado(fila, "TOTAL: S/. " + to_string((int)total));
     }
 
     void seleccionarMetodoPago(double total) {
-        limpiarMenuArea();
-        linea(11, 14, "--- METODO DE PAGO ---");
-        linea(13, 14, "1. Tarjeta");
-        linea(14, 14, "2. Yape / Plin");
-        linea(16, 14, "Opcion: ");
-        irA(16, 22);
+        limpiarZonaVerde();
+        imprimirCentrado(14, "==============================");
+        imprimirCentrado(15, "     METODO DE PAGO           ");
+        imprimirCentrado(16, "==============================");
+        imprimirCentrado(18, "1. Tarjeta");
+        imprimirCentrado(19, "2. Yape / Plin");
+        imprimirCentrado(21, "Opcion: ");
+        irA(21, 63);
         int op; cin >> op;
 
         if (op == 1) {
+            limpiarZonaVerde();
+            irA(13, 12);
             Tarjeta t;
-            limpiarMenuArea();
-            irA(11, 14);
             t.pagar(total);
         } else if (op == 2) {
             limpiarPantalla();
@@ -141,13 +142,15 @@ public:
             yp.pagar(total);
             mostrarFondo2();
         } else {
-            linea(18, 14, "Opcion invalida. Pago cancelado.");
+            imprimirCentrado(23, "Opcion invalida. Pago cancelado.");
         }
     }
 
     void comprarCarrito(Inventario& inv) {
+        limpiarZonaVerde();
         if (carrito->getCabeza() == nullptr) {
-            linea(13, 14, "Carrito vacio.          ");
+            imprimirCentrado(20, "El carrito esta vacio.");
+            irA(23, 12); pausa();
             return;
         }
 
@@ -158,12 +161,15 @@ public:
             if (p != nullptr) total += p->precio;
             actual = actual->siguiente;
         }
+
         verCarrito(inv);
+        irA(36, 12); pausa();
+
         seleccionarMetodoPago(total);
 
-        linea(26, 14, ">> Gracias " + nombre + "!          ");
-        irA(28, 14);
-        pausa();
+        limpiarZonaVerde();
+        imprimirCentrado(20, ">> Compra realizada. Gracias " + nombre + "!");
+        irA(23, 12); pausa();
 
         delete carrito;
         carrito = new ListaEnlazada<int>();
@@ -172,34 +178,34 @@ public:
     void menuBuscarProducto(Inventario& inv) {
         int op;
         do {
-            mostrarFondo2();
-            limpiarMenuArea();
-            linea(11, 14, "--- BUSCAR PRODUCTO ---");
-            linea(13, 14, "1. Ver todo el catalogo");
-            linea(14, 14, "2. Buscar por nombre");
-            linea(15, 14, "3. Agregar al carrito");
-            linea(16, 14, "4. Volver");
-            linea(18, 14, "Opcion: ");
-            irA(18, 22);
+            limpiarZonaVerde();
+            imprimirCentrado(14, "==============================");
+            imprimirCentrado(15, "      BUSCAR PRODUCTO         ");
+            imprimirCentrado(16, "==============================");
+            imprimirCentrado(18, "1. Ver todo el catalogo");
+            imprimirCentrado(19, "2. Buscar por nombre");
+            imprimirCentrado(20, "3. Agregar al carrito");
+            imprimirCentrado(21, "4. Volver");
+            imprimirCentrado(23, "Opcion: ");
+            irA(23, 63);
             cin >> op;
 
             switch (op) {
             case 1:
-                mostrarFondo2();
-                irA(11, 14);
+                limpiarZonaVerde();
+                irA(10, 12);
                 inv.listarTodo();
-                irA(37, 14);
-                pausa();
+                irA(37, 12); pausa();
                 break;
             case 2: {
-                limpiarMenuArea();
-                linea(11, 14, "Ingrese nombre: ");
-                irA(11, 30);
+                limpiarZonaVerde();
+                imprimirCentrado(18, "Ingrese nombre a buscar: ");
+                irA(18, 76);
                 string nom; cin.ignore(); getline(cin, nom);
-                irA(13, 14);
+                limpiarZonaVerde();
+                irA(11, 12);
                 inv.buscarPorNombre(nom);
-                irA(30, 14);
-                pausa();
+                irA(35, 12); pausa();
                 break;
             }
             case 3:
@@ -212,25 +218,24 @@ public:
     void menuCarrito(Inventario& inv) {
         int op;
         do {
-            mostrarFondo2();
-            limpiarMenuArea();
-            linea(11, 14, "--- MI CARRITO ---");
-            linea(13, 14, "1. Ver carrito");
-            linea(14, 14, "2. Comprar");
-            linea(15, 14, "3. Volver");
-            linea(17, 14, "Opcion: ");
-            irA(17, 22);
+            limpiarZonaVerde();
+            imprimirCentrado(14, "==============================");
+            imprimirCentrado(15, "         MI CARRITO           ");
+            imprimirCentrado(16, "==============================");
+            imprimirCentrado(18, "1. Ver carrito");
+            imprimirCentrado(19, "2. Comprar");
+            imprimirCentrado(20, "3. Volver");
+            imprimirCentrado(22, "Opcion: ");
+            irA(22, 63);
             cin >> op;
 
             switch (op) {
             case 1:
-                limpiarMenuArea();
+                limpiarZonaVerde();
                 verCarrito(inv);
-                irA(35, 14);
-                pausa();
+                irA(36, 12); pausa();
                 break;
             case 2:
-                limpiarMenuArea();
                 comprarCarrito(inv);
                 return;
             }
@@ -241,20 +246,20 @@ public:
         mostrarFondo2();
         int op;
         do {
-            limpiarMenuArea();
-            linea(11, 14, "========================================");
-            linea(12, 14, "   MENU CLIENTE - " + nombre);
-            linea(13, 14, "========================================");
-            linea(15, 14, "1. Ver productos / Buscar");
-            linea(16, 14, "2. Mi carrito");
-            linea(17, 14, "3. Cerrar sesion");
-            linea(19, 14, "Opcion: ");
-            irA(19, 22);
+            limpiarZonaVerde();
+            imprimirCentrado(13, "========================================");
+            imprimirCentrado(14, "   BIENVENIDO, " + nombre);
+            imprimirCentrado(15, "========================================");
+            imprimirCentrado(17, "1. Ver productos / Buscar");
+            imprimirCentrado(18, "2. Mi carrito");
+            imprimirCentrado(19, "3. Cerrar sesion");
+            imprimirCentrado(21, "Opcion: ");
+            irA(21, 63);
             cin >> op;
 
             switch (op) {
-            case 1: menuBuscarProducto(inv); mostrarFondo2(); break;
-            case 2: menuCarrito(inv); mostrarFondo2(); break;
+            case 1: menuBuscarProducto(inv); break;
+            case 2: menuCarrito(inv); break;
             }
         } while (op != 3);
     }
