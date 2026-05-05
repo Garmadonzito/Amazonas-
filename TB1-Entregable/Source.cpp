@@ -13,6 +13,8 @@ void configurarConsola() {
     const SHORT ancho = 130;
     const SHORT alto = 45;
 
+    system("mode con: cols=130 lines=45 > nul");
+
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) return;
 
@@ -20,7 +22,7 @@ void configurarConsola() {
 
     DWORD dwMode = 0;
     if (GetConsoleMode(hOut, &dwMode)) {
-        SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        SetConsoleMode(hOut, (dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) & ~ENABLE_WRAP_AT_EOL_OUTPUT);
     }
 
     COORD maxTam = GetLargestConsoleWindowSize(hOut);
