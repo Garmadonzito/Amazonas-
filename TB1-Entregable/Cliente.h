@@ -2,10 +2,10 @@
 #include "Usuario.h"
 #include "Inventario.h"
 #include "MetodoPago.h"
+#include <conio.h>
 
 class Cliente : public Usuario {
 private:
-    // El carrito ahora es dinámico, reutilizando la Lista Enlazada
     ListaEnlazada<int>* carrito;
 
 public:
@@ -22,33 +22,22 @@ public:
         cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
         cout << "Correo: "; getline(cin, correo);
 
-        // ---------------------------------------------------------
-        // FUNCIÓN LAMBDA - Rafael
-        // ---------------------------------------------------------
         auto validarDNI = [](string d) -> bool {
-            // 1. Verifica que tenga exactamente 8 caracteres
             if (d.length() != 8) return false;
-
-            // 2. Verifica manualmente que cada carácter sea un número
             for (char c : d) {
-                if (c < '0' || c > '9') {
-                    return false; 
-                }
+                if (c < '0' || c > '9') return false;
             }
             return true;
-            };
+        };
 
         bool dniValido = false;
         do {
             cout << "DNI: ";
             getline(cin, dni);
-
-            
             if (validarDNI(dni)) {
                 dniValido = true;
-            }
-            else {
-                cout << ">> Error: El DNI es invalido. Debe contener exactamente 8 numeros.\n";
+            } else {
+                cout << ">> Error: El DNI debe tener exactamente 8 numeros.\n";
             }
         } while (!dniValido);
 
@@ -57,16 +46,43 @@ public:
     }
 
     void agregarAlCarrito(Inventario& inv) {
-        cout << "Ingrese ID del producto a agregar: ";
-        int id; cin >> id;
+        limpiarPantalla();
+        inv.listarTodo();
+        cout << "\n>> Ingrese ID del producto y ENTER para agregar. Presione ESC para terminar.\n";
 
-        Producto* p = inv.obtenerProducto(id);
-        if (p == nullptr) { cout << "Producto no existe.\n"; return; }
-        if (p->stock <= 0) { cout << "Sin stock.\n"; return; }
+        while (true) {
+            cout << "ID: ";
+            string buf;
+            bool salir = false;
 
-        carrito->agregar(id);
-        p->stock--;
-        cout << ">> " << p->nombre << " agregado al carrito.\n";
+            while (true) {
+                int c = _getch();
+                if (c == 27) { salir = true; cout << "\n"; break; }
+                if (c == '\r') { cout << "\n"; break; }
+                if (c == 8 && !buf.empty()) {
+                    buf.pop_back();
+                    cout << "\b \b";
+                } else if (c >= '0' && c <= '9') {
+                    buf += (char)c;
+                    cout << (char)c;
+                }
+            }
+
+            if (salir) break;
+            if (buf.empty()) continue;
+
+            int id = stoi(buf);
+            Producto* p = inv.obtenerProducto(id);
+            if (p == nullptr) {
+                cout << ">> Producto no existe.\n";
+            } else if (p->stock <= 0) {
+                cout << ">> Sin stock disponible.\n";
+            } else {
+                carrito->agregar(id);
+                p->stock--;
+                cout << ">> " << p->nombre << " agregado al carrito!\n";
+            }
+        }
     }
 
     void verCarrito(Inventario& inv) {
@@ -99,15 +115,14 @@ public:
         if (op == 1) {
             Tarjeta t;
             t.pagar(total);
-        }
-        else if (op == 2) {
+        } else if (op == 2) {
             YapePlin yp;
             yp.pagar(total);
-        }
-        else {
+        } else {
             cout << "Opcion invalida. Pago cancelado.\n";
         }
     }
+
     void comprarCarrito(Inventario& inv) {
         if (carrito->getCabeza() == nullptr) { cout << "Carrito vacio.\n"; return; }
 
@@ -115,16 +130,13 @@ public:
         Nodo<int>* actual = carrito->getCabeza();
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr) {
-                total += p->precio;
-            }
+            if (p != nullptr) total += p->precio;
             actual = actual->siguiente;
         }
         verCarrito(inv);
         seleccionarMetodoPago(total);
         cout << ">> Gracias " << nombre << "!\n";
 
-      
         delete carrito;
         carrito = new ListaEnlazada<int>();
     }
@@ -134,22 +146,24 @@ public:
         do {
             limpiarPantalla();
             cout << "\n--- BUSCAR PRODUCTO ---\n";
-            cout << "1. Ver todo el catalogo\n2. Buscar por nombre\n";
-            cout << "3. Agregar al carrito\n4. Volver\n";
+            cout << "1. Ver todo el catalogo\n";
+            cout << "2. Buscar por nombre\n";
+            cout << "3. Agregar al carrito\n";
+            cout << "4. Volver\n";
             cout << "Opcion: "; cin >> op;
             limpiarPantalla();
 
             switch (op) {
-            case 1: inv.listarTodo(); break;
+            case 1: inv.listarTodo(); pausa(); break;
             case 2: {
                 cout << "Ingrese nombre: ";
                 string nom; cin.ignore(); getline(cin, nom);
                 inv.buscarPorNombre(nom);
+                pausa();
                 break;
             }
             case 3: agregarAlCarrito(inv); break;
             }
-            if (op != 4) pausa();
         } while (op != 4);
     }
 
@@ -163,10 +177,9 @@ public:
             limpiarPantalla();
 
             switch (op) {
-            case 1: verCarrito(inv); break;
+            case 1: verCarrito(inv); pausa(); break;
             case 2: comprarCarrito(inv); pausa(); return;
             }
-            if (op != 3 && op != 2) pausa();
         } while (op != 3);
     }
 
