@@ -9,6 +9,34 @@
 
 using namespace std;
 
+void configurarConsola() {
+    const SHORT ancho = 130;
+    const SHORT alto = 45;
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
+
+    SetConsoleOutputCP(437);
+
+    DWORD dwMode = 0;
+    if (GetConsoleMode(hOut, &dwMode)) {
+        SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    }
+
+    COORD maxTam = GetLargestConsoleWindowSize(hOut);
+    SHORT anchoVentana = (maxTam.X > 0 && maxTam.X < ancho) ? maxTam.X : ancho;
+    SHORT altoVentana = (maxTam.Y > 0 && maxTam.Y < alto) ? maxTam.Y : alto;
+
+    SMALL_RECT ventanaMinima = { 0, 0, 1, 1 };
+    SetConsoleWindowInfo(hOut, TRUE, &ventanaMinima);
+
+    COORD buffer = { ancho, alto };
+    SetConsoleScreenBufferSize(hOut, buffer);
+
+    SMALL_RECT ventana = { 0, 0, (SHORT)(anchoVentana - 1), (SHORT)(altoVentana - 1) };
+    SetConsoleWindowInfo(hOut, TRUE, &ventana);
+}
+
 // Convierte color del codigo original (C# ConsoleColor) a ANSI
 const char* colorFondo(int c) {
     switch (c) {
@@ -173,10 +201,7 @@ void mostrarLogo() {
 }
 
 int main() {
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    configurarConsola();
 
     limpiarPantalla();
     mostrarLogo();
