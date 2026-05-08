@@ -119,7 +119,6 @@
     <ClInclude Include="Inventario.h" />
     <ClInclude Include="ListaEnlazada.h" />
     <ClInclude Include="MetodoPago.h" />
-    <ClInclude Include="Pedido.h" />
     <ClInclude Include="Producto.h" />
     <ClInclude Include="Registro.h" />
     <ClInclude Include="Usuario.h" />

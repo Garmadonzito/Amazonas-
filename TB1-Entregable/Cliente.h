@@ -173,17 +173,6 @@ public:
 
         seleccionarMetodoPago(total);
 
-        inv.registrarPedido(nombre, (float)total);
-
-        actual = carrito->getCabeza();
-        while (actual != nullptr) {
-            Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr) {
-                inv.registrarVenta(nombre, p->nombre, p->precio, p->stock);
-            }
-            actual = actual->siguiente;
-        }
-
         // 1. Guardar cliente en clientes.dat
         ofstream archivoClientes("clientes.dat", ios::binary | ios::app);
         if (archivoClientes) {
@@ -195,23 +184,14 @@ public:
             archivoClientes.close();
         }
 
-        // 2. Guardar ventas individuales en ventas.dat
-        ofstream archivoVentas("ventas.dat", ios::binary | ios::app);
-        if (archivoVentas) {
-            actual = carrito->getCabeza();
-            while (actual != nullptr) {
-                Producto* p = inv.obtenerProducto(actual->dato);
-                if (p != nullptr) {
-                    RegistroVenta rv;
-                    rv.idProducto = p->id;
-                    strncpy_s(rv.nombreProducto, sizeof(rv.nombreProducto), p->nombre.c_str(), _TRUNCATE);
-                    rv.monto = p->precio;
-                    strncpy_s(rv.dniCliente, sizeof(rv.dniCliente), dni.c_str(), _TRUNCATE);
-                    archivoVentas.write((char*)&rv, sizeof(RegistroVenta));
-                }
-                actual = actual->siguiente;
+        // 2. Guardar ventas individuales en ventas.dat usando la cola del inventario
+        actual = carrito->getCabeza();
+        while (actual != nullptr) {
+            Producto* p = inv.obtenerProducto(actual->dato);
+            if (p != nullptr) {
+                inv.registrarVenta(dni, nombre, p);
             }
-            archivoVentas.close();
+            actual = actual->siguiente;
         }
 
         // 3. Confirmar la resta de stock escribiendo en el disco

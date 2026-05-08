@@ -2,7 +2,6 @@
 #include "ListaEnlazada.h"
 #include "Cola.h"
 #include "Producto.h"
-#include "Pedido.h"
 #include "Usuario.h" 
 #include "Registro.h" // Nombre corregido
 #include "Venta.h"
@@ -15,9 +14,7 @@
 class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
-    ListaEnlazada<Venta>* registroVentas;
-    Cola<Pedido>* pedidosPendientes;
-    int contadorPedidos;
+    Cola<Venta>* registroVentas;
 
     // Complejidad Tiempo O(n), Espacio O(n) por la pila de llamadas
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
@@ -26,18 +23,28 @@ private:
         return buscarRecursivo(actual->siguiente, idBuscado);
     }
 
+    std::string buscarNombreCliente(std::string dniBuscado) {
+        std::ifstream archivo("clientes.dat", std::ios::binary);
+        RegistroCliente reg;
+        while (archivo.read((char*)&reg, sizeof(RegistroCliente))) {
+            if (dniBuscado == reg.dni) {
+                archivo.close();
+                return reg.nombre;
+            }
+        }
+        archivo.close();
+        return "Cliente no encontrado";
+    }
+
 public:
     Inventario() {
         listaProductos = new ListaEnlazada<Producto>();
-        registroVentas = new ListaEnlazada<Venta>();
-        pedidosPendientes = new Cola<Pedido>();
-        contadorPedidos = 1;
+        registroVentas = new Cola<Venta>();
     }
 
     ~Inventario() {
         delete listaProductos;
         delete registroVentas;
-        delete pedidosPendientes;
     }
 
     void guardarEnArchivo() {
@@ -207,21 +214,61 @@ public:
         if (!encontrado) imprimirEnPanel(fila, "No se encontraron productos.");
     }
 
-    void registrarVenta(std::string cliente, std::string producto, float precio, int stockRestante) {
+    void registrarVenta(std::string dniCliente, std::string cliente, Producto* producto) {
         auto precioValido = [](float monto) -> bool {
             return monto > 0;
             };
 
-        if (!precioValido(precio)) return;
+        auto tieneCliente = [](std::string nombre) -> bool {
+            return nombre != "";
+            };
 
-        Venta nueva(cliente, producto, precio, stockRestante, true);
-        registroVentas->agregar(nueva);
+        if (producto == nullptr) return;
+        if (!precioValido(producto->precio)) return;
+        if (!tieneCliente(cliente)) return;
+
+        RegistroVenta reg;
+        reg.idProducto = producto->id;
+        reg.monto = producto->precio;
+        strncpy_s(reg.nombreProducto, sizeof(reg.nombreProducto), producto->nombre.c_str(), _TRUNCATE);
+        strncpy_s(reg.dniCliente, sizeof(reg.dniCliente), dniCliente.c_str(), _TRUNCATE);
+
+        std::ofstream archivo("ventas.dat", std::ios::binary | std::ios::app);
+        if (archivo) {
+            archivo.write((char*)&reg, sizeof(RegistroVenta));
+            archivo.close();
+        }
+
+        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, producto->stock, true);
+        registroVentas->encolar(nueva);
+    }
+
+    void cargarVentasDesdeArchivo() {
+        delete registroVentas;
+        registroVentas = new Cola<Venta>();
+
+        std::ifstream archivo("ventas.dat", std::ios::binary);
+        if (!archivo) return;
+
+        RegistroVenta reg;
+        while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
+            Producto* p = obtenerProducto(reg.idProducto);
+            int stockActual = 0;
+            if (p != nullptr) stockActual = p->stock;
+
+            std::string dni = reg.dniCliente;
+            std::string cliente = buscarNombreCliente(dni);
+            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, stockActual, true);
+            registroVentas->encolar(venta);
+        }
+        archivo.close();
     }
 
     void mostrarRegistroVentas() {
+        cargarVentasDesdeArchivo();
         std::cout << "\n========== REGISTRO DE VENTAS ==========\n";
 
-        if (registroVentas->getCabeza() == nullptr) {
+        if (registroVentas->estaVacia()) {
             std::cout << "Todavia no hay ventas registradas.\n";
             std::cout << "========================================\n";
             return;
@@ -235,7 +282,7 @@ public:
             return v.stockRestante < 10;
             };
 
-        Nodo<Venta>* actual = registroVentas->getCabeza();
+        NodoCola<Venta>* actual = registroVentas->getFrente();
         while (actual != nullptr) {
             imprimirVenta(actual->dato);
             if (stockBajoLuegoVenta(actual->dato)) {
@@ -246,59 +293,5 @@ public:
 
         std::cout << "Total de ventas registradas: " << registroVentas->getCantidad() << "\n";
         std::cout << "========================================\n";
-    }
-
-    void registrarPedido(std::string cliente, float total) {
-        auto totalValido = [](float monto) -> bool {
-            return monto > 0;
-            };
-
-        if (!totalValido(total)) return;
-
-        Pedido nuevo(contadorPedidos, cliente, total);
-        pedidosPendientes->encolar(nuevo);
-        contadorPedidos++;
-    }
-
-    void mostrarPedidosPendientes() {
-        std::cout << "\n========== PEDIDOS PENDIENTES ==========\n";
-        if (pedidosPendientes->estaVacia()) {
-            std::cout << "No hay pedidos pendientes.\n";
-            std::cout << "========================================\n";
-            return;
-        }
-
-        auto imprimirPedido = [](Pedido pedido) {
-            pedido.mostrar();
-            };
-
-        NodoCola<Pedido>* actual = pedidosPendientes->getFrente();
-        while (actual != nullptr) {
-            imprimirPedido(actual->dato);
-            actual = actual->siguiente;
-        }
-
-        std::cout << "Total en cola: " << pedidosPendientes->getCantidad() << "\n";
-        std::cout << "========================================\n";
-    }
-
-    void atenderPedido() {
-        std::cout << "\n========== ATENDER PEDIDO ==========\n";
-        Pedido* primero = pedidosPendientes->verFrente();
-        if (primero == nullptr) {
-            std::cout << "No hay pedidos para atender.\n";
-            return;
-        }
-
-        auto esPedidoGrande = [](Pedido pedido) -> bool {
-            return pedido.total >= 1000;
-            };
-
-        std::cout << "Se atendio el primer pedido de la cola:\n";
-        primero->mostrar();
-        if (esPedidoGrande(*primero)) {
-            std::cout << "Nota: pedido de monto alto.\n";
-        }
-        pedidosPendientes->desencolar();
     }
 };
