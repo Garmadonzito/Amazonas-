@@ -72,6 +72,18 @@ public:
         }
     }
 
+    void verRegistroVentas(Inventario& inv) {
+        inv.mostrarRegistroVentas();
+    }
+
+    void verPedidosPendientes(Inventario& inv) {
+        inv.mostrarPedidosPendientes();
+    }
+
+    void atenderPrimerPedido(Inventario& inv) {
+        inv.atenderPedido();
+    }
+
     void menu(Inventario& inv) {
         int op;
         do {
@@ -82,7 +94,10 @@ public:
             cout << "3. Editar Producto\n";
             cout << "4. Eliminar Producto\n";
             cout << "5. Alertas de Stock (Lambda)\n";
-            cout << "6. Cerrar Sesion\n";
+            cout << "6. Ver registro de ventas\n";
+            cout << "7. Ver pedidos pendientes (Cola)\n";
+            cout << "8. Atender primer pedido\n";
+            cout << "9. Cerrar Sesion\n";
             cout << "Opcion: "; cin >> op;
 
             switch (op) {
@@ -91,8 +106,11 @@ public:
             case 3: editarProducto(inv); break;
             case 4: eliminarProducto(inv); break;
             case 5: inv.mostrarStockBajo(10); break;
+            case 6: verRegistroVentas(inv); break;
+            case 7: verPedidosPendientes(inv); break;
+            case 8: atenderPrimerPedido(inv); break;
             }
-            if (op != 6) pausa();
-        } while (op != 6);
+            if (op != 9) pausa();
+        } while (op != 9);
     }
 };

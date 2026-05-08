@@ -173,6 +173,17 @@ public:
 
         seleccionarMetodoPago(total);
 
+        inv.registrarPedido(nombre, (float)total);
+
+        actual = carrito->getCabeza();
+        while (actual != nullptr) {
+            Producto* p = inv.obtenerProducto(actual->dato);
+            if (p != nullptr) {
+                inv.registrarVenta(nombre, p->nombre, p->precio, p->stock);
+            }
+            actual = actual->siguiente;
+        }
+
         // 1. Guardar cliente en clientes.dat
         ofstream archivoClientes("clientes.dat", ios::binary | ios::app);
         if (archivoClientes) {

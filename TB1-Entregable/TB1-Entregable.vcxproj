@@ -115,12 +115,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cliente.h" />
+    <ClInclude Include="Cola.h" />
     <ClInclude Include="Inventario.h" />
     <ClInclude Include="ListaEnlazada.h" />
     <ClInclude Include="MetodoPago.h" />
+    <ClInclude Include="Pedido.h" />
     <ClInclude Include="Producto.h" />
     <ClInclude Include="Registro.h" />
     <ClInclude Include="Usuario.h" />
+    <ClInclude Include="Venta.h" />
     <ClInclude Include="Vendedor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
