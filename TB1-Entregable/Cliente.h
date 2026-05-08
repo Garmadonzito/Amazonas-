@@ -2,7 +2,8 @@
 #include "Usuario.h"
 #include "Inventario.h"
 #include "MetodoPago.h"
-#include "Registro.h" // Nombre corregido
+#include "Registro.h" 
+#include "Pila.h" 
 #include <conio.h>
 #include <fstream>
 
@@ -11,9 +12,25 @@ extern void mostrarFondo2();
 class Cliente : public Usuario {
 private:
     ListaEnlazada<int>* carrito;
+    Pila<int> historialNavegacion;
+
+    const int MENU_PRINCIPAL = 1;
+    const int MENU_BUSQUEDA = 2;
+    const int MENU_CARRITO = 3;
 
     void linea(int fila, const string& texto) {
         irA(fila, PANEL_COL); cout << "\033[0m" << texto;
+    }
+
+    void pausaRetroceder(int fila = 37) {
+        irA(fila, PANEL_COL);
+        cout << "\033[93m>> Presione ESC para volver atras...";
+        while (true) {
+            if (_kbhit()) {
+                int c = _getch();
+                if (c == 27) break;
+            }
+        }
     }
 
 public:
@@ -31,67 +48,53 @@ public:
         cout << "Correo: "; getline(cin, correo);
 
         auto validarDNI = [](string d) -> bool {
-            if (d.length() != 8) return false;
-            for (char c : d) {
-                if (c < '0' || c > '9') return false;
-            }
-            return true;
+            return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
             };
 
         bool dniValido = false;
         do {
             cout << "DNI: ";
             getline(cin, dni);
-            if (validarDNI(dni)) {
-                dniValido = true;
-            }
-            else {
-                cout << ">> Error: El DNI debe tener exactamente 8 numeros.\n";
-            }
+            if (validarDNI(dni)) dniValido = true;
+            else cout << ">> Error: DNI invalido.\n";
         } while (!dniValido);
 
         cout << "\n>> Bienvenido " << nombre << "!\n";
         pausa();
     }
 
-    void agregarAlCarrito(Inventario& inv) {
-        limpiarZonaVerde();
-        irA(10, PANEL_COL);
-        inv.listarTodo();
+    // Lógica reutilizable para agregar productos por ID desde cualquier pantalla
+    void bucleAgregarRapido(Inventario& inv, int filaInicio) {
+        irA(filaInicio, PANEL_COL);
+        cout << "\033[0m>> Ingrese ID para agregar. [ESC] para dejar de añadir.";
 
-        irA(32, PANEL_COL); cout << "\033[0m>> Ingrese ID y ENTER para agregar. ESC para terminar.";
-
-        int filaMsg = 34;
+        int filaMsg = filaInicio + 2;
         while (true) {
             irA(filaMsg, PANEL_COL);
             cout << "\033[0mID: ";
             string buf;
-            bool salir = false;
+            bool terminar = false;
 
             while (true) {
                 int c = _getch();
-                if (c == 27) { salir = true; cout << "\n"; break; }
+                if (c == 27) { terminar = true; break; }
                 if (c == '\r') { cout << "\n"; break; }
                 if (c == 8 && !buf.empty()) { buf.pop_back(); cout << "\b \b"; }
                 else if (c >= '0' && c <= '9') { buf += (char)c; cout << (char)c; }
             }
 
-            if (salir) break;
+            if (terminar) break;
             if (buf.empty()) continue;
 
             int id = stoi(buf);
             Producto* p = inv.obtenerProducto(id);
             irA(filaMsg + 1, PANEL_COL);
-            cout << "\033[0m";
-            if (p == nullptr) {
-                cout << ">> ID no encontrado.                          ";
-            }
-            else if (p->stock <= 0) {
-                cout << ">> Sin stock disponible.                      ";
+            if (p != nullptr && p->stock > 0) {
+                carrito->agregar(id);
+                cout << "\033[92m>> '" << p->nombre << "' agregado! Stock: " << p->stock << "          ";
             }
             else {
-                carrito->agregar(id);
-                cout << ">> '" << p->nombre << "' agregado al carrito! ";
+                cout << "\033[91m>> ID invalido o sin stock.                         ";
             }
         }
     }
@@ -112,16 +115,12 @@ public:
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
             if (p != nullptr) {
-                string item = to_string(i) + ". " + p->nombre +
-                    "  -  S/. " + to_string((int)p->precio);
-                linea(fila++, item);
+                linea(fila++, to_string(i++) + ". " + p->nombre + " - S/. " + to_string((int)p->precio));
                 total += p->precio;
             }
             actual = actual->siguiente;
-            i++;
         }
-        fila++;
-        linea(fila, "TOTAL: S/. " + to_string((int)total));
+        linea(fila + 1, "TOTAL: S/. " + to_string((int)total));
     }
 
     void seleccionarMetodoPago(double total) {
@@ -136,18 +135,12 @@ public:
 
         if (op == 1) {
             limpiarZonaVerde();
-            irA(13, PANEL_COL);
-            Tarjeta t;
-            t.pagar(total);
+            Tarjeta t; t.pagar(total);
         }
         else if (op == 2) {
             limpiarPantalla();
-            YapePlin yp;
-            yp.pagar(total);
+            YapePlin yp; yp.pagar(total);
             mostrarFondo2();
-        }
-        else {
-            linea(19, "Opcion invalida. Pago cancelado.");
         }
     }
 
@@ -155,7 +148,7 @@ public:
         limpiarZonaVerde();
         if (carrito->getCabeza() == nullptr) {
             linea(16, "El carrito esta vacio.");
-            irA(19, PANEL_COL); pausa();
+            pausaRetroceder();
             return;
         }
 
@@ -168,132 +161,130 @@ public:
         }
 
         verCarrito(inv);
-        irA(36, PANEL_COL); pausa();
+        pausaRetroceder(36);
 
         seleccionarMetodoPago(total);
-
-        // 1. Guardar cliente en clientes.dat
-        ofstream archivoClientes("clientes.dat", ios::binary | ios::app);
-        if (archivoClientes) {
-            RegistroCliente rc;
-            strncpy_s(rc.nombre, sizeof(rc.nombre), nombre.c_str(), _TRUNCATE);
-            strncpy_s(rc.correo, sizeof(rc.correo), correo.c_str(), _TRUNCATE);
-            strncpy_s(rc.dni, sizeof(rc.dni), dni.c_str(), _TRUNCATE);
-            archivoClientes.write((char*)&rc, sizeof(RegistroCliente));
-            archivoClientes.close();
-        }
-
-        // 2. Guardar ventas individuales en ventas.dat usando la cola del inventario
-        auto descontarStock = [](Producto* p, int cantidad) -> bool {
-            if (p == nullptr) return false;
-            if (p->stock < cantidad) return false;
-            p->stock -= cantidad;
-            return true;
-            };
 
         actual = carrito->getCabeza();
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
-            if (descontarStock(p, 1)) {
+            if (p != nullptr && p->stock > 0) {
+                p->stock--;
                 inv.registrarVenta(dni, nombre, p);
             }
             actual = actual->siguiente;
         }
-
-        // 3. Confirmar la resta de stock escribiendo en el disco
         inv.guardarEnArchivo();
+        carrito->vaciar();
 
         limpiarZonaVerde();
-        linea(16, ">> Compra realizada. Gracias " + nombre + "!");
-        irA(19, PANEL_COL); pausa();
-
-        carrito->vaciar();
+        linea(16, ">> Compra realizada con exito.");
+        pausaRetroceder(19);
     }
 
     void menuBuscarProducto(Inventario& inv) {
-        int op;
-        do {
+        while (true) {
             limpiarZonaVerde();
-            linea(10, "--- BUSCAR PRODUCTO ---");
-            linea(12, "1. Ver todo el catalogo");
-            linea(13, "2. Buscar por nombre");
-            linea(14, "3. Agregar al carrito");
-            linea(15, "4. Volver");
-            linea(17, "Opcion: ");
-            cin >> op;
+            linea(10, "--- TIENDA AMAZONAS ---");
+            linea(12, "1. Ver Catalogo Completo (Agregar por ID)");
+            linea(13, "2. Buscar por nombre (Confirmacion S/N)");
+            linea(15, "\033[93m[ESC] Volver al Menu Principal");
 
-            if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); op = -1; }
+            int c = _getch();
+            if (c == 27) break;
 
-            switch (op) {
-            case 1:
+            if (c == '1') {
                 limpiarZonaVerde();
-                irA(10, PANEL_COL);
                 inv.listarTodo();
-                irA(37, PANEL_COL); pausa();
-                break;
-            case 2: {
+                bucleAgregarRapido(inv, 32); // Permite agregar directamente
+            }
+            else if (c == '2') {
                 limpiarZonaVerde();
-                linea(10, "Nombre a buscar: ");
+                linea(10, "Ingrese nombre del producto: ");
                 string nom; cin.ignore(); getline(cin, nom);
+
                 limpiarZonaVerde();
-                irA(10, PANEL_COL);
                 inv.buscarPorNombre(nom);
-                irA(35, PANEL_COL); pausa();
-                break;
+
+                linea(30, ">> Ingrese el ID del producto que desea: ");
+                string idStr; cin >> idStr;
+
+                if (idStr.find_first_not_of("0123456789") == string::npos) {
+                    int idBuscado = stoi(idStr);
+                    Producto* p = inv.obtenerProducto(idBuscado);
+
+                    if (p != nullptr && p->stock > 0) {
+                        linea(32, "Desea agregar '" + p->nombre + "' al carrito? (S/N): ");
+                        char confirma = _getch();
+                        if (confirma == 's' || confirma == 'S') {
+                            carrito->agregar(idBuscado);
+                            linea(34, "\033[92m>> Agregado con exito!");
+                        }
+                        else {
+                            linea(34, "\033[91m>> Operacion cancelada.");
+                        }
+                    }
+                    else {
+                        linea(32, "\033[91m>> Producto no encontrado o sin stock.");
+                    }
+                }
+                pausaRetroceder(36);
             }
-            case 3:
-                agregarAlCarrito(inv);
-                break;
-            }
-        } while (op != 4);
+        }
     }
 
     void menuCarrito(Inventario& inv) {
-        int op;
-        do {
+        while (true) {
             limpiarZonaVerde();
-            linea(10, "--- MI CARRITO ---");
-            linea(12, "1. Ver carrito");
-            linea(13, "2. Comprar");
-            linea(14, "3. Volver");
-            linea(16, "Opcion: ");
-            cin >> op;
+            linea(10, "--- MI CARRITO DE COMPRAS ---");
+            linea(12, "1. Revisar lista de productos");
+            linea(13, "2. Proceder al pago");
+            linea(15, "\033[93m[ESC] Volver al Menu Principal");
 
-            if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); op = -1; }
+            int c = _getch();
+            if (c == 27) break;
 
-            switch (op) {
-            case 1:
+            if (c == '1') {
                 limpiarZonaVerde();
                 verCarrito(inv);
-                irA(36, PANEL_COL); pausa();
-                break;
-            case 2:
-                comprarCarrito(inv);
-                return;
+                pausaRetroceder(36);
             }
-        } while (op != 3);
+            else if (c == '2') {
+                comprarCarrito(inv);
+                break;
+            }
+        }
     }
 
     void menu(Inventario& inv) {
         mostrarFondo2();
-        int op;
-        do {
+        historialNavegacion.apilar(MENU_PRINCIPAL);
+
+        while (!historialNavegacion.estaVacia()) {
+            int pantallaActual = historialNavegacion.obtenerTope();
             limpiarZonaVerde();
-            linea(10, "========================================");
-            linea(11, "   BIENVENIDO, " + nombre);
-            linea(12, "========================================");
-            linea(14, "1. Ver productos / Buscar");
-            linea(15, "2. Mi carrito");
-            linea(16, "3. Cerrar sesion");
-            linea(18, "Opcion: ");
-            cin >> op;
 
-            if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); op = -1; }
+            if (pantallaActual == MENU_PRINCIPAL) {
+                linea(10, "========================================");
+                linea(11, "   BIENVENIDO, " + nombre);
+                linea(12, "========================================");
+                linea(14, "1. Entrar a la Tienda (Catalogo/Busqueda)");
+                linea(15, "2. Ver mi Carrito");
+                linea(17, "\033[93m[ESC] Salir del Sistema");
 
-            switch (op) {
-            case 1: menuBuscarProducto(inv); break;
-            case 2: menuCarrito(inv); break;
+                int c = _getch();
+                if (c == '1') historialNavegacion.apilar(MENU_BUSQUEDA);
+                else if (c == '2') historialNavegacion.apilar(MENU_CARRITO);
+                else if (c == 27) historialNavegacion.desapilar();
             }
-        } while (op != 3);
+            else if (pantallaActual == MENU_BUSQUEDA) {
+                menuBuscarProducto(inv);
+                historialNavegacion.desapilar();
+            }
+            else if (pantallaActual == MENU_CARRITO) {
+                menuCarrito(inv);
+                historialNavegacion.desapilar();
+            }
+        }
     }
 };

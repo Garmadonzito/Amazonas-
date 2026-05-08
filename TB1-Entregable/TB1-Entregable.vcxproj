@@ -120,6 +120,7 @@
     <ClInclude Include="ListaEnlazada.h" />
     <ClInclude Include="MetodoPago.h" />
     <ClInclude Include="Nodo.h" />
+    <ClInclude Include="Pila.h" />
     <ClInclude Include="Producto.h" />
     <ClInclude Include="Registro.h" />
     <ClInclude Include="Usuario.h" />
