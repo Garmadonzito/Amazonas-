@@ -3,7 +3,7 @@
 #include "Cola.h"
 #include "Producto.h"
 #include "Usuario.h" 
-#include "Registro.h" // Nombre corregido
+#include "Registro.h" 
 #include "Venta.h"
 #include <string>
 #include <iostream>
@@ -17,23 +17,7 @@ private:
     ListaEnlazada<Producto>* listaProductos;
     Cola<Venta>* registroVentas;
 
-    struct RegistroVentaAntiguo {
-        int idProducto;
-        char nombreProducto[50];
-        float monto;
-        char dniCliente[9];
-    };
-
-    struct RegistroVentaSinFecha {
-        int idProducto;
-        char nombreProducto[50];
-        float monto;
-        char dniCliente[9];
-        int cantidadRestada;
-        int stockRestante;
-    };
-
-    // Complejidad Tiempo O(n), Espacio O(n) por la pila de llamadas
+    // Métodos privados de soporte y recursividad
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
         if (actual == nullptr) return nullptr;
         if (actual->dato.id == idBuscado) return actual;
@@ -60,96 +44,40 @@ private:
 
     std::string obtenerFechaTexto(long long fechaHora) {
         if (fechaHora == 0) return "Sin fecha";
-
         time_t tiempo = (time_t)fechaHora;
         tm fechaLocal;
         localtime_s(&fechaLocal, &tiempo);
-
         char texto[20];
         strftime(texto, sizeof(texto), "%d/%m/%Y %H:%M", &fechaLocal);
         return texto;
     }
 
-    void ordenarVentasBurbuja(std::vector<Venta>& ventas) {
+    // ---------------------------------------------------------
+    // ALGORITMO AVANZADO: ORDENAMIENTO SHELL (Orden Cronológico) [cite: 615, 666]
+    // ---------------------------------------------------------
+    void ordenarVentasShell(std::vector<Venta>& ventas) {
         int n = (int)ventas.size();
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                if (ventas[j].fechaHora > ventas[j + 1].fechaHora) {
-                    Venta temp = ventas[j];
-                    ventas[j] = ventas[j + 1];
-                    ventas[j + 1] = temp;
+        if (n <= 1) return;
+        int i, j, k, intervalo = n / 2;
+        Venta temp;
+        while (intervalo > 0) {
+            for (i = intervalo; i < n; i++) {
+                j = i - intervalo;
+                while (j >= 0) {
+                    k = j + intervalo;
+                    if (ventas[j].fechaHora <= ventas[k].fechaHora) {
+                        j = -1;
+                    }
+                    else {
+                        temp = ventas[j];
+                        ventas[j] = ventas[k];
+                        ventas[k] = temp;
+                        j -= intervalo;
+                    }
                 }
             }
+            intervalo = intervalo / 2;
         }
-    }
-
-    void convertirVentasAntiguas() {
-        std::ifstream archivo("ventas.dat", std::ios::binary);
-        if (!archivo) return;
-
-        archivo.seekg(0, std::ios::end);
-        long tamanoArchivo = (long)archivo.tellg();
-        archivo.seekg(0, std::ios::beg);
-
-        if (tamanoArchivo == 0 || tamanoArchivo % sizeof(RegistroVenta) == 0) {
-            archivo.close();
-            return;
-        }
-
-        std::vector<RegistroVenta> ventasConvertidas;
-
-        if (tamanoArchivo % sizeof(RegistroVentaSinFecha) == 0) {
-            RegistroVentaSinFecha sinFecha;
-            while (archivo.read((char*)&sinFecha, sizeof(RegistroVentaSinFecha))) {
-                RegistroVenta nuevo;
-                nuevo.idProducto = sinFecha.idProducto;
-                nuevo.monto = sinFecha.monto;
-                nuevo.cantidadRestada = sinFecha.cantidadRestada;
-                nuevo.stockRestante = sinFecha.stockRestante;
-                nuevo.fechaHora = 0;
-                strncpy_s(nuevo.fechaTexto, sizeof(nuevo.fechaTexto), "Sin fecha", _TRUNCATE);
-                strncpy_s(nuevo.nombreProducto, sizeof(nuevo.nombreProducto), sinFecha.nombreProducto, _TRUNCATE);
-                strncpy_s(nuevo.dniCliente, sizeof(nuevo.dniCliente), sinFecha.dniCliente, _TRUNCATE);
-                ventasConvertidas.push_back(nuevo);
-            }
-            archivo.close();
-
-            std::ofstream salida("ventas.dat", std::ios::binary | std::ios::trunc);
-            for (RegistroVenta venta : ventasConvertidas) {
-                salida.write((char*)&venta, sizeof(RegistroVenta));
-            }
-            salida.close();
-            return;
-        }
-
-        if (tamanoArchivo % sizeof(RegistroVentaAntiguo) != 0) {
-            archivo.close();
-            return;
-        }
-
-        RegistroVentaAntiguo antiguo;
-        while (archivo.read((char*)&antiguo, sizeof(RegistroVentaAntiguo))) {
-            RegistroVenta nuevo;
-            nuevo.idProducto = antiguo.idProducto;
-            nuevo.monto = antiguo.monto;
-            nuevo.cantidadRestada = 1;
-
-            Producto* p = obtenerProducto(antiguo.idProducto);
-            nuevo.stockRestante = (p != nullptr) ? p->stock : 0;
-            nuevo.fechaHora = 0;
-            strncpy_s(nuevo.fechaTexto, sizeof(nuevo.fechaTexto), "Sin fecha", _TRUNCATE);
-
-            strncpy_s(nuevo.nombreProducto, sizeof(nuevo.nombreProducto), antiguo.nombreProducto, _TRUNCATE);
-            strncpy_s(nuevo.dniCliente, sizeof(nuevo.dniCliente), antiguo.dniCliente, _TRUNCATE);
-            ventasConvertidas.push_back(nuevo);
-        }
-        archivo.close();
-
-        std::ofstream salida("ventas.dat", std::ios::binary | std::ios::trunc);
-        for (RegistroVenta venta : ventasConvertidas) {
-            salida.write((char*)&venta, sizeof(RegistroVenta));
-        }
-        salida.close();
     }
 
 public:
@@ -163,20 +91,40 @@ public:
         delete registroVentas;
     }
 
+    // NUEVO MÉTODO: REPORTE DE STOCK GENERAL
+    void verStockGeneral() {
+        if (listaProductos->getCabeza() == nullptr) {
+            imprimirEnPanel(10, "Inventario vacio.");
+            return;
+        }
+        int fila = 10;
+        imprimirEnPanel(fila++, "========================================================", 96);
+        imprimirEnPanel(fila++, "                REPORTE DE STOCK GENERAL                ", 96);
+        imprimirEnPanel(fila++, "========================================================", 96);
+        fila++;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            std::string item = "Producto: " + actual->dato.nombre;
+            while (item.length() < 45) item += " "; // Alineación manual
+            item += "| Stock: " + std::to_string(actual->dato.stock);
+            imprimirEnPanel(fila++, item, (actual->dato.stock < 10 ? 91 : 0)); // Rojo si es bajo
+            actual = actual->siguiente;
+        }
+        imprimirEnPanel(fila, "========================================================", 96);
+    }
+
+    // Persistencia y Gestión
     void guardarEnArchivo() {
         std::ofstream archivo("productos.dat", std::ios::binary | std::ios::trunc);
         if (!archivo) return;
-
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
             RegistroProducto reg;
             reg.id = actual->dato.id;
             reg.precio = actual->dato.precio;
             reg.stock = actual->dato.stock;
-            
             strncpy_s(reg.nombre, sizeof(reg.nombre), actual->dato.nombre.c_str(), _TRUNCATE);
             strncpy_s(reg.categoria, sizeof(reg.categoria), actual->dato.categoria.c_str(), _TRUNCATE);
-
             archivo.write((char*)&reg, sizeof(RegistroProducto));
             actual = actual->siguiente;
         }
@@ -190,7 +138,6 @@ public:
             guardarEnArchivo();
             return;
         }
-
         listaProductos->vaciar();
         RegistroProducto reg;
         while (archivo.read((char*)&reg, sizeof(RegistroProducto))) {
@@ -213,7 +160,7 @@ public:
     void agregarProducto(int id, std::string nombre, std::string categoria, float precio, int stock, bool guardar = true) {
         Producto nuevo(id, nombre, categoria, precio, stock);
         listaProductos->agregar(nuevo);
-        if (guardar) guardarEnArchivo(); 
+        if (guardar) guardarEnArchivo();
     }
 
     bool existeProducto(int id) {
@@ -222,10 +169,7 @@ public:
 
     Producto* obtenerProducto(int id) {
         Nodo<Producto>* encontrado = buscarRecursivo(listaProductos->getCabeza(), id);
-        if (encontrado != nullptr) {
-            return &(encontrado->dato);
-        }
-        return nullptr;
+        return (encontrado != nullptr) ? &(encontrado->dato) : nullptr;
     }
 
     void modificarProducto(int id, float nuevoPrecio, int nuevoStock) {
@@ -233,31 +177,24 @@ public:
         if (p != nullptr) {
             p->precio = nuevoPrecio;
             p->stock = nuevoStock;
-            std::cout << ">> Producto actualizado correctamente.\n";
-            guardarEnArchivo(); 
+            guardarEnArchivo();
         }
     }
 
     bool eliminarProducto(int id) {
-        bool eliminado = listaProductos->eliminarSi([id](Producto p) -> bool {
-            return p.id == id;
-        });
-        if (eliminado) guardarEnArchivo(); 
+        bool eliminado = listaProductos->eliminarSi([id](Producto p) -> bool { return p.id == id; });
+        if (eliminado) guardarEnArchivo();
         return eliminado;
     }
 
     void mostrarStockBajo(int limite) {
         std::cout << "\n========== ALERTAS DE STOCK (Limite: " << limite << ") ==========\n";
-        auto esCritico = [limite](Producto p) -> bool {
-            return p.stock < limite;
-        };
+        auto esCritico = [limite](Producto p) -> bool { return p.stock < limite; };
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool huboAlertas = false;
         while (actual != nullptr) {
             if (esCritico(actual->dato)) {
-                std::cout << "[ID: " << actual->dato.id << "] "
-                    << actual->dato.nombre << " - Unidades: "
-                    << actual->dato.stock << "\n";
+                std::cout << "[ID: " << actual->dato.id << "] " << actual->dato.nombre << " - Unidades: " << actual->dato.stock << "\n";
                 huboAlertas = true;
             }
             actual = actual->siguiente;
@@ -271,57 +208,42 @@ public:
             imprimirEnPanel(10, "Inventario vacio.");
             return;
         }
-
         int fila = 10;
         imprimirEnPanel(fila++, "========================================================", 96);
         imprimirEnPanel(fila++, "                  CATALOGO AMAZONAS                     ", 96);
         imprimirEnPanel(fila++, "========================================================", 96);
         fila++;
-
         std::vector<std::string> categorias;
         Nodo<Producto>* actual = listaProductos->getCabeza();
-
         while (actual != nullptr) {
-            bool categoriaExiste = false;
-            for (const std::string& cat : categorias) {
-                if (cat == actual->dato.categoria) {
-                    categoriaExiste = true;
-                    break;
-                }
-            }
-            if (!categoriaExiste) categorias.push_back(actual->dato.categoria);
+            bool existe = false;
+            for (const std::string& cat : categorias) if (cat == actual->dato.categoria) existe = true;
+            if (!existe) categorias.push_back(actual->dato.categoria);
             actual = actual->siguiente;
         }
-
         for (const std::string& cat : categorias) {
             imprimirEnPanel(fila++, ">>> " + cat + " <<<", 93);
             actual = listaProductos->getCabeza();
             while (actual != nullptr) {
                 if (actual->dato.categoria == cat) {
-                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " +
-                        actual->dato.nombre +
-                        " | Precio: S/. " + std::to_string((int)actual->dato.precio) +
-                        " | Stock: " + std::to_string(actual->dato.stock);
+                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " + actual->dato.nombre +
+                        " | Precio: S/. " + std::to_string((int)actual->dato.precio) + " | Stock: " + std::to_string(actual->dato.stock);
                     imprimirEnPanel(fila++, item);
                 }
                 actual = actual->siguiente;
             }
             fila++;
         }
-        imprimirEnPanel(fila, "========================================================", 96);
     }
 
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
-        bool encontrado = false;
         int fila = 10;
+        bool encontrado = false;
         imprimirEnPanel(fila++, "--- RESULTADOS ---");
-        fila++;
         while (actual != nullptr) {
             if (actual->dato.nombre.find(nom) != std::string::npos) {
-                std::string item = "[ID: " + std::to_string(actual->dato.id) + "] (" +
-                    actual->dato.categoria + ") " + actual->dato.nombre +
-                    " | S/. " + std::to_string((int)actual->dato.precio);
+                std::string item = "[ID: " + std::to_string(actual->dato.id) + "] (" + actual->dato.categoria + ") " + actual->dato.nombre;
                 imprimirEnPanel(fila++, item);
                 encontrado = true;
             }
@@ -331,109 +253,55 @@ public:
     }
 
     void registrarVenta(std::string dniCliente, std::string cliente, Producto* producto) {
-        auto precioValido = [](float monto) -> bool {
-            return monto > 0;
-            };
-
-        auto tieneCliente = [](std::string nombre) -> bool {
-            return nombre != "";
-            };
-
-        if (producto == nullptr) return;
-        if (!precioValido(producto->precio)) return;
-        if (!tieneCliente(cliente)) return;
-
+        if (producto == nullptr || producto->precio <= 0 || cliente == "") return;
         RegistroVenta reg;
         reg.idProducto = producto->id;
         reg.monto = producto->precio;
         reg.cantidadRestada = 1;
         reg.stockRestante = producto->stock;
         reg.fechaHora = (long long)time(0);
-        std::string fechaTexto = obtenerFechaTexto(reg.fechaHora);
-        strncpy_s(reg.fechaTexto, sizeof(reg.fechaTexto), fechaTexto.c_str(), _TRUNCATE);
+        std::string fechaT = obtenerFechaTexto(reg.fechaHora);
+        strncpy_s(reg.fechaTexto, sizeof(reg.fechaTexto), fechaT.c_str(), _TRUNCATE);
         strncpy_s(reg.nombreProducto, sizeof(reg.nombreProducto), producto->nombre.c_str(), _TRUNCATE);
         strncpy_s(reg.dniCliente, sizeof(reg.dniCliente), dniCliente.c_str(), _TRUNCATE);
-
-        convertirVentasAntiguas();
-
         std::ofstream archivo("ventas.dat", std::ios::binary | std::ios::app);
         if (archivo) {
             archivo.write((char*)&reg, sizeof(RegistroVenta));
             archivo.close();
         }
-
-        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, 1, producto->stock, true, reg.fechaHora, reg.fechaTexto);
+        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, 1, producto->stock, true, reg.fechaHora, fechaT);
         registroVentas->encolar(nueva);
     }
 
     void cargarVentasDesdeArchivo() {
         delete registroVentas;
         registroVentas = new Cola<Venta>();
-
         std::ifstream archivo("ventas.dat", std::ios::binary);
         if (!archivo) return;
-
-        archivo.seekg(0, std::ios::end);
-        long tamanoArchivo = (long)archivo.tellg();
-        archivo.seekg(0, std::ios::beg);
-
-        if (tamanoArchivo % sizeof(RegistroVenta) != 0) {
-            archivo.close();
-            convertirVentasAntiguas();
-            cargarVentasDesdeArchivo();
-            return;
-        }
-
         std::vector<Venta> ventasOrdenadas;
         RegistroVenta reg;
         while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
-            Producto* p = obtenerProducto(reg.idProducto);
-            int stockMostrar = reg.stockRestante;
-            if (stockMostrar == 0 && p != nullptr) stockMostrar = p->stock;
-
-            std::string dni = reg.dniCliente;
-            std::string cliente = buscarNombreCliente(dni);
-            std::string fechaTexto = reg.fechaTexto;
-            if (fechaTexto == "") fechaTexto = obtenerFechaTexto(reg.fechaHora);
-            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, reg.cantidadRestada, stockMostrar, true, reg.fechaHora, fechaTexto);
-            ventasOrdenadas.push_back(venta);
+            std::string cliente = buscarNombreCliente(reg.dniCliente);
+            Venta v(reg.idProducto, reg.dniCliente, cliente, reg.nombreProducto, reg.monto, reg.cantidadRestada, reg.stockRestante, true, reg.fechaHora, reg.fechaTexto);
+            ventasOrdenadas.push_back(v);
         }
         archivo.close();
-
-        ordenarVentasBurbuja(ventasOrdenadas);
-        for (Venta venta : ventasOrdenadas) {
-            registroVentas->encolar(venta);
-        }
+        ordenarVentasShell(ventasOrdenadas);
+        for (Venta v : ventasOrdenadas) registroVentas->encolar(v);
     }
 
     void mostrarRegistroVentas() {
         cargarVentasDesdeArchivo();
         std::cout << "\n========== REGISTRO DE VENTAS ==========\n";
-
         if (registroVentas->estaVacia()) {
-            std::cout << "Todavia no hay ventas registradas.\n";
-            std::cout << "========================================\n";
+            std::cout << "Sin ventas registradas.\n";
             return;
         }
-
-        auto imprimirVenta = [](Venta v) {
-            v.mostrar();
-            };
-
-        auto stockBajoLuegoVenta = [](Venta v) -> bool {
-            return v.stockRestante < 10;
-            };
-
         Nodo<Venta>* actual = registroVentas->getFrente();
         while (actual != nullptr) {
-            imprimirVenta(actual->dato);
-            if (stockBajoLuegoVenta(actual->dato)) {
-                std::cout << "  >> Aviso: este producto quedo con stock bajo.\n";
-            }
+            actual->dato.mostrar();
             actual = actual->siguiente;
         }
-
-        std::cout << "Total de ventas registradas: " << contarVentasRecursivo(registroVentas->getFrente()) << "\n";
-        std::cout << "========================================\n";
+        std::cout << "Total de ventas: " << contarVentasRecursivo(registroVentas->getFrente()) << "\n";
     }
 };

@@ -87,7 +87,8 @@ public:
             cout << "4. Eliminar Producto\n";
             cout << "5. Alertas de Stock (Lambda)\n";
             cout << "6. Ver registro de ventas\n";
-            cout << "7. Cerrar Sesion\n";
+            cout << "7. Ver Stock General (Resumen)\n"; // Nueva opción integrada
+            cout << "8. Cerrar Sesion\n";
             cout << "Opcion: "; cin >> op;
 
             switch (op) {
@@ -97,8 +98,9 @@ public:
             case 4: eliminarProducto(inv); break;
             case 5: inv.mostrarStockBajo(10); break;
             case 6: verRegistroVentas(inv); break;
+            case 7: inv.verStockGeneral(); break; // Llamada al nuevo método
             }
-            if (op != 7) pausa();
-        } while (op != 7);
+            if (op != 8) pausa();
+        } while (op != 8);
     }
 };
