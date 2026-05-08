@@ -9,66 +9,67 @@
 
 using namespace std;
 
+#define ANCHO_TERMINAL 130
+#define ALTO_TERMINAL 45
+
 void configurarConsola() {
-    const SHORT ancho = 130;
-    const SHORT alto = 45;
+    HANDLE manejadorConsola = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (manejadorConsola == INVALID_HANDLE_VALUE) return;
 
-    system("mode con: cols=130 lines=45 > nul");
-
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return;
-
+    // Habilita los caracteres ASCII extendidos (necesario para imprimir el bloque 219)
     SetConsoleOutputCP(437);
 
-    DWORD dwMode = 0;
-    if (GetConsoleMode(hOut, &dwMode)) {
-        SetConsoleMode(hOut, (dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) & ~ENABLE_WRAP_AT_EOL_OUTPUT);
+    // Habilita el procesamiento ANSI (colores) y evita el salto automático de línea
+    DWORD modoConsola = 0;
+    if (GetConsoleMode(manejadorConsola, &modoConsola)) {
+        SetConsoleMode(manejadorConsola, (modoConsola | ENABLE_VIRTUAL_TERMINAL_PROCESSING) & ~ENABLE_WRAP_AT_EOL_OUTPUT);
     }
 
-    COORD maxTam = GetLargestConsoleWindowSize(hOut);
-    SHORT anchoVentana = (maxTam.X > 0 && maxTam.X < ancho) ? maxTam.X : ancho;
-    SHORT altoVentana = (maxTam.Y > 0 && maxTam.Y < alto) ? maxTam.Y : alto;
+    // Fuerza la fuente a 8x16 para asegurar que la matriz de 130x45 quepa en pantallas estándar
+    CONSOLE_FONT_INFOEX infoFuente;
+    infoFuente.cbSize = sizeof(infoFuente);
+    infoFuente.nFont = 0;
+    infoFuente.dwFontSize.X = 8;
+    infoFuente.dwFontSize.Y = 16;
+    infoFuente.FontFamily = FF_DONTCARE;
+    infoFuente.FontWeight = FW_NORMAL;
+    lstrcpyW(infoFuente.FaceName, L"Consolas");
+    SetCurrentConsoleFontEx(manejadorConsola, FALSE, &infoFuente);
 
-    SMALL_RECT ventanaMinima = { 0, 0, 1, 1 };
-    SetConsoleWindowInfo(hOut, TRUE, &ventanaMinima);
-
-    COORD buffer = { ancho, alto };
-    SetConsoleScreenBufferSize(hOut, buffer);
-
-    SMALL_RECT ventana = { 0, 0, (SHORT)(anchoVentana - 1), (SHORT)(altoVentana - 1) };
-    SetConsoleWindowInfo(hOut, TRUE, &ventana);
+    // Redimensionamiento forzado moderno compatible con Windows Terminal
+    cout << "\033[8;" << ALTO_TERMINAL << ";" << ANCHO_TERMINAL << "t";
+    cout.flush();
 }
 
-// Convierte color del codigo original (C# ConsoleColor) a ANSI
-const char* colorFondo(int c) {
-    switch (c) {
-    case 0:  return "\033[30m";   // Black
-    case 1:  return "\033[34m";   // DarkBlue
-    case 2:  return "\033[97m";   // White
-    case 3:  return "\033[36m";   // DarkCyan
-    case 4:  return "\033[31m";   // DarkRed
-    case 5:  return "\033[33m";   // DarkYellow
-    case 6:  return "\033[37m";   // Gray
-    case 7:  return "\033[95m";   // Magenta
-    case 8:  return "\033[90m";   // DarkGray
-    case 9:  return "\033[94m";   // Blue
-    case 10: return "\033[92m";   // Green
-    case 11: return "\033[96m";   // Cyan
-    case 12: return "\033[91m";   // Red
-    case 13: return "\033[35m";   // DarkMagenta
-    case 14: return "\033[93m";   // Yellow
-    case 15: return "\033[97m";   // White (valor 15 = ConsoleColor::White)
+const char* colorFondo(int color) {
+    switch (color) {
+    case 0:  return "\033[30m";
+    case 1:  return "\033[34m";
+    case 2:  return "\033[97m";
+    case 3:  return "\033[36m";
+    case 4:  return "\033[31m";
+    case 5:  return "\033[33m";
+    case 6:  return "\033[37m";
+    case 7:  return "\033[95m";
+    case 8:  return "\033[90m";
+    case 9:  return "\033[94m";
+    case 10: return "\033[92m";
+    case 11: return "\033[96m";
+    case 12: return "\033[91m";
+    case 13: return "\033[35m";
+    case 14: return "\033[93m";
+    case 15: return "\033[97m";
     default: return "\033[0m";
     }
 }
 
 void mostrarFondo2() {
-    int matriz2[40][125] = {
+    static const vector<vector<int>> matrizFondo = {
         {2,2,2,2,12,12,12,12,12,12,12,12,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,12,12,12,12,12,12,12,12,2,2,2,2},
         {2,2,2,2,2,12,12,12,12,12,12,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,12,12,12,12,12,12,2,2,2,2,2},
         {2,2,2,2,2,2,12,12,12,12,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,12,12,12,12,2,2,2,2,2,2},
         {2,2,2,2,2,2,2,12,12,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,12,12,2,2,2,2,2,2,2},
-        {12,2,2,2,2,2,2,2,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,2,2,2,2,2,2,2,12},
+        {12,2,2,2,2,2,2,2,12,12,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,12,12,2,2,2,2,2,2,2,12},
         {12,12,2,2,2,2,2,2,2,12,12,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,12,12,2,2,2,2,2,2,2,12,12},
         {12,12,12,2,2,2,2,2,2,2,12,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,15,12,2,2,2,2,2,2,2,12,12,12},
         {12,12,12,12,2,2,2,2,2,2,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,10,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,10,15,15,15,15,2,2,2,2,2,2,12,12,12,12},
@@ -107,11 +108,15 @@ void mostrarFondo2() {
     };
 
     unsigned char bloque = 219;
-    limpiarPantalla();
 
-    for (int i = 0; i < 40; i++) {
-        for (int j = 0; j < 125; j++) {
-            cout << colorFondo(matriz2[i][j]) << bloque;
+    // --- LIMPIEZA VISUAL ABSOLUTA ANTES DE DIBUJAR ---
+    // \033[2J borra toda la consola y \033[1;1H pone el cursor arriba a la izquierda.
+    // Así evitamos que la matriz se imprima debajo del texto de Login.
+    cout << "\033[2J\033[1;1H";
+
+    for (int i = 0; i < (int)matrizFondo.size(); i++) {
+        for (int j = 0; j < (int)matrizFondo[i].size(); j++) {
+            cout << colorFondo(matrizFondo[i][j]) << bloque;
         }
         cout << "\033[0m\n";
     }
@@ -120,13 +125,7 @@ void mostrarFondo2() {
 }
 
 void mostrarLogo() {
-    const int FILAS = 23;
-    const int COLS = 80;
-
-    // 0: Negro/Fondo, 1: Blanco (Texto/Salpicadura), 2: Rojo (Bandera), 3: Magenta Oscuro (Cielo)
-    // 4: Purpura (Horizonte/Scanlines), 5: Amarillo (Sol alto/Flecha), 6: Naranja (Sol bajo)
-    // 7: Verde (Selva), 8: Cian (Rio base), 9: Azul (Rio olas), 10: Rosa (Delfines)
-    int matriz_c[FILAS][COLS] = {
+    static const vector<vector<int>> matrizLogo = {
         // [0-2] Cielo Superior Magenta y Banderas de Peru
         {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
         {3,3,3,3, 2,2,1,1,1,2,2, 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, 2,2,1,1,1,2,2, 3,3,3,3},
@@ -169,16 +168,22 @@ void mostrarLogo() {
 
     unsigned char bloque = 219;
 
-    cout << "\nCargando sistema Amazonas (Synthwave & Dolphins Edition)...\n\n";
+    // --- LIMPIEZA VISUAL ABSOLUTA ---
+    cout << "\033[2J\033[1;1H";
 
-    for (int i = 0; i < FILAS; i++) {
-        cout << "  ";
-        for (int j = 0; j < COLS; j++) {
-            if (matriz_c[i][j] == 0) {
+    int margenIzq = (ANCHO_TERMINAL > 80) ? (ANCHO_TERMINAL - 80) / 2 : 0;
+
+    cout << "\n  Cargando sistema Amazonas...\n\n";
+
+    for (int i = 0; i < (int)matrizLogo.size(); i++) {
+        for (int m = 0; m < margenIzq; m++) cout << " ";
+
+        for (int j = 0; j < (int)matrizLogo[i].size(); j++) {
+            if (matrizLogo[i][j] == 0) {
                 cout << " ";
             }
             else {
-                switch (matriz_c[i][j]) {
+                switch (matrizLogo[i][j]) {
                 case 1: cout << "\033[97m" << bloque; break;
                 case 2: cout << "\033[31m" << bloque; break;
                 case 3: cout << "\033[35m" << bloque; break;
@@ -197,57 +202,66 @@ void mostrarLogo() {
     }
 
     cout << "\033[0m";
-    cout << "\n  ================================================================================" << endl;
-    cout << "  Presione ENTER para ingresar al Marketplace...";
+    for (int m = 0; m < margenIzq; m++) cout << " ";
+    cout << "================================================================================" << endl;
+    for (int m = 0; m < margenIzq; m++) cout << " ";
+    cout << "Presione ENTER para ingresar al Marketplace...";
     cin.get();
 }
 
 int main() {
     configurarConsola();
 
-    limpiarPantalla();
     mostrarLogo();
 
     Inventario* miTienda = new Inventario();
     miTienda->cargarProductosIniciales();
 
-    Vendedor* admin = new Vendedor();
-    Cliente* user = new Cliente();
+    Vendedor* administrador = new Vendedor();
+    Cliente* usuario = new Cliente();
 
-    int op;
+    int opcion;
     do {
-        limpiarPantalla();
-        cout << "========================================\n";
-        cout << "        AMAZONAS - INICIO\n";
-        cout << "========================================\n";
-        cout << "Que tipo de usuario eres?\n";
-        cout << "1. Cliente\n";
-        cout << "2. Vendedor (Empieza por aqui para anadir stock)\n";
-        cout << "3. Salir\n";
-        cout << "Opcion: "; cin >> op;
+        mostrarFondo2();
 
-        switch (op) {
+        cout << "\033[10;12H========================================\n";
+        cout << "\033[11;12H        AMAZONAS - INICIO\n";
+        cout << "\033[12;12H========================================\n";
+        cout << "\033[14;12HQue tipo de usuario eres?\n";
+        cout << "\033[15;12H1. Cliente\n";
+        cout << "\033[16;12H2. Vendedor (Empieza por aqui para anadir stock)\n";
+        cout << "\033[17;12H3. Salir\n";
+        cout << "\033[19;12HOpcion: ";
+        cin >> opcion;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            opcion = -1;
+        }
+
+        switch (opcion) {
         case 1: {
-            limpiarPantalla();
-            user->login();
-            user->menu(*miTienda);
+            cout << "\033[2J\033[1;1H"; // Limpiar antes del login
+            usuario->login();
+            usuario->menu(*miTienda);
             break;
         }
         case 2: {
-            limpiarPantalla();
-            if (admin->login()) {
-                admin->menu(*miTienda);
+            cout << "\033[2J\033[1;1H"; // Limpiar antes del login
+            if (administrador->login()) {
+                administrador->menu(*miTienda);
             }
             break;
         }
         }
-    } while (op != 3);
+    } while (opcion != 3);
 
     delete miTienda;
-    delete admin;
-    delete user;
+    delete administrador;
+    delete usuario;
 
-    limpiarPantalla();
-    cout << "\nHasta pronto!\n";
+    cout << "\033[2J\033[1;1H";
+    cout << "\033[10;12HHasta pronto!\n";
     return 0;
 }

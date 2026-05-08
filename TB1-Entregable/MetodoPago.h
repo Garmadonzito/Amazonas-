@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Usuario.h"
 
 class MetodoPago {
@@ -100,20 +101,23 @@ public:
         for (int row = 0; row < QR_SIZE; row += 2) {
             cout << "  \033[107m    \033[0m"; // quiet zone izquierdo
             for (int col = 0; col < QR_SIZE; col++) {
-                bool top    = QR_DATA[row][col]          == '1';
+                bool top = QR_DATA[row][col] == '1';
                 bool bottom = (row + 1 < QR_SIZE) ?
-                              QR_DATA[row + 1][col] == '1' : false;
+                    QR_DATA[row + 1][col] == '1' : false;
 
                 if (!top && !bottom) {
                     // ambos blancos
                     cout << "\033[107;107m " << "\033[0m";
-                } else if (!top && bottom) {
+                }
+                else if (!top && bottom) {
                     // superior blanco, inferior negro
                     cout << "\033[30;107m" << halfBlock << "\033[0m";
-                } else if (top && !bottom) {
+                }
+                else if (top && !bottom) {
                     // superior negro, inferior blanco
                     cout << "\033[97;40m" << halfBlock << "\033[0m";
-                } else {
+                }
+                else {
                     // ambos negros
                     cout << "\033[40;40m " << "\033[0m";
                 }

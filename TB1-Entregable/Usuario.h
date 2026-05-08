@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -25,8 +26,7 @@ inline void irA(int fila, int col) {
     cout << "\033[" << fila << ";" << col << "H";
 }
 
-// Panel de contenido: terminal cols 12-109, filas 10-38
-// Limpia solo esa zona para no pisar los bordes grises
+// Limpia solo la zona de contenido para no pisar los bordes
 inline void limpiarZonaVerde() {
     cout << "\033[0m";
     for (int i = 0; i < PANEL_ALTO; i++) {
@@ -36,12 +36,12 @@ inline void limpiarZonaVerde() {
     cout.flush();
 }
 
-// Imprime texto centrado en el panel negro en la fila indicada
-inline void imprimirCentrado(int fila, const string& texto) {
-    int padding = (PANEL_ANCHO - (int)texto.length()) / 2;
-    if (padding < 0) padding = 0;
-    irA(fila, PANEL_COL + padding);
-    cout << "\033[0m" << texto;
+// Movido desde Inventario.h y optimizado para reutilizar irA()
+inline void imprimirEnPanel(int fila, const string& texto, int color = 0) {
+    irA(fila, PANEL_COL);
+    if (color != 0) cout << "\033[" << color << "m";
+    else cout << "\033[0m";
+    cout << texto << "\033[0m";
 }
 
 class Usuario {
@@ -52,5 +52,5 @@ protected:
 
 public:
     Usuario() : nombre(""), correo(""), dni("") {}
-    string getNombre() { return nombre; }
+    // getNombre() eliminado por ser código muerto (garbage code)
 };

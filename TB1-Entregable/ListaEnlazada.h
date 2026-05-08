@@ -1,10 +1,7 @@
 #pragma once
-#include <iostream>
-#include <functional> // Necesario para la lambda
 
-//Chicos desde ahora he puesto comentarios en secciones del codigo para describir los cambios nuevos que he echo
-//cambie el codigo ahora por lis simple enlazada para que todo funcione bien y le he puesto una validacion al DNI para 
-//Que solo si tiene 8 digitos entre el DNI 
+#include <iostream>
+#include <functional> // Necesario para lambdas
 
 template <class T>
 class Nodo {
@@ -17,7 +14,6 @@ public:
         siguiente = nullptr;
     }
 };
-
 
 template <class T>
 class ListaEnlazada {
@@ -33,16 +29,24 @@ public:
         cantidad = 0;
     }
 
-  
-    ~ListaEnlazada() {
+    // Nuevo método O(n) para limpiar memoria sin destruir el objeto principal
+    void vaciar() {
         Nodo<T>* actual = cabeza;
         while (actual != nullptr) {
             Nodo<T>* aBorrar = actual;
             actual = actual->siguiente;
             delete aBorrar;
         }
+        cabeza = nullptr;
+        cola = nullptr;
+        cantidad = 0;
     }
 
+    ~ListaEnlazada() {
+        vaciar();
+    }
+
+    // Complejidad O(1) gracias al puntero "cola"
     void agregar(T valor) {
         Nodo<T>* nuevoNodo = new Nodo<T>(valor);
         if (cabeza == nullptr) {
@@ -56,11 +60,10 @@ public:
         cantidad++;
     }
 
-    
+    // Complejidad O(n)
     bool eliminarSi(std::function<bool(T)> condicion) {
         if (cabeza == nullptr) return false;
 
-        
         if (condicion(cabeza->dato)) {
             Nodo<T>* aBorrar = cabeza;
             cabeza = cabeza->siguiente;
@@ -70,7 +73,6 @@ public:
             return true;
         }
 
-        
         Nodo<T>* actual = cabeza;
         while (actual->siguiente != nullptr && !condicion(actual->siguiente->dato)) {
             actual = actual->siguiente;
@@ -78,8 +80,8 @@ public:
 
         if (actual->siguiente != nullptr) {
             Nodo<T>* aBorrar = actual->siguiente;
-            actual->siguiente = aBorrar->siguiente; 
-            if (aBorrar == cola) cola = actual;     
+            actual->siguiente = aBorrar->siguiente;
+            if (aBorrar == cola) cola = actual;
             delete aBorrar;
             cantidad--;
             return true;
