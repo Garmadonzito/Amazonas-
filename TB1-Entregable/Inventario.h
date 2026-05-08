@@ -40,6 +40,11 @@ private:
         return buscarRecursivo(actual->siguiente, idBuscado);
     }
 
+    int contarVentasRecursivo(NodoCola<Venta>* actual) {
+        if (actual == nullptr) return 0;
+        return 1 + contarVentasRecursivo(actual->siguiente);
+    }
+
     std::string buscarNombreCliente(std::string dniBuscado) {
         std::ifstream archivo("clientes.dat", std::ios::binary);
         RegistroCliente reg;
@@ -428,7 +433,7 @@ public:
             actual = actual->siguiente;
         }
 
-        std::cout << "Total de ventas registradas: " << registroVentas->getCantidad() << "\n";
+        std::cout << "Total de ventas registradas: " << contarVentasRecursivo(registroVentas->getFrente()) << "\n";
         std::cout << "========================================\n";
     }
 };
