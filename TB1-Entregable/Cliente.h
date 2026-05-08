@@ -7,8 +7,6 @@
 #include <conio.h>
 #include <fstream>
 
-extern void mostrarFondo2();
-
 class Cliente : public Usuario {
 private:
     ListaEnlazada<int>* carrito;
@@ -140,7 +138,7 @@ public:
         else if (op == 2) {
             limpiarPantalla();
             YapePlin yp; yp.pagar(total);
-            mostrarFondo2();
+            //aca muestra el fondo 2
         }
     }
 
@@ -257,7 +255,7 @@ public:
     }
 
     void menu(Inventario& inv) {
-        mostrarFondo2();
+        //aca muestra el fondo 2
         historialNavegacion.apilar(MENU_PRINCIPAL);
 
         while (!historialNavegacion.estaVacia()) {

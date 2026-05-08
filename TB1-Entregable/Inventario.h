@@ -53,7 +53,7 @@ private:
     }
 
     // ---------------------------------------------------------
-    // ALGORITMO AVANZADO: ORDENAMIENTO SHELL (Orden Cronológico) [cite: 615, 666]
+    // ALGORITMO AVANZADO: ORDENAMIENTO SHELL
     // ---------------------------------------------------------
     void ordenarVentasShell(std::vector<Venta>& ventas) {
         int n = (int)ventas.size();
