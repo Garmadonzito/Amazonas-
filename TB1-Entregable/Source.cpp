@@ -6,6 +6,7 @@
 #include "Inventario.h"
 #include "Cliente.h"
 #include "Vendedor.h"
+#include"GestorEscenas.h"
 
 using namespace std;
 
@@ -209,20 +210,31 @@ void mostrarLogo() {
     cin.get();
 }
 
+void establecerColor(int letra, int fondo) {
+    // Obtenemos el identificador de la consola
+    HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // La fórmula mágica: (fondo * 16) + letra
+    // Esto combina ambos colores en un solo atributo de Windows
+    SetConsoleTextAttribute(hCon, (fondo * 16) + letra);
+}
+
 int main() {
     configurarConsola();
 
-    mostrarLogo();
+    //mostrarLogo();
 
     Inventario* miTienda = new Inventario();
     miTienda->cargarDesdeArchivo();
 
     Vendedor* administrador = new Vendedor();
     Cliente* usuario = new Cliente();
-
+    gestorEscenas grafica;
+    grafica.dibujarEscena();
+    establecerColor(0, 15);
     int opcion;
     do {
-        mostrarFondo2();
+        //mostrarFondo2();
 
         cout << "\033[10;12H========================================\n";
         cout << "\033[11;12H        AMAZONAS - INICIO\n";
