@@ -215,7 +215,7 @@ int main() {
     mostrarLogo();
 
     Inventario* miTienda = new Inventario();
-    miTienda->cargarProductosIniciales();
+    miTienda->cargarDesdeArchivo();
 
     Vendedor* administrador = new Vendedor();
     Cliente* usuario = new Cliente();

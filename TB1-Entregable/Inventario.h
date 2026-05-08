@@ -1,12 +1,13 @@
 #pragma once
-
 #include "ListaEnlazada.h"
 #include "Producto.h"
-#include "Usuario.h" // Para heredar imprimirEnPanel
+#include "Usuario.h" 
+#include "Registro.h" // Nombre corregido
 #include <string>
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <fstream>     
 
 class Inventario {
 private:
@@ -28,20 +29,57 @@ public:
         delete listaProductos;
     }
 
-    void cargarProductosIniciales() {
-        agregarProducto(101, "Laptop Gamer ASUS ROG", "Computadoras", 4500.00f, 15);
-        agregarProducto(104, "Monitor LG 144Hz 24\"", "Computadoras", 800.00f, 10);
-        agregarProducto(102, "Smartphone Samsung S23", "Telefonia", 3200.00f, 20);
-        agregarProducto(103, "Teclado Mecanico Redragon", "Accesorios", 150.00f, 50);
-        agregarProducto(105, "Mouse Logitech G502", "Accesorios", 200.00f, 5);
-        agregarProducto(201, "Amazon Echo Dot (Alexa)", "Dispositivos Amazon", 180.00f, 30);
-        agregarProducto(202, "Kindle Paperwhite", "Dispositivos Amazon", 550.00f, 12);
-        agregarProducto(203, "Fire TV Stick 4K", "Dispositivos Amazon", 220.00f, 25);
+    void guardarEnArchivo() {
+        std::ofstream archivo("productos.dat", std::ios::binary | std::ios::trunc);
+        if (!archivo) return;
+
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            RegistroProducto reg;
+            reg.id = actual->dato.id;
+            reg.precio = actual->dato.precio;
+            reg.stock = actual->dato.stock;
+            
+            strncpy_s(reg.nombre, sizeof(reg.nombre), actual->dato.nombre.c_str(), _TRUNCATE);
+            strncpy_s(reg.categoria, sizeof(reg.categoria), actual->dato.categoria.c_str(), _TRUNCATE);
+
+            archivo.write((char*)&reg, sizeof(RegistroProducto));
+            actual = actual->siguiente;
+        }
+        archivo.close();
     }
 
-    void agregarProducto(int id, std::string nombre, std::string categoria, float precio, int stock) {
+    void cargarDesdeArchivo() {
+        std::ifstream archivo("productos.dat", std::ios::binary);
+        if (!archivo) {
+            cargarProductosIniciales();
+            guardarEnArchivo();
+            return;
+        }
+
+        listaProductos->vaciar();
+        RegistroProducto reg;
+        while (archivo.read((char*)&reg, sizeof(RegistroProducto))) {
+            agregarProducto(reg.id, reg.nombre, reg.categoria, reg.precio, reg.stock, false);
+        }
+        archivo.close();
+    }
+
+    void cargarProductosIniciales() {
+        agregarProducto(101, "Laptop Gamer ASUS ROG", "Computadoras", 4500.00f, 15, false);
+        agregarProducto(104, "Monitor LG 144Hz 24\"", "Computadoras", 800.00f, 10, false);
+        agregarProducto(102, "Smartphone Samsung S23", "Telefonia", 3200.00f, 20, false);
+        agregarProducto(103, "Teclado Mecanico Redragon", "Accesorios", 150.00f, 50, false);
+        agregarProducto(105, "Mouse Logitech G502", "Accesorios", 200.00f, 5, false);
+        agregarProducto(201, "Amazon Echo Dot (Alexa)", "Dispositivos Amazon", 180.00f, 30, false);
+        agregarProducto(202, "Kindle Paperwhite", "Dispositivos Amazon", 550.00f, 12, false);
+        agregarProducto(203, "Fire TV Stick 4K", "Dispositivos Amazon", 220.00f, 25, false);
+    }
+
+    void agregarProducto(int id, std::string nombre, std::string categoria, float precio, int stock, bool guardar = true) {
         Producto nuevo(id, nombre, categoria, precio, stock);
         listaProductos->agregar(nuevo);
+        if (guardar) guardarEnArchivo(); 
     }
 
     bool existeProducto(int id) {
@@ -62,20 +100,23 @@ public:
             p->precio = nuevoPrecio;
             p->stock = nuevoStock;
             std::cout << ">> Producto actualizado correctamente.\n";
+            guardarEnArchivo(); 
         }
     }
 
     bool eliminarProducto(int id) {
-        return listaProductos->eliminarSi([id](Producto p) -> bool {
+        bool eliminado = listaProductos->eliminarSi([id](Producto p) -> bool {
             return p.id == id;
-            });
+        });
+        if (eliminado) guardarEnArchivo(); 
+        return eliminado;
     }
 
     void mostrarStockBajo(int limite) {
         std::cout << "\n========== ALERTAS DE STOCK (Limite: " << limite << ") ==========\n";
         auto esCritico = [limite](Producto p) -> bool {
             return p.stock < limite;
-            };
+        };
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool huboAlertas = false;
         while (actual != nullptr) {
@@ -91,8 +132,6 @@ public:
         std::cout << "========================================================\n";
     }
 
-    // Complejidad actual: O(n^2) debido al agrupamiento de categorías. 
-    // Justificable por ahora hasta aplicar algoritmos de ordenamiento avanzados.
     void listarTodo() {
         if (listaProductos->getCabeza() == nullptr) {
             imprimirEnPanel(10, "Inventario vacio.");

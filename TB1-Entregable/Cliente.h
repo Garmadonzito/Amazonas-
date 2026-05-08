@@ -1,9 +1,10 @@
 #pragma once
-
 #include "Usuario.h"
 #include "Inventario.h"
 #include "MetodoPago.h"
+#include "Registro.h" // Nombre corregido
 #include <conio.h>
+#include <fstream>
 
 extern void mostrarFondo2();
 
@@ -96,7 +97,6 @@ public:
         }
     }
 
-    // Complejidad de consulta de O(k * n) justificada para Listas simples básicas.
     void verCarrito(Inventario& inv) {
         int fila = 10;
         linea(fila++, "--- TU CARRITO ---");
@@ -173,12 +173,43 @@ public:
 
         seleccionarMetodoPago(total);
 
+        // 1. Guardar cliente en clientes.dat
+        ofstream archivoClientes("clientes.dat", ios::binary | ios::app);
+        if (archivoClientes) {
+            RegistroCliente rc;
+            strncpy_s(rc.nombre, sizeof(rc.nombre), nombre.c_str(), _TRUNCATE);
+            strncpy_s(rc.correo, sizeof(rc.correo), correo.c_str(), _TRUNCATE);
+            strncpy_s(rc.dni, sizeof(rc.dni), dni.c_str(), _TRUNCATE);
+            archivoClientes.write((char*)&rc, sizeof(RegistroCliente));
+            archivoClientes.close();
+        }
+
+        // 2. Guardar ventas individuales en ventas.dat
+        ofstream archivoVentas("ventas.dat", ios::binary | ios::app);
+        if (archivoVentas) {
+            actual = carrito->getCabeza();
+            while (actual != nullptr) {
+                Producto* p = inv.obtenerProducto(actual->dato);
+                if (p != nullptr) {
+                    RegistroVenta rv;
+                    rv.idProducto = p->id;
+                    strncpy_s(rv.nombreProducto, sizeof(rv.nombreProducto), p->nombre.c_str(), _TRUNCATE);
+                    rv.monto = p->precio;
+                    strncpy_s(rv.dniCliente, sizeof(rv.dniCliente), dni.c_str(), _TRUNCATE);
+                    archivoVentas.write((char*)&rv, sizeof(RegistroVenta));
+                }
+                actual = actual->siguiente;
+            }
+            archivoVentas.close();
+        }
+
+        // 3. Confirmar la resta de stock escribiendo en el disco
+        inv.guardarEnArchivo();
+
         limpiarZonaVerde();
         linea(16, ">> Compra realizada. Gracias " + nombre + "!");
         irA(19, PANEL_COL); pausa();
 
-        // [MÁXIMA OPTIMIZACIÓN APLICADA AQUÍ]
-        // O(n) tiempo en limpieza, pero O(1) de espacio en memoria sin reasignar new.
         carrito->vaciar();
     }
 
@@ -194,7 +225,6 @@ public:
             linea(17, "Opcion: ");
             cin >> op;
 
-            // Bloqueo anticaídas de bucle (scroll infinito)
             if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); op = -1; }
 
             switch (op) {
