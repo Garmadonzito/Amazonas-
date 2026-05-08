@@ -16,6 +16,13 @@ private:
     ListaEnlazada<Producto>* listaProductos;
     Cola<Venta>* registroVentas;
 
+    struct RegistroVentaAntiguo {
+        int idProducto;
+        char nombreProducto[50];
+        float monto;
+        char dniCliente[9];
+    };
+
     // Complejidad Tiempo O(n), Espacio O(n) por la pila de llamadas
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
         if (actual == nullptr) return nullptr;
@@ -34,6 +41,48 @@ private:
         }
         archivo.close();
         return "Cliente no encontrado";
+    }
+
+    void convertirVentasAntiguas() {
+        std::ifstream archivo("ventas.dat", std::ios::binary);
+        if (!archivo) return;
+
+        archivo.seekg(0, std::ios::end);
+        long tamanoArchivo = (long)archivo.tellg();
+        archivo.seekg(0, std::ios::beg);
+
+        if (tamanoArchivo == 0 || tamanoArchivo % sizeof(RegistroVenta) == 0) {
+            archivo.close();
+            return;
+        }
+
+        if (tamanoArchivo % sizeof(RegistroVentaAntiguo) != 0) {
+            archivo.close();
+            return;
+        }
+
+        std::vector<RegistroVenta> ventasConvertidas;
+        RegistroVentaAntiguo antiguo;
+        while (archivo.read((char*)&antiguo, sizeof(RegistroVentaAntiguo))) {
+            RegistroVenta nuevo;
+            nuevo.idProducto = antiguo.idProducto;
+            nuevo.monto = antiguo.monto;
+            nuevo.cantidadRestada = 1;
+
+            Producto* p = obtenerProducto(antiguo.idProducto);
+            nuevo.stockRestante = (p != nullptr) ? p->stock : 0;
+
+            strncpy_s(nuevo.nombreProducto, sizeof(nuevo.nombreProducto), antiguo.nombreProducto, _TRUNCATE);
+            strncpy_s(nuevo.dniCliente, sizeof(nuevo.dniCliente), antiguo.dniCliente, _TRUNCATE);
+            ventasConvertidas.push_back(nuevo);
+        }
+        archivo.close();
+
+        std::ofstream salida("ventas.dat", std::ios::binary | std::ios::trunc);
+        for (RegistroVenta venta : ventasConvertidas) {
+            salida.write((char*)&venta, sizeof(RegistroVenta));
+        }
+        salida.close();
     }
 
 public:
@@ -230,8 +279,12 @@ public:
         RegistroVenta reg;
         reg.idProducto = producto->id;
         reg.monto = producto->precio;
+        reg.cantidadRestada = 1;
+        reg.stockRestante = producto->stock;
         strncpy_s(reg.nombreProducto, sizeof(reg.nombreProducto), producto->nombre.c_str(), _TRUNCATE);
         strncpy_s(reg.dniCliente, sizeof(reg.dniCliente), dniCliente.c_str(), _TRUNCATE);
+
+        convertirVentasAntiguas();
 
         std::ofstream archivo("ventas.dat", std::ios::binary | std::ios::app);
         if (archivo) {
@@ -239,7 +292,7 @@ public:
             archivo.close();
         }
 
-        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, producto->stock, true);
+        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, 1, producto->stock, true);
         registroVentas->encolar(nueva);
     }
 
@@ -250,15 +303,35 @@ public:
         std::ifstream archivo("ventas.dat", std::ios::binary);
         if (!archivo) return;
 
+        archivo.seekg(0, std::ios::end);
+        long tamanoArchivo = (long)archivo.tellg();
+        archivo.seekg(0, std::ios::beg);
+
+        if (tamanoArchivo % sizeof(RegistroVenta) != 0 && tamanoArchivo % sizeof(RegistroVentaAntiguo) == 0) {
+            RegistroVentaAntiguo regAntiguo;
+            while (archivo.read((char*)&regAntiguo, sizeof(RegistroVentaAntiguo))) {
+                Producto* p = obtenerProducto(regAntiguo.idProducto);
+                int stockActual = 0;
+                if (p != nullptr) stockActual = p->stock;
+
+                std::string dni = regAntiguo.dniCliente;
+                std::string cliente = buscarNombreCliente(dni);
+                Venta venta(regAntiguo.idProducto, dni, cliente, regAntiguo.nombreProducto, regAntiguo.monto, 1, stockActual, true);
+                registroVentas->encolar(venta);
+            }
+            archivo.close();
+            return;
+        }
+
         RegistroVenta reg;
         while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
             Producto* p = obtenerProducto(reg.idProducto);
-            int stockActual = 0;
-            if (p != nullptr) stockActual = p->stock;
+            int stockMostrar = reg.stockRestante;
+            if (stockMostrar == 0 && p != nullptr) stockMostrar = p->stock;
 
             std::string dni = reg.dniCliente;
             std::string cliente = buscarNombreCliente(dni);
-            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, stockActual, true);
+            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, reg.cantidadRestada, stockMostrar, true);
             registroVentas->encolar(venta);
         }
         archivo.close();

@@ -24,4 +24,6 @@ struct RegistroVenta {
     char nombreProducto[50];
     float monto;
     char dniCliente[9];
+    int cantidadRestada;
+    int stockRestante;
 };
