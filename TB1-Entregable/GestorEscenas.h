@@ -61,27 +61,21 @@ void gestorEscenas::configObjEscena() {
 
 		Matriz* Anaconda = new Matriz();
 		Anaconda->inicializar(anaconda);
-		listaObjetos.push_back({ Anaconda,30,15 });
+		// 🔴 SOLUCIÓN DE COORDENADAS: 
+		// La nube blanca (nubebig) empieza en X=35, Y=15.
+		// Para centrar la anaconda azul dentro de ella, la movemos a X=52, Y=21.
+		listaObjetos.push_back({ Anaconda, 52, 21 });
 		break;
 	}
 	case gestorEscenas::MENU_PRINCIPAL:
-
-
 		break;
 	case gestorEscenas::CATALOGO:
-
-
 		break;
 	case gestorEscenas::CARRITO:
-
-
 		break;
 	case gestorEscenas::PAGO:
-
-
 		break;
 	default:
-
 		break;
 	}
 }
@@ -105,9 +99,6 @@ void gestorEscenas::setEscena(Escena nueva) {
 
 	//2. Se limpia actualizan los objetos segun escena
 	configObjEscena();
-
-	//xsiaca poner un reset de consola 
-	system("cls");// ver si se queda xd
 }
 
 
@@ -121,6 +112,7 @@ gestorEscenas::gestorEscenas() {
 	//3.Configuramos los objetos segun "estado"
 	configObjEscena();
 }
+
 gestorEscenas::~gestorEscenas() {
 	limpiar_listaObj();
 }

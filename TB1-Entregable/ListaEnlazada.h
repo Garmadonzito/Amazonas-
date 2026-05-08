@@ -2,7 +2,7 @@
 
 #include "Nodo.h"
 #include <iostream>
-#include <functional> // Necesario para lambdas
+#include <functional> 
 
 template <class T>
 class ListaEnlazada {
@@ -12,13 +12,19 @@ private:
     int cantidad;
 
 public:
-    ListaEnlazada() {
-        cabeza = nullptr;
-        cola = nullptr;
-        cantidad = 0;
-    }
+    // Clase Iterador para cumplir con la rúbrica del TB1
+    class Iterator {
+    private:
+        Nodo<T>* actual;
+    public:
+        Iterator(Nodo<T>* nodo) : actual(nodo) {}
+        Iterator& operator++() { if (actual) actual = actual->siguiente; return *this; }
+        T& operator*() { return actual->dato; }
+        bool operator!=(const Iterator& otro) const { return actual != otro.actual; }
+    };
 
-    // Nuevo método O(n) para limpiar memoria sin destruir el objeto principal
+    ListaEnlazada() : cabeza(nullptr), cola(nullptr), cantidad(0) {}
+
     void vaciar() {
         Nodo<T>* actual = cabeza;
         while (actual != nullptr) {
@@ -26,58 +32,41 @@ public:
             actual = actual->siguiente;
             delete aBorrar;
         }
-        cabeza = nullptr;
-        cola = nullptr;
-        cantidad = 0;
+        cabeza = nullptr; cola = nullptr; cantidad = 0;
     }
 
-    ~ListaEnlazada() {
-        vaciar();
-    }
+    ~ListaEnlazada() { vaciar(); }
 
-    // Complejidad O(1) gracias al puntero "cola"
     void agregar(T valor) {
         Nodo<T>* nuevoNodo = new Nodo<T>(valor);
-        if (cabeza == nullptr) {
-            cabeza = nuevoNodo;
-            cola = nuevoNodo;
-        }
-        else {
-            cola->siguiente = nuevoNodo;
-            cola = nuevoNodo;
-        }
+        if (cabeza == nullptr) { cabeza = cola = nuevoNodo; }
+        else { cola->siguiente = nuevoNodo; cola = nuevoNodo; }
         cantidad++;
     }
 
-    // Complejidad O(n)
     bool eliminarSi(std::function<bool(T)> condicion) {
         if (cabeza == nullptr) return false;
-
         if (condicion(cabeza->dato)) {
             Nodo<T>* aBorrar = cabeza;
             cabeza = cabeza->siguiente;
             if (cabeza == nullptr) cola = nullptr;
-            delete aBorrar;
-            cantidad--;
-            return true;
+            delete aBorrar; cantidad--; return true;
         }
-
         Nodo<T>* actual = cabeza;
         while (actual->siguiente != nullptr && !condicion(actual->siguiente->dato)) {
             actual = actual->siguiente;
         }
-
         if (actual->siguiente != nullptr) {
             Nodo<T>* aBorrar = actual->siguiente;
             actual->siguiente = aBorrar->siguiente;
             if (aBorrar == cola) cola = actual;
-            delete aBorrar;
-            cantidad--;
-            return true;
+            delete aBorrar; cantidad--; return true;
         }
         return false;
     }
 
     Nodo<T>* getCabeza() { return cabeza; }
     int getCantidad() { return cantidad; }
+    Iterator begin() { return Iterator(cabeza); }
+    Iterator end() { return Iterator(nullptr); }
 };

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Usuario.h"
 #include "Inventario.h"
 #include "MetodoPago.h"
@@ -20,30 +21,33 @@ private:
         irA(fila, PANEL_COL); cout << "\033[0m" << texto;
     }
 
-    void pausaRetroceder(int fila = 37) {
+   
+    void pausaRetroceder(int fila = 40) {
         irA(fila, PANEL_COL);
-        cout << "\033[93m>> Presione ESC para volver atras...";
+        cout << "\033[93m>> Presione ESC para volver atras...\033[0m";
         while (true) {
             if (_kbhit()) {
                 int c = _getch();
                 if (c == 27) break;
             }
         }
+        irA(fila, PANEL_COL);
+        cout << string(60, ' '); 
     }
 
 public:
-    Cliente() {
-        carrito = new ListaEnlazada<int>();
-    }
-
-    ~Cliente() {
-        delete carrito;
-    }
+    Cliente() { carrito = new ListaEnlazada<int>(); }
+    ~Cliente() { delete carrito; }
 
     void login() {
-        cout << "\n--- LOGIN CLIENTE ---\n";
-        cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
-        cout << "Correo: "; getline(cin, correo);
+        limpiarPantalla();
+        
+        irA(12, PANEL_COL); cout << "========================================================";
+        irA(14, PANEL_COL); cout << "                    LOGIN DE CLIENTE                    ";
+        irA(16, PANEL_COL); cout << "========================================================";
+
+        irA(20, PANEL_COL); cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
+        irA(22, PANEL_COL); cout << "Correo: "; getline(cin, correo);
 
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
@@ -51,25 +55,25 @@ public:
 
         bool dniValido = false;
         do {
-            cout << "DNI: ";
+            irA(24, PANEL_COL); cout << string(40, ' ');
+            irA(24, PANEL_COL); cout << "DNI: ";
             getline(cin, dni);
             if (validarDNI(dni)) dniValido = true;
-            else cout << ">> Error: DNI invalido.\n";
+            else { irA(26, PANEL_COL); cout << "\033[91m>> Error: DNI invalido.\033[0m"; }
         } while (!dniValido);
 
-        cout << "\n>> Bienvenido " << nombre << "!\n";
+        irA(28, PANEL_COL); cout << "\033[92m>> Bienvenido " << nombre << "!\033[0m";
         pausa();
     }
 
-    // Lógica reutilizable para agregar productos por ID desde cualquier pantalla
     void bucleAgregarRapido(Inventario& inv, int filaInicio) {
         irA(filaInicio, PANEL_COL);
-        cout << "\033[0m>> Ingrese ID para agregar. [ESC] para dejar de añadir.";
+        cout << "\033[0m>> Ingrese ID para agregar. [\033[93mESC\033[0m] para terminar.";
 
         int filaMsg = filaInicio + 2;
         while (true) {
-            irA(filaMsg, PANEL_COL);
-            cout << "\033[0mID: ";
+            irA(filaMsg, PANEL_COL); cout << string(50, ' ');
+            irA(filaMsg, PANEL_COL); cout << "\033[0mID: ";
             string buf;
             bool terminar = false;
 
@@ -98,12 +102,14 @@ public:
     }
 
     void verCarrito(Inventario& inv) {
-        int fila = 10;
-        linea(fila++, "--- TU CARRITO ---");
+        int fila = 12;
+        linea(fila++, "========================================================");
+        linea(fila++, "                   TU CARRITO ACTUAL                    ");
+        linea(fila++, "========================================================");
         fila++;
 
         if (carrito->getCabeza() == nullptr) {
-            linea(fila, "Carrito vacio.");
+            linea(fila, "El carrito esta vacio.");
             return;
         }
 
@@ -113,22 +119,24 @@ public:
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
             if (p != nullptr) {
-                linea(fila++, to_string(i++) + ". " + p->nombre + " - S/. " + to_string((int)p->precio));
+                linea(fila++, "  " + to_string(i++) + ". " + p->nombre + " - S/. " + to_string((int)p->precio));
                 total += p->precio;
             }
             actual = actual->siguiente;
         }
-        linea(fila + 1, "TOTAL: S/. " + to_string((int)total));
+        fila++;
+        linea(fila++, "--------------------------------------------------------");
+        linea(fila, "  \033[92mTOTAL A PAGAR: S/. " + to_string((int)total) + "\033[0m");
     }
 
     void seleccionarMetodoPago(double total) {
         limpiarZonaVerde();
-        linea(10, "==============================");
-        linea(11, "     METODO DE PAGO           ");
-        linea(12, "==============================");
-        linea(14, "1. Tarjeta");
-        linea(15, "2. Yape / Plin");
-        linea(17, "Opcion: ");
+        linea(12, "========================================================");
+        linea(14, "                SELECCIONA METODO DE PAGO               ");
+        linea(16, "========================================================");
+        linea(20, "    1. Tarjeta de Credito / Debito");
+        linea(22, "    2. Yape / Plin (Codigo QR)");
+        linea(26, "    Opcion: ");
         int op; cin >> op;
 
         if (op == 1) {
@@ -138,14 +146,13 @@ public:
         else if (op == 2) {
             limpiarPantalla();
             YapePlin yp; yp.pagar(total);
-            //aca muestra el fondo 2
         }
     }
 
     void comprarCarrito(Inventario& inv) {
         limpiarZonaVerde();
         if (carrito->getCabeza() == nullptr) {
-            linea(16, "El carrito esta vacio.");
+            linea(18, "  El carrito esta vacio. Agrega productos primero.");
             pausaRetroceder();
             return;
         }
@@ -159,7 +166,7 @@ public:
         }
 
         verCarrito(inv);
-        pausaRetroceder(36);
+        pausaRetroceder(38);
 
         seleccionarMetodoPago(total);
 
@@ -176,17 +183,20 @@ public:
         carrito->vaciar();
 
         limpiarZonaVerde();
-        linea(16, ">> Compra realizada con exito.");
-        pausaRetroceder(19);
+        linea(20, "  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m");
+        pausaRetroceder(24);
     }
 
     void menuBuscarProducto(Inventario& inv) {
         while (true) {
             limpiarZonaVerde();
-            linea(10, "--- TIENDA AMAZONAS ---");
-            linea(12, "1. Ver Catalogo Completo (Agregar por ID)");
-            linea(13, "2. Buscar por nombre (Confirmacion S/N)");
-            linea(15, "\033[93m[ESC] Volver al Menu Principal");
+          
+            linea(12, "========================================================");
+            linea(14, "                 --- TIENDA AMAZONAS ---                ");
+            linea(16, "========================================================");
+            linea(20, "    1. Ver Catalogo Completo (Agregar por ID)");
+            linea(22, "    2. Buscar producto por nombre especifico");
+            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
@@ -194,17 +204,17 @@ public:
             if (c == '1') {
                 limpiarZonaVerde();
                 inv.listarTodo();
-                bucleAgregarRapido(inv, 32); // Permite agregar directamente
+                bucleAgregarRapido(inv, 38);
             }
             else if (c == '2') {
                 limpiarZonaVerde();
-                linea(10, "Ingrese nombre del producto: ");
+                linea(14, "  Ingrese nombre del producto: ");
                 string nom; cin.ignore(); getline(cin, nom);
 
                 limpiarZonaVerde();
                 inv.buscarPorNombre(nom);
 
-                linea(30, ">> Ingrese el ID del producto que desea: ");
+                linea(32, "  >> Ingrese el ID del producto que desea: ");
                 string idStr; cin >> idStr;
 
                 if (idStr.find_first_not_of("0123456789") == string::npos) {
@@ -212,21 +222,21 @@ public:
                     Producto* p = inv.obtenerProducto(idBuscado);
 
                     if (p != nullptr && p->stock > 0) {
-                        linea(32, "Desea agregar '" + p->nombre + "' al carrito? (S/N): ");
+                        linea(34, "  Desea agregar '" + p->nombre + "' al carrito? (S/N): ");
                         char confirma = _getch();
                         if (confirma == 's' || confirma == 'S') {
                             carrito->agregar(idBuscado);
-                            linea(34, "\033[92m>> Agregado con exito!");
+                            linea(36, "  \033[92m>> Agregado con exito!\033[0m");
                         }
                         else {
-                            linea(34, "\033[91m>> Operacion cancelada.");
+                            linea(36, "  \033[91m>> Operacion cancelada.\033[0m");
                         }
                     }
                     else {
-                        linea(32, "\033[91m>> Producto no encontrado o sin stock.");
+                        linea(34, "  \033[91m>> Producto no encontrado o sin stock.\033[0m");
                     }
                 }
-                pausaRetroceder(36);
+                pausaRetroceder(39);
             }
         }
     }
@@ -234,10 +244,13 @@ public:
     void menuCarrito(Inventario& inv) {
         while (true) {
             limpiarZonaVerde();
-            linea(10, "--- MI CARRITO DE COMPRAS ---");
-            linea(12, "1. Revisar lista de productos");
-            linea(13, "2. Proceder al pago");
-            linea(15, "\033[93m[ESC] Volver al Menu Principal");
+           
+            linea(12, "========================================================");
+            linea(14, "               --- MI CARRITO DE COMPRAS ---            ");
+            linea(16, "========================================================");
+            linea(20, "    1. Ver lista de productos añadidos");
+            linea(22, "    2. Proceder al pago final");
+            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
@@ -245,7 +258,7 @@ public:
             if (c == '1') {
                 limpiarZonaVerde();
                 verCarrito(inv);
-                pausaRetroceder(36);
+                pausaRetroceder(38);
             }
             else if (c == '2') {
                 comprarCarrito(inv);
@@ -255,7 +268,6 @@ public:
     }
 
     void menu(Inventario& inv) {
-        //aca muestra el fondo 2
         historialNavegacion.apilar(MENU_PRINCIPAL);
 
         while (!historialNavegacion.estaVacia()) {
@@ -263,12 +275,13 @@ public:
             limpiarZonaVerde();
 
             if (pantallaActual == MENU_PRINCIPAL) {
-                linea(10, "========================================");
-                linea(11, "   BIENVENIDO, " + nombre);
-                linea(12, "========================================");
-                linea(14, "1. Entrar a la Tienda (Catalogo/Busqueda)");
-                linea(15, "2. Ver mi Carrito");
-                linea(17, "\033[93m[ESC] Salir del Sistema");
+                
+                linea(12, "========================================================");
+                linea(14, "             BIENVENIDO AL MARKETPLACE, " + nombre);
+                linea(16, "========================================================");
+                linea(20, "    1. Entrar a la Tienda (Catalogo y Busqueda)");
+                linea(22, "    2. Gestionar mi Carrito de Compras");
+                linea(28, "    \033[93m[ESC] Salir del Sistema de Cliente\033[0m");
 
                 int c = _getch();
                 if (c == '1') historialNavegacion.apilar(MENU_BUSQUEDA);

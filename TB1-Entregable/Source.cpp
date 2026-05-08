@@ -1,7 +1,7 @@
 #include "Consola.h"
 
 int main() {
-    Consola consola ;
+    Consola consola;
     consola.configurarConsola();
 
     Inventario* miTienda = new Inventario();
@@ -10,25 +10,30 @@ int main() {
     Vendedor* administrador = new Vendedor();
     Cliente* usuario = new Cliente();
     gestorEscenas grafica;
-    grafica.dibujarEscena();
-    consola.establecerColor(0, 15);
+
     int opcion;
     do {
+        system("cls");
+        grafica.dibujarEscena();
+        consola.establecerColor(15, 0); //Cambie el color blanco por negro, no se veia muy bien 
 
-        cout << "========================================\n";
-        cout << "        AMAZONAS - INICIO\n";
-        cout << "========================================\n";
-        cout << "Que tipo de usuario eres?\n";
-        cout << "1. Cliente\n";
-        cout << "2. Vendedor (Empieza por aqui para anadir stock)\n";
-        cout << "3. Salir\n";
-        cout << "Opcion: ";
+       
+        irA(4, 12); cout << "========================================";
+        irA(5, 12); cout << "        AMAZONAS - INICIO";
+        irA(6, 12); cout << "========================================";
+        irA(8, 12); cout << "Que tipo de usuario eres?";
+        irA(9, 12); cout << "1. Cliente";
+        irA(10, 12); cout << "2. Vendedor (Empieza por aqui para anadir stock)";
+        irA(11, 12); cout << "3. Salir";
+        irA(13, 12); cout << "Opcion: ";
+
         cin >> opcion;
 
         if (cin.fail()) {
             cin.clear();
             cin.ignore(10000, '\n');
             opcion = -1;
+            continue;
         }
 
         switch (opcion) {
@@ -52,6 +57,6 @@ int main() {
     delete administrador;
     delete usuario;
 
-    cout << "Hasta pronto!\n";
+    irA(15, 12); cout << "Hasta pronto!\n";
     return 0;
 }
