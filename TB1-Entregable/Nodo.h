@@ -1,8 +1,7 @@
 #pragma once
 
 template <class T>
-class Nodo {
-public:
+struct Nodo {
     T dato;
     Nodo<T>* siguiente;
 
