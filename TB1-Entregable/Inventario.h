@@ -9,7 +9,8 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include <fstream>     
+#include <fstream>
+#include <ctime>
 
 class Inventario {
 private:
@@ -21,6 +22,15 @@ private:
         char nombreProducto[50];
         float monto;
         char dniCliente[9];
+    };
+
+    struct RegistroVentaSinFecha {
+        int idProducto;
+        char nombreProducto[50];
+        float monto;
+        char dniCliente[9];
+        int cantidadRestada;
+        int stockRestante;
     };
 
     // Complejidad Tiempo O(n), Espacio O(n) por la pila de llamadas
@@ -43,6 +53,31 @@ private:
         return "Cliente no encontrado";
     }
 
+    std::string obtenerFechaTexto(long long fechaHora) {
+        if (fechaHora == 0) return "Sin fecha";
+
+        time_t tiempo = (time_t)fechaHora;
+        tm fechaLocal;
+        localtime_s(&fechaLocal, &tiempo);
+
+        char texto[20];
+        strftime(texto, sizeof(texto), "%d/%m/%Y %H:%M", &fechaLocal);
+        return texto;
+    }
+
+    void ordenarVentasBurbuja(std::vector<Venta>& ventas) {
+        int n = (int)ventas.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (ventas[j].fechaHora > ventas[j + 1].fechaHora) {
+                    Venta temp = ventas[j];
+                    ventas[j] = ventas[j + 1];
+                    ventas[j + 1] = temp;
+                }
+            }
+        }
+    }
+
     void convertirVentasAntiguas() {
         std::ifstream archivo("ventas.dat", std::ios::binary);
         if (!archivo) return;
@@ -56,12 +91,37 @@ private:
             return;
         }
 
+        std::vector<RegistroVenta> ventasConvertidas;
+
+        if (tamanoArchivo % sizeof(RegistroVentaSinFecha) == 0) {
+            RegistroVentaSinFecha sinFecha;
+            while (archivo.read((char*)&sinFecha, sizeof(RegistroVentaSinFecha))) {
+                RegistroVenta nuevo;
+                nuevo.idProducto = sinFecha.idProducto;
+                nuevo.monto = sinFecha.monto;
+                nuevo.cantidadRestada = sinFecha.cantidadRestada;
+                nuevo.stockRestante = sinFecha.stockRestante;
+                nuevo.fechaHora = 0;
+                strncpy_s(nuevo.fechaTexto, sizeof(nuevo.fechaTexto), "Sin fecha", _TRUNCATE);
+                strncpy_s(nuevo.nombreProducto, sizeof(nuevo.nombreProducto), sinFecha.nombreProducto, _TRUNCATE);
+                strncpy_s(nuevo.dniCliente, sizeof(nuevo.dniCliente), sinFecha.dniCliente, _TRUNCATE);
+                ventasConvertidas.push_back(nuevo);
+            }
+            archivo.close();
+
+            std::ofstream salida("ventas.dat", std::ios::binary | std::ios::trunc);
+            for (RegistroVenta venta : ventasConvertidas) {
+                salida.write((char*)&venta, sizeof(RegistroVenta));
+            }
+            salida.close();
+            return;
+        }
+
         if (tamanoArchivo % sizeof(RegistroVentaAntiguo) != 0) {
             archivo.close();
             return;
         }
 
-        std::vector<RegistroVenta> ventasConvertidas;
         RegistroVentaAntiguo antiguo;
         while (archivo.read((char*)&antiguo, sizeof(RegistroVentaAntiguo))) {
             RegistroVenta nuevo;
@@ -71,6 +131,8 @@ private:
 
             Producto* p = obtenerProducto(antiguo.idProducto);
             nuevo.stockRestante = (p != nullptr) ? p->stock : 0;
+            nuevo.fechaHora = 0;
+            strncpy_s(nuevo.fechaTexto, sizeof(nuevo.fechaTexto), "Sin fecha", _TRUNCATE);
 
             strncpy_s(nuevo.nombreProducto, sizeof(nuevo.nombreProducto), antiguo.nombreProducto, _TRUNCATE);
             strncpy_s(nuevo.dniCliente, sizeof(nuevo.dniCliente), antiguo.dniCliente, _TRUNCATE);
@@ -281,6 +343,9 @@ public:
         reg.monto = producto->precio;
         reg.cantidadRestada = 1;
         reg.stockRestante = producto->stock;
+        reg.fechaHora = (long long)time(0);
+        std::string fechaTexto = obtenerFechaTexto(reg.fechaHora);
+        strncpy_s(reg.fechaTexto, sizeof(reg.fechaTexto), fechaTexto.c_str(), _TRUNCATE);
         strncpy_s(reg.nombreProducto, sizeof(reg.nombreProducto), producto->nombre.c_str(), _TRUNCATE);
         strncpy_s(reg.dniCliente, sizeof(reg.dniCliente), dniCliente.c_str(), _TRUNCATE);
 
@@ -292,7 +357,7 @@ public:
             archivo.close();
         }
 
-        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, 1, producto->stock, true);
+        Venta nueva(producto->id, dniCliente, cliente, producto->nombre, producto->precio, 1, producto->stock, true, reg.fechaHora, reg.fechaTexto);
         registroVentas->encolar(nueva);
     }
 
@@ -307,22 +372,14 @@ public:
         long tamanoArchivo = (long)archivo.tellg();
         archivo.seekg(0, std::ios::beg);
 
-        if (tamanoArchivo % sizeof(RegistroVenta) != 0 && tamanoArchivo % sizeof(RegistroVentaAntiguo) == 0) {
-            RegistroVentaAntiguo regAntiguo;
-            while (archivo.read((char*)&regAntiguo, sizeof(RegistroVentaAntiguo))) {
-                Producto* p = obtenerProducto(regAntiguo.idProducto);
-                int stockActual = 0;
-                if (p != nullptr) stockActual = p->stock;
-
-                std::string dni = regAntiguo.dniCliente;
-                std::string cliente = buscarNombreCliente(dni);
-                Venta venta(regAntiguo.idProducto, dni, cliente, regAntiguo.nombreProducto, regAntiguo.monto, 1, stockActual, true);
-                registroVentas->encolar(venta);
-            }
+        if (tamanoArchivo % sizeof(RegistroVenta) != 0) {
             archivo.close();
+            convertirVentasAntiguas();
+            cargarVentasDesdeArchivo();
             return;
         }
 
+        std::vector<Venta> ventasOrdenadas;
         RegistroVenta reg;
         while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
             Producto* p = obtenerProducto(reg.idProducto);
@@ -331,10 +388,17 @@ public:
 
             std::string dni = reg.dniCliente;
             std::string cliente = buscarNombreCliente(dni);
-            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, reg.cantidadRestada, stockMostrar, true);
-            registroVentas->encolar(venta);
+            std::string fechaTexto = reg.fechaTexto;
+            if (fechaTexto == "") fechaTexto = obtenerFechaTexto(reg.fechaHora);
+            Venta venta(reg.idProducto, dni, cliente, reg.nombreProducto, reg.monto, reg.cantidadRestada, stockMostrar, true, reg.fechaHora, fechaTexto);
+            ventasOrdenadas.push_back(venta);
         }
         archivo.close();
+
+        ordenarVentasBurbuja(ventasOrdenadas);
+        for (Venta venta : ventasOrdenadas) {
+            registroVentas->encolar(venta);
+        }
     }
 
     void mostrarRegistroVentas() {

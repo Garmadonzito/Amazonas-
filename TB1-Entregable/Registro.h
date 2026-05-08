@@ -26,4 +26,6 @@ struct RegistroVenta {
     char dniCliente[9];
     int cantidadRestada;
     int stockRestante;
+    long long fechaHora;
+    char fechaTexto[20];
 };

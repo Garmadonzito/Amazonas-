@@ -11,6 +11,8 @@ struct Venta {
     int cantidadRestada;
     int stockRestante;
     bool stockDisminuido;
+    long long fechaHora;
+    std::string fechaTexto;
 
     Venta() {
         idProducto = 0;
@@ -21,9 +23,11 @@ struct Venta {
         cantidadRestada = 0;
         stockRestante = 0;
         stockDisminuido = false;
+        fechaHora = 0;
+        fechaTexto = "Sin fecha";
     }
 
-    Venta(int _idProducto, std::string _dniCliente, std::string _cliente, std::string _producto, float _precio, int _cantidadRestada, int _stockRestante, bool _stockDisminuido) {
+    Venta(int _idProducto, std::string _dniCliente, std::string _cliente, std::string _producto, float _precio, int _cantidadRestada, int _stockRestante, bool _stockDisminuido, long long _fechaHora, std::string _fechaTexto) {
         idProducto = _idProducto;
         dniCliente = _dniCliente;
         cliente = _cliente;
@@ -32,10 +36,13 @@ struct Venta {
         cantidadRestada = _cantidadRestada;
         stockRestante = _stockRestante;
         stockDisminuido = _stockDisminuido;
+        fechaHora = _fechaHora;
+        fechaTexto = _fechaTexto;
     }
 
     void mostrar() {
-        std::cout << "Cliente: " << cliente
+        std::cout << "Fecha/Hora: " << fechaTexto
+            << " | Cliente: " << cliente
             << " | DNI: " << dniCliente
             << " | Producto: " << producto
             << " | Precio: S/. " << precio
