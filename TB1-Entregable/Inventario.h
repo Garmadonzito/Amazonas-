@@ -40,7 +40,7 @@ private:
         return buscarRecursivo(actual->siguiente, idBuscado);
     }
 
-    int contarVentasRecursivo(NodoCola<Venta>* actual) {
+    int contarVentasRecursivo(Nodo<Venta>* actual) {
         if (actual == nullptr) return 0;
         return 1 + contarVentasRecursivo(actual->siguiente);
     }
@@ -424,7 +424,7 @@ public:
             return v.stockRestante < 10;
             };
 
-        NodoCola<Venta>* actual = registroVentas->getFrente();
+        Nodo<Venta>* actual = registroVentas->getFrente();
         while (actual != nullptr) {
             imprimirVenta(actual->dato);
             if (stockBajoLuegoVenta(actual->dato)) {

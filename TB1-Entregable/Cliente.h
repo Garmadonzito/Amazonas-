@@ -91,7 +91,6 @@ public:
             }
             else {
                 carrito->agregar(id);
-                p->stock--;
                 cout << ">> '" << p->nombre << "' agregado al carrito! ";
             }
         }
@@ -185,10 +184,17 @@ public:
         }
 
         // 2. Guardar ventas individuales en ventas.dat usando la cola del inventario
+        auto descontarStock = [](Producto* p, int cantidad) -> bool {
+            if (p == nullptr) return false;
+            if (p->stock < cantidad) return false;
+            p->stock -= cantidad;
+            return true;
+            };
+
         actual = carrito->getCabeza();
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr) {
+            if (descontarStock(p, 1)) {
                 inv.registrarVenta(dni, nombre, p);
             }
             actual = actual->siguiente;

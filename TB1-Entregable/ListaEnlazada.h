@@ -1,19 +1,8 @@
 #pragma once
 
+#include "Nodo.h"
 #include <iostream>
 #include <functional> // Necesario para lambdas
-
-template <class T>
-class Nodo {
-public:
-    T dato;
-    Nodo<T>* siguiente;
-
-    Nodo(T valor) {
-        dato = valor;
-        siguiente = nullptr;
-    }
-};
 
 template <class T>
 class ListaEnlazada {
