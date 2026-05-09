@@ -103,18 +103,16 @@ public:
             linea(16, "    3. Editar Precio/Stock    10. Valor Total Inventario");
             linea(17, "    4. Eliminar Producto      11. Gestionar Cupones");
             linea(18, "    5. Alertas de Stock       12. Ver Pedidos");
-            linea(19, "    6. Historial de Ventas    13. Ver Notificaciones");
+            linea(19, "    6. Historial de Ventas    13. Soporte al Cliente");
             linea(20, "    7. Reporte de Almacen     14. Ver Resenas");
             linea(23, "   15. Cerrar Sesion de Administrador");
             linea(26, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
             case 1:  limpiarZonaVerde(); inv.listarTodo(); break;
-            case 2:  gestionarProductos(inv);
-                     inv.getNotificaciones()->agregar("Nuevo producto registrado", "INFO"); break;
+            case 2:  gestionarProductos(inv); break;
             case 3:  editarProducto(inv); break;
-            case 4:  eliminarProducto(inv);
-                     inv.getNotificaciones()->agregar("Producto eliminado del sistema", "ALERTA"); break;
+            case 4:  eliminarProducto(inv); break;
             case 5:  limpiarZonaVerde(); inv.mostrarStockBajo(10); break;
             case 6:  limpiarZonaVerde(); inv.mostrarRegistroVentas(); break;
             case 7:  limpiarZonaVerde(); inv.verStockGeneral(); break;
@@ -144,7 +142,14 @@ public:
                 break;
             }
             case 12: limpiarZonaVerde(); inv.getPedidos()->listarPedidos(); break;
-            case 13: limpiarZonaVerde(); inv.getNotificaciones()->mostrarTodas(); break;
+            case 13: {
+                limpiarZonaVerde();
+                inv.getSoporte()->listarTodos();
+                linea(38, "  Avanzar estado de ticket? Ingrese ID (0 para no): ");
+                int idT; irA(38, PANEL_COL + 50); cin >> idT;
+                if (idT > 0) inv.getSoporte()->avanzarEstado(idT);
+                break;
+            }
             case 14: limpiarZonaVerde(); inv.getResenas()->listarResenas(); break;
             }
 

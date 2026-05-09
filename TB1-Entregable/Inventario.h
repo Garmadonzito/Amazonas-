@@ -8,7 +8,7 @@
 #include "Cupon.h"
 #include "Pedido.h"
 #include "Resena.h"
-#include "Notificacion.h"
+#include "Soporte.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -20,10 +20,10 @@ class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
     Cola<Venta>* registroVentas;
-    GestorCupones*       cupones;
-    GestorPedidos*       pedidos;
-    GestorResenas*       resenas;
-    GestorNotificaciones* notificaciones;
+    GestorCupones*  cupones;
+    GestorPedidos*  pedidos;
+    GestorResenas*  resenas;
+    GestorSoporte*  soporte;
 
     // Métodos privados de soporte y recursividad
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
@@ -92,10 +92,10 @@ public:
     Inventario() {
         listaProductos  = new ListaEnlazada<Producto>();
         registroVentas  = new Cola<Venta>();
-        cupones         = new GestorCupones();
-        pedidos         = new GestorPedidos();
-        resenas         = new GestorResenas();
-        notificaciones  = new GestorNotificaciones();
+        cupones  = new GestorCupones();
+        pedidos  = new GestorPedidos();
+        resenas  = new GestorResenas();
+        soporte  = new GestorSoporte();
     }
 
     ~Inventario() {
@@ -104,13 +104,13 @@ public:
         delete cupones;
         delete pedidos;
         delete resenas;
-        delete notificaciones;
+        delete soporte;
     }
 
-    GestorCupones*        getCupones()       { return cupones; }
-    GestorPedidos*        getPedidos()        { return pedidos; }
-    GestorResenas*        getResenas()        { return resenas; }
-    GestorNotificaciones* getNotificaciones() { return notificaciones; }
+    GestorCupones* getCupones()  { return cupones; }
+    GestorPedidos* getPedidos()  { return pedidos; }
+    GestorResenas* getResenas()  { return resenas; }
+    GestorSoporte* getSoporte()  { return soporte; }
 
     void verStockGeneral() {
         if (listaProductos->getCabeza() == nullptr) {

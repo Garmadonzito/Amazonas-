@@ -186,10 +186,8 @@ public:
         actual = carrito->getCabeza();
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr) {
+            if (p != nullptr)
                 inv.getPedidos()->registrarPedido(dni, nombre, p->nombre, p->precio);
-                inv.getNotificaciones()->agregar("Nueva venta: " + p->nombre + " - S/. " + std::to_string((int)p->precio), "VENTA");
-            }
             actual = actual->siguiente;
         }
 
@@ -212,6 +210,7 @@ public:
             linea(24, "    3. Ver Catalogo ordenado por Precio");
             linea(26, "    4. Registrar Direccion de Envio");
             linea(28, "    5. Dejar Resena de un Producto");
+            linea(30, "    6. Soporte - Reportar problema con pedido");
             linea(32, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
@@ -263,10 +262,8 @@ public:
             else if (c == '4') {
                 limpiarZonaVerde();
                 direccionEnvio.registrar(12);
-                if (direccionEnvio.esValida()) {
+                if (direccionEnvio.esValida())
                     linea(24, "  \033[92m>> Direccion registrada correctamente.\033[0m");
-                    inv.getNotificaciones()->agregar("Cliente registro direccion: " + dni, "INFO");
-                }
                 pausaRetroceder(26);
             }
             else if (c == '5') {
@@ -286,12 +283,38 @@ public:
                         getline(cin, comentario);
                         inv.getResenas()->agregarResena(idProd, p->nombre, dni, comentario, punt);
                         linea(19, "  \033[92m>> Resena registrada. Gracias!\033[0m");
-                        inv.getNotificaciones()->agregar("Nueva resena de " + p->nombre, "INFO");
                     } else {
                         linea(14, "  \033[91m>> Producto no encontrado.\033[0m");
                     }
                 }
                 pausaRetroceder(22);
+            }
+            else if (c == '6') {
+                limpiarZonaVerde();
+                linea(12, "========================================================");
+                linea(13, "                  SOPORTE AL CLIENTE                   ");
+                linea(14, "========================================================");
+                linea(16, "    1. Abrir nuevo ticket de soporte");
+                linea(17, "    2. Ver mis tickets");
+                linea(20, "    Opcion: ");
+                char op2 = _getch();
+
+                if (op2 == '1') {
+                    limpiarZonaVerde();
+                    linea(12, "  Numero de pedido con problema (0 si es general): ");
+                    int idPed; irA(12, PANEL_COL + 50); cin >> idPed;
+                    linea(14, "  Asunto: ");
+                    string asunto; cin.ignore(); irA(14, PANEL_COL + 10); getline(cin, asunto);
+                    linea(16, "  Descripcion: ");
+                    string desc; irA(16, PANEL_COL + 15); getline(cin, desc);
+                    inv.getSoporte()->abrirTicket(dni, nombre, idPed, asunto, desc);
+                    linea(19, "  \033[92m>> Ticket abierto. Un agente lo revisara pronto.\033[0m");
+                }
+                else if (op2 == '2') {
+                    limpiarZonaVerde();
+                    inv.getSoporte()->listarMisTickets(dni);
+                }
+                pausaRetroceder(38);
             }
         }
     }
