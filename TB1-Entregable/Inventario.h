@@ -2,9 +2,13 @@
 #include "ListaEnlazada.h"
 #include "Cola.h"
 #include "Producto.h"
-#include "Usuario.h" 
-#include "Registro.h" 
+#include "Usuario.h"
+#include "Registro.h"
 #include "Venta.h"
+#include "Cupon.h"
+#include "Pedido.h"
+#include "Resena.h"
+#include "Notificacion.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -16,6 +20,10 @@ class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
     Cola<Venta>* registroVentas;
+    GestorCupones*       cupones;
+    GestorPedidos*       pedidos;
+    GestorResenas*       resenas;
+    GestorNotificaciones* notificaciones;
 
     // Métodos privados de soporte y recursividad
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
@@ -82,14 +90,27 @@ private:
 
 public:
     Inventario() {
-        listaProductos = new ListaEnlazada<Producto>();
-        registroVentas = new Cola<Venta>();
+        listaProductos  = new ListaEnlazada<Producto>();
+        registroVentas  = new Cola<Venta>();
+        cupones         = new GestorCupones();
+        pedidos         = new GestorPedidos();
+        resenas         = new GestorResenas();
+        notificaciones  = new GestorNotificaciones();
     }
 
     ~Inventario() {
         delete listaProductos;
         delete registroVentas;
+        delete cupones;
+        delete pedidos;
+        delete resenas;
+        delete notificaciones;
     }
+
+    GestorCupones*        getCupones()       { return cupones; }
+    GestorPedidos*        getPedidos()        { return pedidos; }
+    GestorResenas*        getResenas()        { return resenas; }
+    GestorNotificaciones* getNotificaciones() { return notificaciones; }
 
     void verStockGeneral() {
         if (listaProductos->getCabeza() == nullptr) {

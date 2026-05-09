@@ -5,6 +5,7 @@
 #include "MetodoPago.h"
 #include "Registro.h"
 #include "Pila.h"
+#include "Direccion.h"
 #include <conio.h>
 #include <fstream>
 
@@ -12,6 +13,7 @@ class Cliente : public Usuario {
 private:
     ListaEnlazada<int>* carrito;
     Pila<int> historialNavegacion;
+    Direccion direccionEnvio;
 
     const int MENU_PRINCIPAL = 1;
     const int MENU_BUSQUEDA  = 2;
@@ -179,6 +181,18 @@ public:
             actual = actual->siguiente;
         }
         inv.guardarEnArchivo();
+
+        // Registrar pedido por cada producto comprado
+        actual = carrito->getCabeza();
+        while (actual != nullptr) {
+            Producto* p = inv.obtenerProducto(actual->dato);
+            if (p != nullptr) {
+                inv.getPedidos()->registrarPedido(dni, nombre, p->nombre, p->precio);
+                inv.getNotificaciones()->agregar("Nueva venta: " + p->nombre + " - S/. " + std::to_string((int)p->precio), "VENTA");
+            }
+            actual = actual->siguiente;
+        }
+
         carrito->vaciar();
 
         limpiarZonaVerde();
@@ -196,7 +210,9 @@ public:
             linea(20, "    1. Ver Catalogo Completo (Agregar por ID)");
             linea(22, "    2. Buscar producto por nombre especifico");
             linea(24, "    3. Ver Catalogo ordenado por Precio");
-            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+            linea(26, "    4. Registrar Direccion de Envio");
+            linea(28, "    5. Dejar Resena de un Producto");
+            linea(32, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
@@ -243,6 +259,39 @@ public:
                 inv.ordenarPorPrecio();
                 inv.listarTodo();
                 bucleAgregarRapido(inv, 38);
+            }
+            else if (c == '4') {
+                limpiarZonaVerde();
+                direccionEnvio.registrar(12);
+                if (direccionEnvio.esValida()) {
+                    linea(24, "  \033[92m>> Direccion registrada correctamente.\033[0m");
+                    inv.getNotificaciones()->agregar("Cliente registro direccion: " + dni, "INFO");
+                }
+                pausaRetroceder(26);
+            }
+            else if (c == '5') {
+                limpiarZonaVerde();
+                linea(12, "  ID del producto a resenar: ");
+                string idStr; cin.ignore(); cin >> idStr;
+                if (idStr.find_first_not_of("0123456789") == string::npos) {
+                    int idProd = stoi(idStr);
+                    Producto* p = inv.obtenerProducto(idProd);
+                    if (p != nullptr) {
+                        limpiarZonaVerde();
+                        linea(12, "  Producto: " + p->nombre);
+                        linea(14, "  Puntuacion (1-5): ");
+                        int punt; irA(14, PANEL_COL + 20); cin >> punt;
+                        linea(16, "  Comentario: ");
+                        string comentario; cin.ignore(); irA(16, PANEL_COL + 14);
+                        getline(cin, comentario);
+                        inv.getResenas()->agregarResena(idProd, p->nombre, dni, comentario, punt);
+                        linea(19, "  \033[92m>> Resena registrada. Gracias!\033[0m");
+                        inv.getNotificaciones()->agregar("Nueva resena de " + p->nombre, "INFO");
+                    } else {
+                        linea(14, "  \033[91m>> Producto no encontrado.\033[0m");
+                    }
+                }
+                pausaRetroceder(22);
             }
         }
     }

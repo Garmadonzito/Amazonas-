@@ -98,30 +98,27 @@ public:
             linea(10, "========================================================");
             linea(11, "               PANEL DE CONTROL - LOGISTICA             ");
             linea(12, "========================================================");
-
-            linea(15, "    1. Listar Catalogo Completo");
-            linea(17, "    2. Registrar Nuevo Producto");
-            linea(19, "    3. Editar Precio / Stock");
-            linea(21, "    4. Eliminar Producto");
-            linea(23, "    5. Alertas de Stock Critico (Lambdas)");
-            linea(25, "    6. Ver Historial de Ventas (Ordenado Shell)");
-            linea(27, "    7. Reporte Visual de Almacen");
-            linea(29, "    8. Ordenar Inventario por Precio (Burbuja)");
-            linea(31, "    9. Filtrar por Rango de Precio (Lambda)");
-            linea(33, "   10. Ver Valor Total del Inventario (Lambda)");
-            linea(36, "   11. Cerrar Sesion de Administrador");
-
-            linea(39, "    Seleccione una opcion: "); cin >> op;
+            linea(14, "    1. Listar Catalogo        8. Ordenar por Precio");
+            linea(15, "    2. Registrar Producto      9. Filtrar por Rango");
+            linea(16, "    3. Editar Precio/Stock    10. Valor Total Inventario");
+            linea(17, "    4. Eliminar Producto      11. Gestionar Cupones");
+            linea(18, "    5. Alertas de Stock       12. Ver Pedidos");
+            linea(19, "    6. Historial de Ventas    13. Ver Notificaciones");
+            linea(20, "    7. Reporte de Almacen     14. Ver Resenas");
+            linea(23, "   15. Cerrar Sesion de Administrador");
+            linea(26, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
-            case 1: limpiarZonaVerde(); inv.listarTodo(); break;
-            case 2: gestionarProductos(inv); break;
-            case 3: editarProducto(inv); break;
-            case 4: eliminarProducto(inv); break;
-            case 5: limpiarZonaVerde(); inv.mostrarStockBajo(10); break;
-            case 6: limpiarZonaVerde(); inv.mostrarRegistroVentas(); break;
-            case 7: limpiarZonaVerde(); inv.verStockGeneral(); break;
-            case 8: limpiarZonaVerde(); inv.ordenarPorPrecio(); inv.listarTodo(); break;
+            case 1:  limpiarZonaVerde(); inv.listarTodo(); break;
+            case 2:  gestionarProductos(inv);
+                     inv.getNotificaciones()->agregar("Nuevo producto registrado", "INFO"); break;
+            case 3:  editarProducto(inv); break;
+            case 4:  eliminarProducto(inv);
+                     inv.getNotificaciones()->agregar("Producto eliminado del sistema", "ALERTA"); break;
+            case 5:  limpiarZonaVerde(); inv.mostrarStockBajo(10); break;
+            case 6:  limpiarZonaVerde(); inv.mostrarRegistroVentas(); break;
+            case 7:  limpiarZonaVerde(); inv.verStockGeneral(); break;
+            case 8:  limpiarZonaVerde(); inv.ordenarPorPrecio(); inv.listarTodo(); break;
             case 9: {
                 limpiarZonaVerde();
                 float minP, maxP;
@@ -132,10 +129,27 @@ public:
                 break;
             }
             case 10: limpiarZonaVerde(); inv.calcularTotalInventario(); break;
+            case 11: {
+                limpiarZonaVerde();
+                inv.getCupones()->listarCupones();
+                linea(30, "  Agregar cupon? (S/N): ");
+                char r; cin >> r;
+                if (r == 'S' || r == 's') {
+                    string cod; float desc;
+                    linea(32, "  Codigo: "); irA(32, PANEL_COL + 10); cin >> cod;
+                    linea(33, "  Descuento %: "); irA(33, PANEL_COL + 14); cin >> desc;
+                    inv.getCupones()->agregarCupon(cod, desc);
+                    inv.getNotificaciones()->agregar("Nuevo cupon creado: " + cod, "INFO");
+                }
+                break;
+            }
+            case 12: limpiarZonaVerde(); inv.getPedidos()->listarPedidos(); break;
+            case 13: limpiarZonaVerde(); inv.getNotificaciones()->mostrarTodas(); break;
+            case 14: limpiarZonaVerde(); inv.getResenas()->listarResenas(); break;
             }
 
-            if (op != 11) pausa();
+            if (op != 15) pausa();
 
-        } while (op != 11);
+        } while (op != 15);
     }
 };
