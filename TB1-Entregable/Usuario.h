@@ -1,42 +1,52 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
 
 using namespace std;
 
+
+const int PANEL_FILA = 8;
+const int PANEL_COL = 25;   
+const int PANEL_ANCHO = 80;
+const int PANEL_ALTO = 35;   
+
 inline void limpiarPantalla() {
     system("cls||clear");
 }
 
-inline void pausa() {
-    cout << "\033[0m\nPresione ENTER para continuar...";
-    cin.ignore();
-    cin.get();
-}
-
-// Mueve el cursor a fila/col (1-indexado ANSI)
 inline void irA(int fila, int col) {
     cout << "\033[" << fila << ";" << col << "H";
 }
 
-// Zona verde: terminal cols 12-114 (103 chars), filas 10-38
-// Limpia solo esa zona para no pisar los bordes grises
+
+inline void pausa() {
+    irA(43, PANEL_COL);
+    cout << "\033[93m>> Presione ENTER para continuar...\033[0m";
+    cin.clear();
+    cin.ignore(10000, '\n');
+    cin.get();
+
+   
+    irA(43, PANEL_COL);
+    cout << string(50, ' ');
+}
+
 inline void limpiarZonaVerde() {
     cout << "\033[0m";
-    for (int i = 0; i < 29; i++) {
-        irA(10 + i, 12);
-        cout << string(103, ' ');
+    for (int i = 0; i < PANEL_ALTO; i++) {
+        irA(PANEL_FILA + i, PANEL_COL);
+        cout << string(PANEL_ANCHO, ' ');
     }
     cout.flush();
 }
 
-// Imprime texto centrado en la zona verde (103 cols) en la fila indicada
-inline void imprimirCentrado(int fila, const string& texto) {
-    int padding = (103 - (int)texto.length()) / 2;
-    if (padding < 0) padding = 0;
-    irA(fila, 12 + padding);
-    cout << "\033[0m" << texto;
+inline void imprimirEnPanel(int fila, const string& texto, int color = 0) {
+    irA(fila, PANEL_COL);
+    if (color != 0) cout << "\033[" << color << "m";
+    else cout << "\033[0m";
+    cout << texto << "\033[0m";
 }
 
 class Usuario {
@@ -47,5 +57,4 @@ protected:
 
 public:
     Usuario() : nombre(""), correo(""), dni("") {}
-    string getNombre() { return nombre; }
 };
