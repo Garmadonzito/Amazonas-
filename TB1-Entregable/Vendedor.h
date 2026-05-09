@@ -137,7 +137,7 @@ public:
                     linea(32, "  Codigo: "); irA(32, PANEL_COL + 10); cin >> cod;
                     linea(33, "  Descuento %: "); irA(33, PANEL_COL + 14); cin >> desc;
                     inv.getCupones()->agregarCupon(cod, desc);
-                    inv.getNotificaciones()->agregar("Nuevo cupon creado: " + cod, "INFO");
+                    
                 }
                 break;
             }
