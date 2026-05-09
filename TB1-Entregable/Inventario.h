@@ -244,6 +244,47 @@ public:
         listaProductos->ordenar(comparador);
     }
 
+    void filtrarPorRangoPrecio(float minPrecio, float maxPrecio) {
+        auto dentroDelRango = [minPrecio, maxPrecio](Producto p) -> bool {
+            return p.precio >= minPrecio && p.precio <= maxPrecio;
+        };
+        int fila = 10;
+        imprimirEnPanel(fila++, "========================================================", 96);
+        imprimirEnPanel(fila++, "          PRODUCTOS FILTRADOS POR RANGO DE PRECIO       ", 96);
+        imprimirEnPanel(fila++, "========================================================", 96);
+        fila++;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        bool encontrado = false;
+        while (actual != nullptr) {
+            if (dentroDelRango(actual->dato)) {
+                std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " +
+                    actual->dato.nombre + " | S/. " + std::to_string((int)actual->dato.precio);
+                imprimirEnPanel(fila++, item);
+                encontrado = true;
+            }
+            actual = actual->siguiente;
+        }
+        if (!encontrado) imprimirEnPanel(fila, "  No hay productos en ese rango.", 91);
+    }
+
+    void calcularTotalInventario() {
+        auto sumarValor = [](float acumulado, Producto p) -> float {
+            return acumulado + (p.precio * p.stock);
+        };
+        float total = 0;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            total = sumarValor(total, actual->dato);
+            actual = actual->siguiente;
+        }
+        int fila = 10;
+        imprimirEnPanel(fila++, "========================================================", 96);
+        imprimirEnPanel(fila++, "            VALOR TOTAL DEL INVENTARIO                  ", 96);
+        imprimirEnPanel(fila++, "========================================================", 96);
+        fila++;
+        imprimirEnPanel(fila, "  Valor total en stock: S/. " + std::to_string((int)total), 92);
+    }
+
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
         int fila = 10;
