@@ -24,7 +24,7 @@ public:
 	//Funciones Principales
 	void setEscena(Escena nueva);//cambia el estado de la escena que se encuentra ahora
 	void dibujarEscena();//dibuja la escena completa, el fondo y objetos
-	void restaurarFondo(); //restaura una parte del fondo
+	void restaurarFondo(int x, int y, int ancho, int alto); //restaura una parte del fondo
 	void limpiar_listaObj();
 
 	//Getter
@@ -88,6 +88,25 @@ void gestorEscenas::dibujarEscena() {
 		listaObjetos[i].obj->dibujarMatriz(listaObjetos[i].x, listaObjetos[i].y);
 	}
 }
+
+void gestorEscenas::restaurarFondo(int x, int y, int ancho, int alto) {
+	auto aplicarColorYForma = [this](int fila, int columna) {
+		//Validacion
+		if (fila < 0 || fila >= 45 || columna < 0 || columna >= 130)return;
+		int valor = this->fondo.getDatos(fila, columna);
+
+		fondo.colores(valor);
+		irA(columna, fila);
+		cout << (char)219;
+		};
+
+	for (int i = 0;i < alto;i++) {
+		for (int j = 0;j < ancho;j++) {
+			aplicarColorYForma(y + i, x + j);
+		}
+	}
+}
+
 
 void gestorEscenas::setEscena(Escena nueva) {
 	//0. estado cambio de escena

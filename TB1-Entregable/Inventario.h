@@ -58,6 +58,23 @@ private:
         return texto;
     }
 
+    void ordenarHistorialPorMonto(std::vector<Venta>& historial) {
+        int n = (int)historial.size();
+
+        //Algoritmo de Insercion
+        for (int i = 1;i < n;i++) {
+            Venta llave = historial[i]; //Este es el pedido que se va a insertar
+            int j = i - 1;
+            //Se desplazan los montos menores hacia el principio
+            while (j >= 0 && historial[j].precio < llave.precio) {
+                historial[j + 1] = historial[j];
+                j = j - 1;
+            }
+            historial[j + 1] = llave;
+        }
+
+    }
+
     // ---------------------------------------------------------
     // ALGORITMO DE ORDENAMIENTO SHELL - Rafael 
     // ---------------------------------------------------------
@@ -423,4 +440,27 @@ public:
         // El llamado recursivo para contar se mantiene, asegurando el punto de la rúbrica.
         imprimirEnPanel(fila, "  TOTAL DE TRANSACCIONES HISTORICAS: " + std::to_string(totalVentas), 92);
     }
+
+    void mostrarHistorialClientePersonalizado(std::string dni) {
+        // 1. Obtenemos solo las ventas de ese cliente
+        std::vector<Venta> misVentas = obtenerVentasPorCliente(dni);
+
+        if (misVentas.empty()) {
+            imprimirEnPanel(10, "Aun no has realizado compras.");
+            return;
+        }
+
+        // 2. Aplicamos TU algoritmo de Inserción
+        ordenarHistorialPorMonto(misVentas);
+
+        // 3. Dibujamos en el panel
+        limpiarZonaVerde();
+        int fila = 10;
+        imprimirEnPanel(fila++, "======= MIS COMPRAS (ORDENADAS POR MONTO) =======", 93);
+        for (const auto& v : misVentas) {
+            std::string linea = "Fecha: " + v.fechaTexto + " | " + v.producto + " | S/. " + std::to_string((int)v.precio);
+            imprimirEnPanel(fila++, linea);
+        }
+    }
+
 };

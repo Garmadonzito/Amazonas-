@@ -19,6 +19,8 @@ private:
     const int MENU_BUSQUEDA = 2;
     const int MENU_CARRITO = 3;
 
+    int comprasRealizadas = 0;
+
     void linea(int fila, const string& texto) {
         irA(fila, PANEL_COL); cout << "\033[0m" << texto;
     }
@@ -118,6 +120,16 @@ public:
         }
     }
 
+    double CalcularTotal(double& total, float precio) {
+        auto lam = [](double& t, float p) {return t += p;};
+        return lam(total, precio);
+    }
+
+    double CalcularTotalOferta(double& total) {
+        auto lam = [](double& t) {return t = t * 0.85;};
+        return lam(total);
+    }
+
     void verCarrito(Inventario& inv) {
         int fila = 12;
         linea(fila++, "========================================================");
@@ -142,9 +154,13 @@ public:
             Producto* p = inv.obtenerProducto(actual->dato);
             if (p != nullptr) {
                 linea(fila++, "  " + to_string(i++) + ". " + p->nombre + " - S/. " + to_string((int)p->precio));
-                total += p->precio;
+                CalcularTotal(total, p->precio);
             }
             actual = actual->siguiente;
+        }
+        if (comprasRealizadas == 0 && total > 0) {
+            CalcularTotalOferta(total);
+            linea(fila++, "\033[93m  Descuento de bienvenida (15%) aplicado!\033[0m");
         }
         fila++;
         linea(fila++, "--------------------------------------------------------");
@@ -187,7 +203,7 @@ public:
         Nodo<int>* actual = carrito->getCabeza();
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr) total += p->precio;
+            if (p != nullptr) CalcularTotal(total, p->precio);
             actual = actual->siguiente;
         }
 
@@ -210,6 +226,7 @@ public:
         carrito->vaciar();
 
         limpiarZonaVerde();
+        comprasRealizadas++;
         linea(20, "  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m");
         pausaRetroceder(24);
     }
@@ -398,30 +415,38 @@ public:
     }
 
     void menuCarrito(Inventario& inv) {
-        while (true) {
+    while (true) {
+        limpiarZonaVerde();
+
+        linea(12, "========================================================");
+        linea(14, "               --- MI CARRITO DE COMPRAS ---            ");
+        linea(16, "========================================================");
+        linea(20, "    1. Ver lista de productos anadidos");
+        linea(22, "    2. Proceder al pago final");
+        linea(24, "    3. Historial de pedidos - Orden por Monto");
+        linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+
+        int c = _getch();
+        if (c == 27) break;
+
+        if (c == '1') {
             limpiarZonaVerde();
+            verCarrito(inv);
+            pausaRetroceder(38);
+        }
+        else if (c == '2') {
+            comprarCarrito(inv);
+            break;
+        }
+        else if (c == '3') {
+            limpiarZonaVerde();
+            inv.mostrarHistorialClientePersonalizado(dni);
+            pausaRetroceder(38);
 
-            linea(12, "========================================================");
-            linea(14, "               --- MI CARRITO DE COMPRAS ---            ");
-            linea(16, "========================================================");
-            linea(20, "    1. Ver lista de productos anadidos");
-            linea(22, "    2. Proceder al pago final");
-            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
-
-            int c = _getch();
-            if (c == 27) break;
-
-            if (c == '1') {
-                limpiarZonaVerde();
-                verCarrito(inv);
-                pausaRetroceder(38);
-            }
-            else if (c == '2') {
-                comprarCarrito(inv);
-                break;
-            }
         }
     }
+}
+
 
     void menu(Inventario& inv) {
         historialNavegacion.apilar(MENU_PRINCIPAL);
