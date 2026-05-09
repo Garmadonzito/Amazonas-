@@ -51,14 +51,14 @@ void gestorEscenas::configObjEscena() {
 	switch (estado)
 	{
 	case gestorEscenas::LOGIN: {
-		Matriz* nubebig = new Matriz();
+		/*Matriz* nubebig = new Matriz();
 		nubebig->inicializar(nubeBig);
 		listaObjetos.push_back({ nubebig ,35,15 });//Objeto, Ubicacion en X, Ubicacion en Y
 
 		Matriz* cuadroTxt = new Matriz();
 		cuadroTxt->inicializar(cuadroText);
 		listaObjetos.push_back({ cuadroTxt,50,35 });//Objeto, Ubicacion en X, Ubicacion en Y
-
+		*/
 		Matriz* Anaconda = new Matriz();
 		Anaconda->inicializar(anaconda);
 		// 🔴 SOLUCIÓN DE COORDENADAS: 
