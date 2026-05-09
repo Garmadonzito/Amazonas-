@@ -303,26 +303,61 @@ public:
                 }
                 else if (op2 == '2') {
                     limpiarZonaVerde();
-                    Venta ultima = inv.obtenerUltimaVenta(dni);
-                    if (ultima.producto.empty()) {
-                        linea(14, "  \033[91m>> No tienes compras registradas aun.\033[0m");
+
+                    // Lambda que valida que los datos ingresados coincidan con el cliente logueado
+                    auto validarIdentidad = [&](string nomIngresado, string correoIngresado, string dniIngresado) -> bool {
+                        return dniIngresado == dni &&
+                               nomIngresado == nombre &&
+                               correoIngresado == correo;
+                    };
+
+                    linea(12, "========================================================");
+                    linea(13, "          VERIFICACION DE IDENTIDAD - REEMBOLSO         ");
+                    linea(14, "========================================================");
+                    linea(16, "  Confirme sus datos para continuar:");
+                    linea(17, "  Nombre : "); string nomV; cin.ignore(); irA(17, PANEL_COL + 11); getline(cin, nomV);
+                    linea(18, "  Correo : "); string correoV;           irA(18, PANEL_COL + 11); getline(cin, correoV);
+                    linea(19, "  DNI    : "); string dniV;              irA(19, PANEL_COL + 11); getline(cin, dniV);
+
+                    if (!validarIdentidad(nomV, correoV, dniV)) {
+                        limpiarZonaVerde();
+                        linea(16, "  \033[91m>> Datos incorrectos. No se puede procesar el reembolso.\033[0m");
+                        pausaRetroceder(19);
                     } else {
-                        linea(12, "  Tu ultima compra fue:");
-                        linea(14, "    Producto : " + ultima.producto);
-                        linea(15, "    Monto    : S/. " + to_string((int)ultima.precio));
-                        linea(16, "    Fecha    : " + ultima.fechaTexto);
-                        linea(18, "  Deseas solicitar la devolucion? (S/N): ");
-                        char conf = _getch();
-                        if (conf == 'S' || conf == 's') {
-                            inv.getSoporte()->solicitarDevolucion(
-                                dni, nombre, ultima.producto, ultima.precio);
-                            limpiarZonaVerde();
-                            linea(14, "  \033[92m>> Se procesara la devolucion de S/. " +
-                                to_string((int)ultima.precio) + "\033[0m");
-                            linea(15, "  \033[92m>> del producto: " + ultima.producto + "\033[0m");
-                            linea(16, "  \033[92m>> Un agente confirmara el reembolso pronto.\033[0m");
+                        limpiarZonaVerde();
+                        vector<Venta> misCompras = inv.obtenerVentasPorCliente(dni);
+                        if (misCompras.empty()) {
+                            linea(14, "  \033[91m>> No tienes compras registradas aun.\033[0m");
                         } else {
-                            linea(20, "  \033[91m>> Devolucion cancelada.\033[0m");
+                            linea(12, "========================================================");
+                            linea(13, "               TUS COMPRAS REGISTRADAS                 ");
+                            linea(14, "========================================================");
+                            int fila = 16;
+                            for (int i = 0; i < (int)misCompras.size() && fila < 35; i++) {
+                                string item = "  [" + to_string(i + 1) + "] " +
+                                    misCompras[i].producto + " - S/. " +
+                                    to_string((int)misCompras[i].precio) +
+                                    " | " + misCompras[i].fechaTexto;
+                                imprimirEnPanel(fila++, item);
+                            }
+                            linea(36, "  Ingrese numeros de compras a devolver (ej: 1 2 3), 0 para cancelar: ");
+                            irA(37, PANEL_COL);
+                            int sel;
+                            bool huboDevolucion = false;
+                            while (cin >> sel && sel != 0) {
+                                if (sel >= 1 && sel <= (int)misCompras.size()) {
+                                    Venta& v = misCompras[sel - 1];
+                                    inv.getSoporte()->solicitarDevolucion(dni, nombre, v.producto, v.precio);
+                                    huboDevolucion = true;
+                                }
+                            }
+                            limpiarZonaVerde();
+                            if (huboDevolucion) {
+                                linea(14, "  \033[92m>> Reembolso solicitado correctamente.\033[0m");
+                                linea(15, "  \033[92m>> Un agente revisara y confirmara cada devolucion.\033[0m");
+                            } else {
+                                linea(14, "  \033[91m>> No se selecciono ninguna compra.\033[0m");
+                            }
                         }
                     }
                 }

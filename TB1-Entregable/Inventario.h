@@ -107,16 +107,16 @@ public:
     GestorResenas* getResenas() { return resenas; }
     GestorSoporte* getSoporte() { return soporte; }
 
-    // Busca la ultima venta del cliente por DNI en el historial
-    Venta obtenerUltimaVenta(std::string dni) {
-        Venta ultima;
+    // Retorna todas las ventas de un cliente por DNI
+    std::vector<Venta> obtenerVentasPorCliente(std::string dni) {
+        std::vector<Venta> resultado;
         Nodo<Venta>* actual = registroVentas->getFrente();
         while (actual != nullptr) {
             if (actual->dato.dniCliente == dni)
-                ultima = actual->dato;
+                resultado.push_back(actual->dato);
             actual = actual->siguiente;
         }
-        return ultima;
+        return resultado;
     }
 
     void verStockGeneral() {
