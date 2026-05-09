@@ -146,6 +146,23 @@ public:
         std::cout << "\033[1;36m========================================================\033[0m\n";
     }
 
+    void ordenarPorPrecio(bool ascendente = true) {
+        auto comparador = [ascendente](Producto a, Producto b) -> bool {
+            return ascendente ? (a.precio > b.precio) : (a.precio < b.precio);
+        };
+        listaProductos->ordenar(comparador);
+        std::cout << ">> Inventario ordenado por precio "
+                  << (ascendente ? "(menor a mayor)" : "(mayor a menor)") << ".\n";
+    }
+
+    void ordenarAlfabetico() {
+        auto comparador = [](Producto a, Producto b) -> bool {
+            return a.nombre > b.nombre;
+        };
+        listaProductos->ordenar(comparador);
+        std::cout << ">> Inventario ordenado alfabeticamente.\n";
+    }
+
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool encontrado = false;

@@ -184,8 +184,10 @@ public:
             linea(12, "1. Ver todo el catalogo");
             linea(13, "2. Buscar por nombre");
             linea(14, "3. Agregar al carrito");
-            linea(15, "4. Volver");
-            linea(17, "Opcion: ");
+            linea(15, "4. Ver catalogo por precio (menor a mayor)");
+            linea(16, "5. Ver catalogo alfabeticamente");
+            linea(17, "6. Volver");
+            linea(19, "Opcion: ");
             cin >> op;
 
             switch (op) {
@@ -208,8 +210,22 @@ public:
             case 3:
                 agregarAlCarrito(inv);
                 break;
+            case 4:
+                limpiarZonaVerde();
+                irA(10, IZQ);
+                inv.ordenarPorPrecio(true);
+                inv.listarTodo();
+                irA(37, IZQ); pausa();
+                break;
+            case 5:
+                limpiarZonaVerde();
+                irA(10, IZQ);
+                inv.ordenarAlfabetico();
+                inv.listarTodo();
+                irA(37, IZQ); pausa();
+                break;
             }
-        } while (op != 4);
+        } while (op != 6);
     }
 
     void menuCarrito(Inventario& inv) {

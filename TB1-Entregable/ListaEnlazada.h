@@ -89,4 +89,23 @@ public:
 
     Nodo<T>* getCabeza() { return cabeza; }
     int getCantidad() { return cantidad; }
+
+    // Ordenamiento burbuja con comparador lambda (O(n^2))
+    void ordenar(std::function<bool(T, T)> comparador) {
+        if (cabeza == nullptr || cabeza->siguiente == nullptr) return;
+        bool huboIntercambio;
+        do {
+            huboIntercambio = false;
+            Nodo<T>* actual = cabeza;
+            while (actual->siguiente != nullptr) {
+                if (comparador(actual->dato, actual->siguiente->dato)) {
+                    T temp = actual->dato;
+                    actual->dato = actual->siguiente->dato;
+                    actual->siguiente->dato = temp;
+                    huboIntercambio = true;
+                }
+                actual = actual->siguiente;
+            }
+        } while (huboIntercambio);
+    }
 };
