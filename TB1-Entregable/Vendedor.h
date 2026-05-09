@@ -107,10 +107,9 @@ public:
             linea(25, "    6. Ver Historial de Ventas (Ordenado Shell)");
             linea(27, "    7. Reporte Visual de Almacen");
             linea(29, "    8. Ordenar Inventario por Precio (Burbuja)");
-            linea(31, "    9. Ordenar Inventario Alfabeticamente (Burbuja)");
-            linea(34, "   10. Cerrar Sesion de Administrador");
+            linea(33, "    9. Cerrar Sesion de Administrador");
 
-            linea(37, "    Seleccione una opcion: "); cin >> op;
+            linea(36, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
             case 1: limpiarZonaVerde(); inv.listarTodo(); break;
@@ -120,12 +119,11 @@ public:
             case 5: limpiarZonaVerde(); inv.mostrarStockBajo(10); break;
             case 6: limpiarZonaVerde(); inv.mostrarRegistroVentas(); break;
             case 7: limpiarZonaVerde(); inv.verStockGeneral(); break;
-            case 8: limpiarZonaVerde(); inv.ordenarPorPrecio(true);  inv.listarTodo(); break;
-            case 9: limpiarZonaVerde(); inv.ordenarAlfabetico();     inv.listarTodo(); break;
+            case 8: limpiarZonaVerde(); inv.ordenarPorPrecio(); inv.listarTodo(); break;
             }
 
-            if (op != 10) pausa();
+            if (op != 9) pausa();
 
-        } while (op != 10);
+        } while (op != 9);
     }
 };

@@ -237,16 +237,9 @@ public:
         }
     }
 
-    void ordenarPorPrecio(bool ascendente = true) {
-        auto comparador = [ascendente](Producto a, Producto b) -> bool {
-            return ascendente ? (a.precio > b.precio) : (a.precio < b.precio);
-        };
-        listaProductos->ordenar(comparador);
-    }
-
-    void ordenarAlfabetico() {
+    void ordenarPorPrecio() {
         auto comparador = [](Producto a, Producto b) -> bool {
-            return a.nombre > b.nombre;
+            return a.precio > b.precio;
         };
         listaProductos->ordenar(comparador);
     }

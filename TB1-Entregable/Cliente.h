@@ -195,9 +195,8 @@ public:
             linea(16, "========================================================");
             linea(20, "    1. Ver Catalogo Completo (Agregar por ID)");
             linea(22, "    2. Buscar producto por nombre especifico");
-            linea(24, "    3. Ver Catalogo por Precio (menor a mayor)");
-            linea(26, "    4. Ver Catalogo Alfabeticamente");
-            linea(30, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+            linea(24, "    3. Ver Catalogo ordenado por Precio");
+            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
@@ -241,13 +240,7 @@ public:
             }
             else if (c == '3') {
                 limpiarZonaVerde();
-                inv.ordenarPorPrecio(true);
-                inv.listarTodo();
-                bucleAgregarRapido(inv, 38);
-            }
-            else if (c == '4') {
-                limpiarZonaVerde();
-                inv.ordenarAlfabetico();
+                inv.ordenarPorPrecio();
                 inv.listarTodo();
                 bucleAgregarRapido(inv, 38);
             }
