@@ -6,7 +6,6 @@
 #include "Registro.h"
 #include "Venta.h"
 #include "Cupon.h"
-#include "Pedido.h"
 #include "Resena.h"
 #include "Soporte.h"
 #include <string>
@@ -20,10 +19,9 @@ class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
     Cola<Venta>* registroVentas;
-    GestorCupones*  cupones;
-    GestorPedidos*  pedidos;
-    GestorResenas*  resenas;
-    GestorSoporte*  soporte;
+    GestorCupones* cupones;
+    GestorResenas* resenas;
+    GestorSoporte* soporte;
 
     // Métodos privados de soporte y recursividad
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
@@ -92,25 +90,34 @@ public:
     Inventario() {
         listaProductos  = new ListaEnlazada<Producto>();
         registroVentas  = new Cola<Venta>();
-        cupones  = new GestorCupones();
-        pedidos  = new GestorPedidos();
-        resenas  = new GestorResenas();
-        soporte  = new GestorSoporte();
+        cupones = new GestorCupones();
+        resenas = new GestorResenas();
+        soporte = new GestorSoporte();
     }
 
     ~Inventario() {
         delete listaProductos;
         delete registroVentas;
         delete cupones;
-        delete pedidos;
         delete resenas;
         delete soporte;
     }
 
-    GestorCupones* getCupones()  { return cupones; }
-    GestorPedidos* getPedidos()  { return pedidos; }
-    GestorResenas* getResenas()  { return resenas; }
-    GestorSoporte* getSoporte()  { return soporte; }
+    GestorCupones* getCupones() { return cupones; }
+    GestorResenas* getResenas() { return resenas; }
+    GestorSoporte* getSoporte() { return soporte; }
+
+    // Busca la ultima venta del cliente por DNI en el historial
+    Venta obtenerUltimaVenta(std::string dni) {
+        Venta ultima;
+        Nodo<Venta>* actual = registroVentas->getFrente();
+        while (actual != nullptr) {
+            if (actual->dato.dniCliente == dni)
+                ultima = actual->dato;
+            actual = actual->siguiente;
+        }
+        return ultima;
+    }
 
     void verStockGeneral() {
         if (listaProductos->getCabeza() == nullptr) {

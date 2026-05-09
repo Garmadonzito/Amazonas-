@@ -182,14 +182,6 @@ public:
         }
         inv.guardarEnArchivo();
 
-        // Registrar pedido por cada producto comprado
-        actual = carrito->getCabeza();
-        while (actual != nullptr) {
-            Producto* p = inv.obtenerProducto(actual->dato);
-            if (p != nullptr)
-                inv.getPedidos()->registrarPedido(dni, nombre, p->nombre, p->precio);
-            actual = actual->siguiente;
-        }
 
         carrito->vaciar();
 
@@ -294,23 +286,47 @@ public:
                 linea(12, "========================================================");
                 linea(13, "                  SOPORTE AL CLIENTE                   ");
                 linea(14, "========================================================");
-                linea(16, "    1. Abrir nuevo ticket de soporte");
-                linea(17, "    2. Ver mis tickets");
-                linea(20, "    Opcion: ");
+                linea(16, "    1. Reportar un problema");
+                linea(17, "    2. Solicitar devolucion de ultima compra");
+                linea(18, "    3. Ver mis tickets");
+                linea(21, "    Opcion: ");
                 char op2 = _getch();
 
                 if (op2 == '1') {
                     limpiarZonaVerde();
-                    linea(12, "  Numero de pedido con problema (0 si es general): ");
-                    int idPed; irA(12, PANEL_COL + 50); cin >> idPed;
-                    linea(14, "  Asunto: ");
-                    string asunto; cin.ignore(); irA(14, PANEL_COL + 10); getline(cin, asunto);
-                    linea(16, "  Descripcion: ");
-                    string desc; irA(16, PANEL_COL + 15); getline(cin, desc);
-                    inv.getSoporte()->abrirTicket(dni, nombre, idPed, asunto, desc);
-                    linea(19, "  \033[92m>> Ticket abierto. Un agente lo revisara pronto.\033[0m");
+                    linea(12, "  Asunto: ");
+                    string asunto; cin.ignore(); irA(12, PANEL_COL + 10); getline(cin, asunto);
+                    linea(14, "  Descripcion del problema: ");
+                    string desc; irA(14, PANEL_COL + 28); getline(cin, desc);
+                    inv.getSoporte()->abrirTicket(dni, nombre, asunto, desc);
+                    linea(17, "  \033[92m>> Ticket abierto. Un agente lo revisara pronto.\033[0m");
                 }
                 else if (op2 == '2') {
+                    limpiarZonaVerde();
+                    Venta ultima = inv.obtenerUltimaVenta(dni);
+                    if (ultima.producto.empty()) {
+                        linea(14, "  \033[91m>> No tienes compras registradas aun.\033[0m");
+                    } else {
+                        linea(12, "  Tu ultima compra fue:");
+                        linea(14, "    Producto : " + ultima.producto);
+                        linea(15, "    Monto    : S/. " + to_string((int)ultima.precio));
+                        linea(16, "    Fecha    : " + ultima.fechaTexto);
+                        linea(18, "  Deseas solicitar la devolucion? (S/N): ");
+                        char conf = _getch();
+                        if (conf == 'S' || conf == 's') {
+                            inv.getSoporte()->solicitarDevolucion(
+                                dni, nombre, ultima.producto, ultima.precio);
+                            limpiarZonaVerde();
+                            linea(14, "  \033[92m>> Se procesara la devolucion de S/. " +
+                                to_string((int)ultima.precio) + "\033[0m");
+                            linea(15, "  \033[92m>> del producto: " + ultima.producto + "\033[0m");
+                            linea(16, "  \033[92m>> Un agente confirmara el reembolso pronto.\033[0m");
+                        } else {
+                            linea(20, "  \033[91m>> Devolucion cancelada.\033[0m");
+                        }
+                    }
+                }
+                else if (op2 == '3') {
                     limpiarZonaVerde();
                     inv.getSoporte()->listarMisTickets(dni);
                 }

@@ -8,18 +8,22 @@ struct Ticket {
     int id;
     std::string dniCliente;
     std::string nombreCliente;
-    int idPedido;
+    std::string tipo;           // PROBLEMA, DEVOLUCION
     std::string asunto;
     std::string descripcion;
-    std::string estado; // Abierto, En proceso, Resuelto
+    std::string nombreProducto; // solo para DEVOLUCION
+    float monto;                // solo para DEVOLUCION
+    std::string estado;         // Abierto, En proceso, Resuelto
 
-    Ticket() : id(0), dniCliente(""), nombreCliente(""), idPedido(0),
-               asunto(""), descripcion(""), estado("Abierto") {}
+    Ticket() : id(0), dniCliente(""), nombreCliente(""), tipo("PROBLEMA"),
+               asunto(""), descripcion(""), nombreProducto(""), monto(0), estado("Abierto") {}
 
-    Ticket(int _id, std::string _dni, std::string _nombre, int _idPedido,
-           std::string _asunto, std::string _descripcion)
-        : id(_id), dniCliente(_dni), nombreCliente(_nombre), idPedido(_idPedido),
-          asunto(_asunto), descripcion(_descripcion), estado("Abierto") {}
+    Ticket(int _id, std::string _dni, std::string _nombre, std::string _tipo,
+           std::string _asunto, std::string _descripcion,
+           std::string _producto = "", float _monto = 0)
+        : id(_id), dniCliente(_dni), nombreCliente(_nombre), tipo(_tipo),
+          asunto(_asunto), descripcion(_descripcion),
+          nombreProducto(_producto), monto(_monto), estado("Abierto") {}
 };
 
 class GestorSoporte {
@@ -35,16 +39,26 @@ public:
 
     ~GestorSoporte() { delete listaTickets; }
 
-    void abrirTicket(std::string dni, std::string nombre, int idPedido,
+    void abrirTicket(std::string dni, std::string nombre,
                      std::string asunto, std::string descripcion) {
-        listaTickets->agregar(Ticket(contadorId++, dni, nombre, idPedido, asunto, descripcion));
+        listaTickets->agregar(Ticket(contadorId++, dni, nombre,
+                                    "PROBLEMA", asunto, descripcion));
+    }
+
+    void solicitarDevolucion(std::string dni, std::string nombre,
+                             std::string producto, float monto) {
+        std::string asunto = "Devolucion de: " + producto;
+        std::string desc   = "Cliente solicita devolucion. Monto a reembolsar: S/. " +
+                             std::to_string((int)monto);
+        listaTickets->agregar(Ticket(contadorId++, dni, nombre,
+                                    "DEVOLUCION", asunto, desc, producto, monto));
     }
 
     void avanzarEstado(int id) {
         Nodo<Ticket>* actual = listaTickets->getCabeza();
         while (actual != nullptr) {
             if (actual->dato.id == id) {
-                if (actual->dato.estado == "Abierto")     actual->dato.estado = "En proceso";
+                if      (actual->dato.estado == "Abierto")    actual->dato.estado = "En proceso";
                 else if (actual->dato.estado == "En proceso") actual->dato.estado = "Resuelto";
                 return;
             }
@@ -60,18 +74,21 @@ public:
         imprimirEnPanel(fila++, "========================================================", 96);
         fila++;
         if (listaTickets->getCabeza() == nullptr) {
-            imprimirEnPanel(fila, "  No hay tickets de soporte abiertos.", 92);
+            imprimirEnPanel(fila, "  No hay tickets de soporte.", 92);
             return;
         }
         Nodo<Ticket>* actual = listaTickets->getCabeza();
         while (actual != nullptr && fila < 36) {
-            int color = (actual->dato.estado == "Abierto")     ? 91 :
-                        (actual->dato.estado == "En proceso")  ? 93 : 92;
-            std::string item = "  [#" + std::to_string(actual->dato.id) + "] " +
-                actual->dato.nombreCliente + " | Pedido #" +
-                std::to_string(actual->dato.idPedido) + " | " +
-                actual->dato.asunto + " [" + actual->dato.estado + "]";
+            int color = (actual->dato.estado == "Abierto")    ? 91 :
+                        (actual->dato.estado == "En proceso") ? 93 : 92;
+            std::string item = "  [#" + std::to_string(actual->dato.id) + "] [" +
+                actual->dato.tipo + "] " + actual->dato.nombreCliente +
+                " | " + actual->dato.asunto + " [" + actual->dato.estado + "]";
             imprimirEnPanel(fila++, item, color);
+            if (actual->dato.tipo == "DEVOLUCION") {
+                imprimirEnPanel(fila++, "    >> Reembolso: S/. " +
+                    std::to_string((int)actual->dato.monto) + " por " + actual->dato.nombreProducto, 93);
+            }
             actual = actual->siguiente;
         }
     }
@@ -89,16 +106,18 @@ public:
             if (actual->dato.dniCliente == dni) {
                 int color = (actual->dato.estado == "Abierto")    ? 91 :
                             (actual->dato.estado == "En proceso") ? 93 : 92;
-                std::string item = "  [#" + std::to_string(actual->dato.id) + "] " +
-                    actual->dato.asunto + " | Estado: " + actual->dato.estado;
+                std::string item = "  [#" + std::to_string(actual->dato.id) + "] [" +
+                    actual->dato.tipo + "] " + actual->dato.asunto +
+                    " | Estado: " + actual->dato.estado;
                 imprimirEnPanel(fila++, item, color);
-                std::string detalle = "    >> " + actual->dato.descripcion;
-                imprimirEnPanel(fila++, detalle);
+                if (actual->dato.tipo == "DEVOLUCION")
+                    imprimirEnPanel(fila++, "    >> Reembolso pendiente: S/. " +
+                        std::to_string((int)actual->dato.monto), 93);
                 encontrado = true;
             }
             actual = actual->siguiente;
         }
-        if (!encontrado) imprimirEnPanel(fila, "  No tienes tickets de soporte abiertos.", 92);
+        if (!encontrado) imprimirEnPanel(fila, "  No tienes tickets abiertos.", 92);
     }
 
     int getCantidad() { return listaTickets->getCantidad(); }

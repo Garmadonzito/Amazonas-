@@ -102,10 +102,10 @@ public:
             linea(15, "    2. Registrar Producto      9. Filtrar por Rango");
             linea(16, "    3. Editar Precio/Stock    10. Valor Total Inventario");
             linea(17, "    4. Eliminar Producto      11. Gestionar Cupones");
-            linea(18, "    5. Alertas de Stock       12. Ver Pedidos");
-            linea(19, "    6. Historial de Ventas    13. Soporte al Cliente");
-            linea(20, "    7. Reporte de Almacen     14. Ver Resenas");
-            linea(23, "   15. Cerrar Sesion de Administrador");
+            linea(18, "    5. Alertas de Stock       11. Gestionar Cupones");
+            linea(19, "    6. Historial de Ventas    12. Soporte al Cliente");
+            linea(20, "    7. Reporte de Almacen     13. Ver Resenas");
+            linea(23, "   14. Cerrar Sesion de Administrador");
             linea(26, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
@@ -141,8 +141,7 @@ public:
                 }
                 break;
             }
-            case 12: limpiarZonaVerde(); inv.getPedidos()->listarPedidos(); break;
-            case 13: {
+            case 12: {
                 limpiarZonaVerde();
                 inv.getSoporte()->listarTodos();
                 linea(38, "  Avanzar estado de ticket? Ingrese ID (0 para no): ");
@@ -150,11 +149,11 @@ public:
                 if (idT > 0) inv.getSoporte()->avanzarEstado(idT);
                 break;
             }
-            case 14: limpiarZonaVerde(); inv.getResenas()->listarResenas(); break;
+            case 13: limpiarZonaVerde(); inv.getResenas()->listarResenas(); break;
             }
 
-            if (op != 15) pausa();
+            if (op != 14) pausa();
 
-        } while (op != 15);
+        } while (op != 14);
     }
 };
