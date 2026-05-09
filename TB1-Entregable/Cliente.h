@@ -16,8 +16,8 @@ private:
     Direccion direccionEnvio;
 
     const int MENU_PRINCIPAL = 1;
-    const int MENU_BUSQUEDA  = 2;
-    const int MENU_CARRITO   = 3;
+    const int MENU_BUSQUEDA = 2;
+    const int MENU_CARRITO = 3;
 
     void linea(int fila, const string& texto) {
         irA(fila, PANEL_COL); cout << "\033[0m" << texto;
@@ -48,15 +48,31 @@ public:
         irA(16, PANEL_COL); cout << "========================================================";
 
         irA(20, PANEL_COL); cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
-        irA(22, PANEL_COL); cout << "Correo: "; getline(cin, correo);
 
+        // LAMBDA 1 : Validación de formato de correo electrónico rafael
+        auto validarCorreo = [](string email) -> bool {
+            return email.find('@') != string::npos && email.find(".com") != string::npos;
+            };
+
+        bool correoValido = false;
+        do {
+            irA(22, PANEL_COL); cout << string(50, ' ');
+            irA(22, PANEL_COL); cout << "Correo: ";
+            getline(cin, correo);
+            if (validarCorreo(correo)) correoValido = true;
+            else { irA(26, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0m"; }
+        } while (!correoValido);
+
+        if (correoValido) { irA(26, PANEL_COL); cout << string(60, ' '); }
+
+        // LAMBDA 2: Validación de DNI (Existente) - Rafael
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
-        };
+            };
 
         bool dniValido = false;
         do {
-            irA(24, PANEL_COL); cout << string(40, ' ');
+            irA(24, PANEL_COL); cout << string(50, ' ');
             irA(24, PANEL_COL); cout << "DNI: ";
             getline(cin, dni);
             if (validarDNI(dni)) dniValido = true;
@@ -110,9 +126,14 @@ public:
         fila++;
 
         if (carrito->getCabeza() == nullptr) {
-            linea(fila, "El carrito esta vacio.");
+            linea(fila, "  El carrito esta vacio.");
             return;
         }
+
+        //LAMBDA 3 (NUEVA): Cálculo de IGV para el desglose del ticket - Rafael
+        auto calcularIGV = [](double total) -> double {
+            return total * 0.18;
+            };
 
         double total = 0;
         int i = 1;
@@ -127,7 +148,11 @@ public:
         }
         fila++;
         linea(fila++, "--------------------------------------------------------");
-        linea(fila, "  \033[92mTOTAL A PAGAR: S/. " + to_string((int)total) + "\033[0m");
+
+        double montoIGV = calcularIGV(total);
+        linea(fila++, "  Subtotal (sin IGV): S/. " + to_string((int)(total - montoIGV)));
+        linea(fila++, "  IGV (18%):          S/. " + to_string((int)montoIGV));
+        linea(fila, "  \033[92mTOTAL A PAGAR:      S/. " + to_string((int)total) + "\033[0m");
     }
 
     void seleccionarMetodoPago(double total) {
@@ -181,7 +206,6 @@ public:
             actual = actual->siguiente;
         }
         inv.guardarEnArchivo();
-
 
         carrito->vaciar();
 
@@ -275,7 +299,8 @@ public:
                         getline(cin, comentario);
                         inv.getResenas()->agregarResena(idProd, p->nombre, dni, comentario, punt);
                         linea(19, "  \033[92m>> Resena registrada. Gracias!\033[0m");
-                    } else {
+                    }
+                    else {
                         linea(14, "  \033[91m>> Producto no encontrado.\033[0m");
                     }
                 }
@@ -304,12 +329,11 @@ public:
                 else if (op2 == '2') {
                     limpiarZonaVerde();
 
-                    // Lambda que valida que los datos ingresados coincidan con el cliente logueado
                     auto validarIdentidad = [&](string nomIngresado, string correoIngresado, string dniIngresado) -> bool {
                         return dniIngresado == dni &&
-                               nomIngresado == nombre &&
-                               correoIngresado == correo;
-                    };
+                            nomIngresado == nombre &&
+                            correoIngresado == correo;
+                        };
 
                     linea(12, "========================================================");
                     linea(13, "          VERIFICACION DE IDENTIDAD - REEMBOLSO         ");
@@ -323,12 +347,14 @@ public:
                         limpiarZonaVerde();
                         linea(16, "  \033[91m>> Datos incorrectos. No se puede procesar el reembolso.\033[0m");
                         pausaRetroceder(19);
-                    } else {
+                    }
+                    else {
                         limpiarZonaVerde();
                         vector<Venta> misCompras = inv.obtenerVentasPorCliente(dni);
                         if (misCompras.empty()) {
                             linea(14, "  \033[91m>> No tienes compras registradas aun.\033[0m");
-                        } else {
+                        }
+                        else {
                             linea(12, "========================================================");
                             linea(13, "               TUS COMPRAS REGISTRADAS                 ");
                             linea(14, "========================================================");
@@ -355,7 +381,8 @@ public:
                             if (huboDevolucion) {
                                 linea(14, "  \033[92m>> Reembolso solicitado correctamente.\033[0m");
                                 linea(15, "  \033[92m>> Un agente revisara y confirmara cada devolucion.\033[0m");
-                            } else {
+                            }
+                            else {
                                 linea(14, "  \033[91m>> No se selecciono ninguna compra.\033[0m");
                             }
                         }
