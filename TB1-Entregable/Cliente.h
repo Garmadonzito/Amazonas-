@@ -6,6 +6,7 @@
 #include "Registro.h"
 #include "Pila.h"
 #include "Direccion.h"
+#include "GestorEscenas.h" 
 #include <conio.h>
 #include <fstream>
 
@@ -43,45 +44,47 @@ public:
     ~Cliente() { delete carrito; }
 
     void login() {
+        gestorEscenas grafica;
+        grafica.setEscena(gestorEscenas::CATALOGO);
+
         limpiarPantalla();
+        grafica.dibujarFondoSinLogo();
 
-        irA(12, PANEL_COL); cout << "========================================================";
-        irA(14, PANEL_COL); cout << "                    LOGIN DE CLIENTE                    ";
-        irA(16, PANEL_COL); cout << "========================================================";
+        irA(4, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
+        irA(5, PANEL_COL); cout << "            \033[96m                    LOGIN DE CLIENTE                    \033[0m";
+        irA(6, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
 
-        irA(20, PANEL_COL); cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
+        irA(14, PANEL_COL); cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
 
-        // LAMBDA 1 : Validación de formato de correo electrónico rafael
         auto validarCorreo = [](string email) -> bool {
             return email.find('@') != string::npos && email.find(".com") != string::npos;
             };
 
         bool correoValido = false;
         do {
-            irA(22, PANEL_COL); cout << string(50, ' ');
-            irA(22, PANEL_COL); cout << "Correo: ";
+            irA(16, PANEL_COL); cout << string(50, ' ');
+            irA(16, PANEL_COL); cout << "Correo: ";
             getline(cin, correo);
             if (validarCorreo(correo)) correoValido = true;
-            else { irA(26, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0m"; }
+            else { irA(22, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0m"; }
         } while (!correoValido);
 
-        if (correoValido) { irA(26, PANEL_COL); cout << string(60, ' '); }
+        if (correoValido) { irA(22, PANEL_COL); cout << string(60, ' '); }
 
-        // LAMBDA 2: Validación de DNI (Existente) - Rafael
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
             };
 
         bool dniValido = false;
         do {
-            irA(24, PANEL_COL); cout << string(50, ' ');
-            irA(24, PANEL_COL); cout << "DNI: ";
+            irA(18, PANEL_COL); cout << string(50, ' ');
+            irA(18, PANEL_COL); cout << "DNI: ";
             getline(cin, dni);
             if (validarDNI(dni)) dniValido = true;
-            else { irA(26, PANEL_COL); cout << "\033[91m>> Error: DNI invalido.\033[0m"; }
+            else { irA(22, PANEL_COL); cout << "\033[91m>> Error: DNI invalido.\033[0m"; }
         } while (!dniValido);
 
-        irA(28, PANEL_COL); cout << "\033[92m>> Bienvenido " << nombre << "!\033[0m";
+        irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido " << nombre << "!\033[0m";
         pausa();
     }
 
@@ -131,18 +134,16 @@ public:
     }
 
     void verCarrito(Inventario& inv) {
-        int fila = 12;
-        linea(fila++, "========================================================");
-        linea(fila++, "                   TU CARRITO ACTUAL                    ");
-        linea(fila++, "========================================================");
-        fila++;
+        linea(4, "            \033[93m========================================================\033[0m");
+        linea(5, "            \033[93m                   TU CARRITO ACTUAL                    \033[0m");
+        linea(6, "            \033[93m========================================================\033[0m");
 
+        int fila = 12;
         if (carrito->getCabeza() == nullptr) {
             linea(fila, "  El carrito esta vacio.");
             return;
         }
 
-        //LAMBDA 3 (NUEVA): Cálculo de IGV para el desglose del ticket - Rafael
         auto calcularIGV = [](double total) -> double {
             return total * 0.18;
             };
@@ -162,9 +163,18 @@ public:
             CalcularTotalOferta(total);
             linea(fila++, "\033[93m  Descuento de bienvenida (15%) aplicado!\033[0m");
         }
-        fila++;
-        linea(fila++, "--------------------------------------------------------");
 
+        fila++;
+        if (direccionEnvio.esValida()) {
+            linea(fila++, "\033[96mDATOS DE ENTREGA:\033[0m");
+            direccionEnvio.mostrar(fila);
+            fila += 4;
+        }
+        else {
+            linea(fila++, "\033[91m[!] Direccion no registrada. Se usara recojo en tienda.\033[0m");
+        }
+
+        linea(fila++, "--------------------------------------------------------");
         double montoIGV = calcularIGV(total);
         linea(fila++, "  Subtotal (sin IGV): S/. " + to_string((int)(total - montoIGV)));
         linea(fila++, "  IGV (18%):          S/. " + to_string((int)montoIGV));
@@ -172,27 +182,37 @@ public:
     }
 
     void seleccionarMetodoPago(double total) {
+        gestorEscenas grafica; grafica.setEscena(gestorEscenas::CATALOGO);
         limpiarZonaVerde();
-        linea(12, "========================================================");
-        linea(14, "                SELECCIONA METODO DE PAGO               ");
-        linea(16, "========================================================");
-        linea(20, "    1. Tarjeta de Credito / Debito");
-        linea(22, "    2. Yape / Plin (Codigo QR)");
-        linea(26, "    Opcion: ");
+        grafica.dibujarFondoSinLogo();
+
+        linea(4, "            \033[95m========================================================\033[0m");
+        linea(5, "            \033[95m                SELECCIONA METODO DE PAGO               \033[0m");
+        linea(6, "            \033[95m========================================================\033[0m");
+
+        linea(14, "    1. Tarjeta de Credito / Debito");
+        linea(16, "    2. Yape / Plin (Codigo QR)");
+        linea(20, "    Opcion: ");
         int op; cin >> op;
 
         if (op == 1) {
             limpiarZonaVerde();
+            grafica.dibujarFondoSinLogo();
             Tarjeta t; t.pagar(total);
         }
         else if (op == 2) {
             limpiarPantalla();
+            grafica.dibujarFondoSinLogo();
             YapePlin yp; yp.pagar(total);
         }
     }
 
     void comprarCarrito(Inventario& inv) {
+        gestorEscenas grafica; grafica.setEscena(gestorEscenas::CATALOGO);
+
         limpiarZonaVerde();
+        grafica.dibujarFondoSinLogo();
+
         if (carrito->getCabeza() == nullptr) {
             linea(18, "  El carrito esta vacio. Agrega productos primero.");
             pausaRetroceder();
@@ -226,40 +246,51 @@ public:
         carrito->vaciar();
 
         limpiarZonaVerde();
+        grafica.dibujarFondoSinLogo();
         comprasRealizadas++;
         linea(20, "  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m");
         pausaRetroceder(24);
     }
 
     void menuBuscarProducto(Inventario& inv) {
+        gestorEscenas grafica;
+        grafica.setEscena(gestorEscenas::CATALOGO);
+
         while (true) {
             limpiarZonaVerde();
+            grafica.dibujarFondoSinLogo();
 
-            linea(12, "========================================================");
-            linea(14, "                 --- TIENDA AMAZONAS ---                ");
-            linea(16, "========================================================");
-            linea(20, "    1. Ver Catalogo Completo (Agregar por ID)");
-            linea(22, "    2. Buscar producto por nombre especifico");
-            linea(24, "    3. Ver Catalogo ordenado por Precio");
-            linea(26, "    4. Registrar Direccion de Envio");
-            linea(28, "    5. Dejar Resena de un Producto");
-            linea(30, "    6. Soporte - Reportar problema con pedido");
-            linea(32, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+            linea(2, "\033[93m   ______ \033[92m   ___      __  ___    ___     ____   ___     _  __     ___     ____ \033[0m");
+            linea(3, "\033[93m  /     /|\033[92m  /   |    /  |/  /   /   |   /_  /  / _ \\   / |/ /    /   |   / __/ \033[0m");
+            linea(4, "\033[93m /_____/ |\033[92m / /| |   / /|_/ /   / /| |    / /  / / / / /    /    / /| |  \\__ \\ \033[0m");
+            linea(5, "\033[93m |     | |\033[92m / ___ |  / /  / /   / ___ |   / /_/ /_/ / / /|  /   / ___ | ___/ /  \033[0m");
+            linea(6, "\033[93m |_____|/ \033[92m /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/ /_/ |_/   /_/  |_|/____/  \033[0m");
+
+            linea(12, "    1. Ver Catalogo Completo (Agregar por ID)");
+            linea(14, "    2. Buscar producto por nombre especifico");
+            linea(16, "    3. Ver Catalogo ordenado por Precio");
+            linea(18, "    4. Registrar Direccion de Envio");
+            linea(20, "    5. Dejar Resena de un Producto");
+            linea(22, "    6. Soporte - Reportar problema con pedido");
+            linea(26, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
 
             if (c == '1') {
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 inv.listarTodo();
                 bucleAgregarRapido(inv, 38);
             }
             else if (c == '2') {
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 linea(14, "  Ingrese nombre del producto: ");
                 string nom; cin.ignore(); getline(cin, nom);
 
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 inv.buscarPorNombre(nom);
 
                 linea(32, "  >> Ingrese el ID del producto que desea: ");
@@ -288,12 +319,14 @@ public:
             }
             else if (c == '3') {
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 inv.ordenarPorPrecio();
                 inv.listarTodo();
                 bucleAgregarRapido(inv, 38);
             }
             else if (c == '4') {
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 direccionEnvio.registrar(12);
                 if (direccionEnvio.esValida())
                     linea(24, "  \033[92m>> Direccion registrada correctamente.\033[0m");
@@ -301,6 +334,7 @@ public:
             }
             else if (c == '5') {
                 limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 linea(12, "  ID del producto a resenar: ");
                 string idStr; cin.ignore(); cin >> idStr;
                 if (idStr.find_first_not_of("0123456789") == string::npos) {
@@ -308,6 +342,7 @@ public:
                     Producto* p = inv.obtenerProducto(idProd);
                     if (p != nullptr) {
                         limpiarZonaVerde();
+                        grafica.dibujarFondoSinLogo();
                         linea(12, "  Producto: " + p->nombre);
                         linea(14, "  Puntuacion (1-5): ");
                         int punt; irA(14, PANEL_COL + 20); cin >> punt;
@@ -325,17 +360,21 @@ public:
             }
             else if (c == '6') {
                 limpiarZonaVerde();
-                linea(12, "========================================================");
-                linea(13, "                  SOPORTE AL CLIENTE                   ");
-                linea(14, "========================================================");
-                linea(16, "    1. Reportar un problema");
-                linea(17, "    2. Solicitar devolucion de ultima compra");
-                linea(18, "    3. Ver mis tickets");
-                linea(21, "    Opcion: ");
+                grafica.dibujarFondoSinLogo();
+
+                linea(4, "            \033[91m========================================================\033[0m");
+                linea(5, "            \033[91m                  SOPORTE AL CLIENTE                    \033[0m");
+                linea(6, "            \033[91m========================================================\033[0m");
+
+                linea(12, "    1. Reportar un problema");
+                linea(14, "    2. Solicitar devolucion de ultima compra");
+                linea(16, "    3. Ver mis tickets");
+                linea(20, "    Opcion: ");
                 char op2 = _getch();
 
                 if (op2 == '1') {
                     limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
                     linea(12, "  Asunto: ");
                     string asunto; cin.ignore(); irA(12, PANEL_COL + 10); getline(cin, asunto);
                     linea(14, "  Descripcion del problema: ");
@@ -345,6 +384,7 @@ public:
                 }
                 else if (op2 == '2') {
                     limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
 
                     auto validarIdentidad = [&](string nomIngresado, string correoIngresado, string dniIngresado) -> bool {
                         return dniIngresado == dni &&
@@ -352,30 +392,34 @@ public:
                             correoIngresado == correo;
                         };
 
-                    linea(12, "========================================================");
-                    linea(13, "          VERIFICACION DE IDENTIDAD - REEMBOLSO         ");
-                    linea(14, "========================================================");
-                    linea(16, "  Confirme sus datos para continuar:");
-                    linea(17, "  Nombre : "); string nomV; cin.ignore(); irA(17, PANEL_COL + 11); getline(cin, nomV);
-                    linea(18, "  Correo : "); string correoV;           irA(18, PANEL_COL + 11); getline(cin, correoV);
-                    linea(19, "  DNI    : "); string dniV;              irA(19, PANEL_COL + 11); getline(cin, dniV);
+                    linea(4, "            \033[93m========================================================\033[0m");
+                    linea(5, "            \033[93m          VERIFICACION DE IDENTIDAD - REEMBOLSO         \033[0m");
+                    linea(6, "            \033[93m========================================================\033[0m");
+
+                    linea(12, "  Confirme sus datos para continuar:");
+                    linea(14, "  Nombre : "); string nomV; cin.ignore(); irA(14, PANEL_COL + 11); getline(cin, nomV);
+                    linea(15, "  Correo : "); string correoV;           irA(15, PANEL_COL + 11); getline(cin, correoV);
+                    linea(16, "  DNI    : "); string dniV;              irA(16, PANEL_COL + 11); getline(cin, dniV);
 
                     if (!validarIdentidad(nomV, correoV, dniV)) {
                         limpiarZonaVerde();
+                        grafica.dibujarFondoSinLogo();
                         linea(16, "  \033[91m>> Datos incorrectos. No se puede procesar el reembolso.\033[0m");
                         pausaRetroceder(19);
                     }
                     else {
                         limpiarZonaVerde();
+                        grafica.dibujarFondoSinLogo();
                         vector<Venta> misCompras = inv.obtenerVentasPorCliente(dni);
                         if (misCompras.empty()) {
                             linea(14, "  \033[91m>> No tienes compras registradas aun.\033[0m");
                         }
                         else {
-                            linea(12, "========================================================");
-                            linea(13, "               TUS COMPRAS REGISTRADAS                 ");
-                            linea(14, "========================================================");
-                            int fila = 16;
+                            linea(4, "            \033[96m========================================================\033[0m");
+                            linea(5, "            \033[96m               TUS COMPRAS REGISTRADAS                  \033[0m");
+                            linea(6, "            \033[96m========================================================\033[0m");
+
+                            int fila = 12;
                             for (int i = 0; i < (int)misCompras.size() && fila < 35; i++) {
                                 string item = "  [" + to_string(i + 1) + "] " +
                                     misCompras[i].producto + " - S/. " +
@@ -395,6 +439,7 @@ public:
                                 }
                             }
                             limpiarZonaVerde();
+                            grafica.dibujarFondoSinLogo();
                             if (huboDevolucion) {
                                 linea(14, "  \033[92m>> Reembolso solicitado correctamente.\033[0m");
                                 linea(15, "  \033[92m>> Un agente revisara y confirmara cada devolucion.\033[0m");
@@ -407,6 +452,7 @@ public:
                 }
                 else if (op2 == '3') {
                     limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
                     inv.getSoporte()->listarMisTickets(dni);
                 }
                 pausaRetroceder(38);
@@ -415,53 +461,66 @@ public:
     }
 
     void menuCarrito(Inventario& inv) {
-    while (true) {
-        limpiarZonaVerde();
+        gestorEscenas grafica;
+        grafica.setEscena(gestorEscenas::CATALOGO);
 
-        linea(12, "========================================================");
-        linea(14, "               --- MI CARRITO DE COMPRAS ---            ");
-        linea(16, "========================================================");
-        linea(20, "    1. Ver lista de productos anadidos");
-        linea(22, "    2. Proceder al pago final");
-        linea(24, "    3. Historial de pedidos - Orden por Monto");
-        linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
-
-        int c = _getch();
-        if (c == 27) break;
-
-        if (c == '1') {
+        while (true) {
             limpiarZonaVerde();
-            verCarrito(inv);
-            pausaRetroceder(38);
-        }
-        else if (c == '2') {
-            comprarCarrito(inv);
-            break;
-        }
-        else if (c == '3') {
-            limpiarZonaVerde();
-            inv.mostrarHistorialClientePersonalizado(dni);
-            pausaRetroceder(38);
+            grafica.dibujarFondoSinLogo();
 
+            linea(4, "            \033[93m========================================================\033[0m");
+            linea(5, "            \033[93m               --- MI CARRITO DE COMPRAS ---            \033[0m");
+            linea(6, "            \033[93m========================================================\033[0m");
+
+            linea(12, "    1. Ver lista de productos anadidos");
+            linea(14, "    2. Proceder al pago final");
+            linea(16, "    3. Historial de pedidos - Orden por Monto");
+            linea(20, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+
+            int c = _getch();
+            if (c == 27) break;
+
+            if (c == '1') {
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                verCarrito(inv);
+                pausaRetroceder(38);
+            }
+            else if (c == '2') {
+                comprarCarrito(inv);
+                break;
+            }
+            else if (c == '3') {
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                inv.mostrarHistorialClientePersonalizado(dni);
+                pausaRetroceder(38);
+            }
         }
     }
-}
-
 
     void menu(Inventario& inv) {
         historialNavegacion.apilar(MENU_PRINCIPAL);
 
+        gestorEscenas grafica;
+        grafica.setEscena(gestorEscenas::CATALOGO);
+
         while (!historialNavegacion.estaVacia()) {
             int pantallaActual = historialNavegacion.obtenerTope();
             limpiarZonaVerde();
+            grafica.dibujarFondoSinLogo();
 
             if (pantallaActual == MENU_PRINCIPAL) {
-                linea(12, "========================================================");
-                linea(14, "             BIENVENIDO AL MARKETPLACE, " + nombre);
-                linea(16, "========================================================");
-                linea(20, "    1. Entrar a la Tienda (Catalogo y Busqueda)");
-                linea(22, "    2. Gestionar mi Carrito de Compras");
-                linea(28, "    \033[93m[ESC] Salir del Sistema de Cliente\033[0m");
+                linea(4, "            \033[94m========================================================\033[0m");
+
+                string saludo = "             BIENVENIDO AL MARKETPLACE, " + nombre;
+                while (saludo.length() < 56) saludo += " ";
+                linea(5, "            \033[94m" + saludo + "\033[0m");
+                linea(6, "            \033[94m========================================================\033[0m");
+
+                linea(12, "    1. Entrar a la Tienda (Catalogo y Busqueda)");
+                linea(14, "    2. Gestionar mi Carrito de Compras");
+                linea(20, "    \033[93m[ESC] Salir del Sistema de Cliente\033[0m");
 
                 int c = _getch();
                 if (c == '1') historialNavegacion.apilar(MENU_BUSQUEDA);

@@ -23,7 +23,6 @@ private:
     GestorResenas* resenas;
     GestorSoporte* soporte;
 
-    // Métodos privados de soporte y recursividad
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
         if (actual == nullptr) return nullptr;
         if (actual->dato.id == idBuscado) return actual;
@@ -33,6 +32,11 @@ private:
     int contarVentasRecursivo(Nodo<Venta>* actual) {
         if (actual == nullptr) return 0;
         return 1 + contarVentasRecursivo(actual->siguiente);
+    }
+
+    int contarStockTotalRecursivo(Nodo<Producto>* actual) {
+        if (actual == nullptr) return 0;
+        return actual->dato.stock + contarStockTotalRecursivo(actual->siguiente);
     }
 
     std::string buscarNombreCliente(std::string dniBuscado) {
@@ -60,24 +64,17 @@ private:
 
     void ordenarHistorialPorMonto(std::vector<Venta>& historial) {
         int n = (int)historial.size();
-
-        //Algoritmo de Insercion
-        for (int i = 1;i < n;i++) {
-            Venta llave = historial[i]; //Este es el pedido que se va a insertar
+        for (int i = 1; i < n; i++) {
+            Venta llave = historial[i];
             int j = i - 1;
-            //Se desplazan los montos menores hacia el principio
             while (j >= 0 && historial[j].precio < llave.precio) {
                 historial[j + 1] = historial[j];
                 j = j - 1;
             }
             historial[j + 1] = llave;
         }
-
     }
 
-    // ---------------------------------------------------------
-    // ALGORITMO DE ORDENAMIENTO SHELL - Rafael 
-    // ---------------------------------------------------------
     void ordenarVentasShell(std::vector<Venta>& ventas) {
         int n = (int)ventas.size();
         if (n <= 1) return;
@@ -105,8 +102,8 @@ private:
 
 public:
     Inventario() {
-        listaProductos  = new ListaEnlazada<Producto>();
-        registroVentas  = new Cola<Venta>();
+        listaProductos = new ListaEnlazada<Producto>();
+        registroVentas = new Cola<Venta>();
         cupones = new GestorCupones();
         resenas = new GestorResenas();
         soporte = new GestorSoporte();
@@ -124,7 +121,6 @@ public:
     GestorResenas* getResenas() { return resenas; }
     GestorSoporte* getSoporte() { return soporte; }
 
-    // Retorna todas las ventas de un cliente por DNI
     std::vector<Venta> obtenerVentasPorCliente(std::string dni) {
         std::vector<Venta> resultado;
         Nodo<Venta>* actual = registroVentas->getFrente();
@@ -138,23 +134,28 @@ public:
 
     void verStockGeneral() {
         if (listaProductos->getCabeza() == nullptr) {
-            imprimirEnPanel(10, "Inventario vacio.");
+            imprimirEnPanel(12, "Inventario vacio.");
             return;
         }
-        int fila = 10;
-        imprimirEnPanel(fila++, "========================================================", 96);
-        imprimirEnPanel(fila++, "                REPORTE DE STOCK GENERAL                ", 96);
-        imprimirEnPanel(fila++, "========================================================", 96);
-        fila++;
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m                REPORTE DE STOCK GENERAL                \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        int fila = 12;
         Nodo<Producto>* actual = listaProductos->getCabeza();
-        while (actual != nullptr) {
+        while (actual != nullptr && fila < 35) {
             std::string item = "Producto: " + actual->dato.nombre;
             while (item.length() < 45) item += " ";
             item += "| Stock: " + std::to_string(actual->dato.stock);
             imprimirEnPanel(fila++, item, (actual->dato.stock < 10 ? 91 : 0));
             actual = actual->siguiente;
         }
-        imprimirEnPanel(fila, "========================================================", 96);
+
+        fila++;
+        int totalUnidades = contarStockTotalRecursivo(listaProductos->getCabeza());
+        imprimirEnPanel(fila++, "--------------------------------------------------------");
+        imprimirEnPanel(fila, "  TOTAL DE UNIDADES FISICAS EN ALMACEN: " + std::to_string(totalUnidades), 92);
     }
 
     void guardarEnArchivo() {
@@ -232,8 +233,9 @@ public:
 
     void mostrarStockBajo(int limite) {
         limpiarZonaVerde();
-        int fila = 10;
-        imprimirEnPanel(fila++, "========== ALERTAS DE STOCK CRITICO ==========", 91);
+        imprimirEnPanel(4, "            \033[91m========== ALERTAS DE STOCK CRITICO ==========\033[0m");
+        int fila = 12;
+
         auto esCritico = [limite](Producto p) -> bool { return p.stock < limite; };
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool huboAlertas = false;
@@ -246,19 +248,19 @@ public:
             actual = actual->siguiente;
         }
         if (!huboAlertas) imprimirEnPanel(fila++, "Todo el inventario cuenta con stock suficiente.", 92);
-        imprimirEnPanel(fila++, "==============================================", 91);
     }
 
     void listarTodo() {
         if (listaProductos->getCabeza() == nullptr) {
-            imprimirEnPanel(10, "Inventario vacio.");
+            imprimirEnPanel(12, "Inventario vacio.");
             return;
         }
-        int fila = 10;
-        imprimirEnPanel(fila++, "========================================================", 96);
-        imprimirEnPanel(fila++, "                  CATALOGO AMAZONAS                     ", 96);
-        imprimirEnPanel(fila++, "========================================================", 96);
-        fila++;
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m                  CATALOGO AMAZONAS                     \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        int fila = 12;
         std::vector<std::string> categorias;
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
@@ -267,13 +269,17 @@ public:
             if (!existe) categorias.push_back(actual->dato.categoria);
             actual = actual->siguiente;
         }
+
         for (const std::string& cat : categorias) {
             imprimirEnPanel(fila++, ">>> " + cat + " <<<", 93);
             actual = listaProductos->getCabeza();
-            while (actual != nullptr) {
+            while (actual != nullptr && fila < 38) {
                 if (actual->dato.categoria == cat) {
-                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " + actual->dato.nombre +
-                        " | Precio: S/. " + std::to_string((int)actual->dato.precio) + " | Stock: " + std::to_string(actual->dato.stock);
+                    float promedio = resenas->obtenerPromedioProducto(actual->dato.id);
+                    std::string estrellas = (promedio > 0) ? " [" + std::to_string(promedio).substr(0, 3) + " \033[93m*\033[0m]" : " [Sin resenas]";
+
+                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " + actual->dato.nombre + estrellas +
+                        " | S/. " + std::to_string((int)actual->dato.precio);
                     imprimirEnPanel(fila++, item);
                 }
                 actual = actual->siguiente;
@@ -285,19 +291,20 @@ public:
     void ordenarPorPrecio() {
         auto comparador = [](Producto a, Producto b) -> bool {
             return a.precio > b.precio;
-        };
+            };
         listaProductos->ordenar(comparador);
     }
 
     void filtrarPorRangoPrecio(float minPrecio, float maxPrecio) {
         auto dentroDelRango = [minPrecio, maxPrecio](Producto p) -> bool {
             return p.precio >= minPrecio && p.precio <= maxPrecio;
-        };
-        int fila = 10;
-        imprimirEnPanel(fila++, "========================================================", 96);
-        imprimirEnPanel(fila++, "          PRODUCTOS FILTRADOS POR RANGO DE PRECIO       ", 96);
-        imprimirEnPanel(fila++, "========================================================", 96);
-        fila++;
+            };
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m          PRODUCTOS FILTRADOS POR RANGO DE PRECIO       \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        int fila = 12;
         Nodo<Producto>* actual = listaProductos->getCabeza();
         bool encontrado = false;
         while (actual != nullptr) {
@@ -315,26 +322,30 @@ public:
     void calcularTotalInventario() {
         auto sumarValor = [](float acumulado, Producto p) -> float {
             return acumulado + (p.precio * p.stock);
-        };
+            };
         float total = 0;
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
             total = sumarValor(total, actual->dato);
             actual = actual->siguiente;
         }
-        int fila = 10;
-        imprimirEnPanel(fila++, "========================================================", 96);
-        imprimirEnPanel(fila++, "            VALOR TOTAL DEL INVENTARIO                  ", 96);
-        imprimirEnPanel(fila++, "========================================================", 96);
-        fila++;
-        imprimirEnPanel(fila, "  Valor total en stock: S/. " + std::to_string((int)total), 92);
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m            VALOR TOTAL DEL INVENTARIO                  \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        imprimirEnPanel(12, "  Valor total en stock: S/. " + std::to_string((int)total), 92);
     }
 
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
-        int fila = 10;
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m                 --- RESULTADOS ---                     \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        int fila = 12;
         bool encontrado = false;
-        imprimirEnPanel(fila++, "--- RESULTADOS ---");
+
         while (actual != nullptr) {
             if (actual->dato.nombre.find(nom) != std::string::npos) {
                 std::string item = "[ID: " + std::to_string(actual->dato.id) + "] (" + actual->dato.categoria + ") " + actual->dato.nombre;
@@ -384,23 +395,20 @@ public:
         for (Venta v : ventasOrdenadas) registroVentas->encolar(v);
     }
 
-    
     void mostrarRegistroVentas() {
         limpiarZonaVerde();
         cargarVentasDesdeArchivo();
 
-        int fila = 10;
-        imprimirEnPanel(fila++, "=======================================================================", 96);
-        imprimirEnPanel(fila++, "                     HISTORIAL DE VENTAS (LOGISTICA)                   ", 96);
-        imprimirEnPanel(fila++, "=======================================================================", 96);
-        fila++;
+        imprimirEnPanel(4, "    \033[96m=======================================================================\033[0m");
+        imprimirEnPanel(5, "    \033[96m                 HISTORIAL DE VENTAS (LOGISTICA)                       \033[0m");
+        imprimirEnPanel(6, "    \033[96m=======================================================================\033[0m");
 
+        int fila = 12;
         if (registroVentas->estaVacia()) {
             imprimirEnPanel(fila, "  No hay ventas registradas en el sistema.", 91);
             return;
         }
 
-      
         imprimirEnPanel(fila++, " FECHA/HORA       | CLIENTE (DNI)     | PRODUCTO             | S/. ", 93);
         imprimirEnPanel(fila++, "-----------------------------------------------------------------------");
 
@@ -415,7 +423,6 @@ public:
         while (actual != nullptr && fila < 38) {
             Venta v = actual->dato;
 
-            // Formateo estricto de columnas rellenando con espacios para alinear
             std::string fecha = v.fechaTexto;
             while (fecha.length() < 16) fecha += " ";
 
@@ -428,7 +435,6 @@ public:
             while (prod.length() < 20) prod += " ";
 
             std::string precioStr = std::to_string((int)v.precio);
-
             std::string lineaVenta = " " + fecha + " | " + clienteDNI + " | " + prod + " | " + precioStr;
 
             imprimirEnPanel(fila++, lineaVenta);
@@ -437,30 +443,29 @@ public:
 
         fila++;
         imprimirEnPanel(fila++, "-----------------------------------------------------------------------");
-        // El llamado recursivo para contar se mantiene, asegurando el punto de la rúbrica.
         imprimirEnPanel(fila, "  TOTAL DE TRANSACCIONES HISTORICAS: " + std::to_string(totalVentas), 92);
     }
 
     void mostrarHistorialClientePersonalizado(std::string dni) {
-        // 1. Obtenemos solo las ventas de ese cliente
         std::vector<Venta> misVentas = obtenerVentasPorCliente(dni);
 
         if (misVentas.empty()) {
-            imprimirEnPanel(10, "Aun no has realizado compras.");
+            imprimirEnPanel(12, "Aun no has realizado compras.");
             return;
         }
 
-        // 2. Aplicamos TU algoritmo de Inserción
         ordenarHistorialPorMonto(misVentas);
 
-        // 3. Dibujamos en el panel
         limpiarZonaVerde();
-        int fila = 10;
-        imprimirEnPanel(fila++, "======= MIS COMPRAS (ORDENADAS POR MONTO) =======", 93);
+        imprimirEnPanel(4, "            \033[93m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[93m        MIS COMPRAS (ORDENADAS POR MONTO)               \033[0m");
+        imprimirEnPanel(6, "            \033[93m========================================================\033[0m");
+
+        int fila = 12;
         for (const auto& v : misVentas) {
+            if (fila >= 38) break;
             std::string linea = "Fecha: " + v.fechaTexto + " | " + v.producto + " | S/. " + std::to_string((int)v.precio);
             imprimirEnPanel(fila++, linea);
         }
     }
-
 };

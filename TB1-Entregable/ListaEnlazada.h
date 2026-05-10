@@ -71,7 +71,7 @@ public:
     Iterator begin() { return Iterator(cabeza); }
     Iterator end() { return Iterator(nullptr); }
 
-    // Ordenamiento burbuja con comparador lambda (O(n^2))
+    // Ordenamiento burbuja con comparador lambda 
     void ordenar(std::function<bool(T, T)> comparador) {
         if (cabeza == nullptr || cabeza->siguiente == nullptr) return;
         bool huboIntercambio;

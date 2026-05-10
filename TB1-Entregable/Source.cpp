@@ -14,19 +14,23 @@ int main() {
     int opcion;
     do {
         system("cls");
-        grafica.dibujarEscena();
-        consola.establecerColor(15, 0); //Cambie el color blanco por negro, no se veia muy bien 
+        grafica.dibujarEscena(); 
+        consola.establecerColor(15, 0);
 
        
-        irA(4, 12); cout << "========================================";
-        irA(5, 12); cout << "        AMAZONAS - INICIO";
-        irA(6, 12); cout << "========================================";
-        irA(8, 12); cout << "Que tipo de usuario eres?";
-        irA(9, 12); cout << "1. Cliente";
-        irA(10, 12); cout << "2. Vendedor (Empieza por aqui para anadir stock)";
-        irA(11, 12); cout << "3. Salir";
-        irA(13, 12); cout << "Opcion: ";
+        irA(2, 24);  cout << "--------------------------------------------------------------------------------";
+        irA(3, 24);  cout << "\033[93m  ________ \033[92m     ___      __  ___    ___     ____   ___       _____     ___     ____ \033[0m";
+        irA(4, 24);  cout << "\033[93m /       /|\033[92m    /   |    /  |/  /   /   |   /_  /  / _ \\     / |/ /    /   |   / __/ \033[0m";
+        irA(5, 24);  cout << "\033[93m/_______/ |\033[92m   / /| |   / /|_/ /   / /| |    / /  / / / /   /    /    / /| |  \\__ \\ \033[0m";
+        irA(6, 24);  cout << "\033[93m|       | |\033[92m  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ /  \033[0m";
+        irA(7, 24);  cout << "\033[93m|_______|/ \033[92m /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  \033[0m";
+        irA(9, 24);  cout << "--------------------------------------------------------------------------------";
 
+        irA(13, 24); cout << "Que tipo de usuario eres?";
+        irA(14, 24); cout << "1. Cliente";
+        irA(15, 24); cout << "2. Vendedor (Empieza por aqui para anadir stock)";
+        irA(16, 24); cout << "3. Salir";
+        irA(17, 24); cout << "Opcion: ";
         cin >> opcion;
 
         if (cin.fail()) {
