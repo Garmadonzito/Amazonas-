@@ -21,8 +21,8 @@ public:
 	gestorEscenas();
 	~gestorEscenas();
 
-	void setEscena(Escena nueva);
-	void dibujarEscena();
+	void setEscena(Escena nueva); //cambia el estado de la escena que se encuentra ahora
+	void dibujarEscena();//dibuja la escena completa, el fondo y objetos
 	void dibujarFondoSinLogo();
 	void restaurarFondo(int x, int y, int ancho, int alto);
 	void limpiar_listaObj();
@@ -31,7 +31,7 @@ public:
 	Matriz& getFondoActual() { return fondo; }
 
 private:
-	void configObjEscena();
+	void configObjEscena();//creara la lista de objetos para cada escena
 };
 
 void gestorEscenas::limpiar_listaObj() {
@@ -47,9 +47,17 @@ void gestorEscenas::configObjEscena() {
 	switch (estado)
 	{
 	case gestorEscenas::LOGIN: {
+		Matriz* nubebig = new Matriz();
+		nubebig->inicializar(nubeBig);
+		listaObjetos.push_back({ nubebig ,35,15 });//Objeto, Ubicacion en X, Ubicacion en Y
+
+		Matriz* cuadroTxt = new Matriz();
+		cuadroTxt->inicializar(cuadroText);
+		listaObjetos.push_back({ cuadroTxt,50,35 });//Objeto, Ubicacion en X, Ubicacion en Y
+
 		Matriz* Anaconda = new Matriz();
 		Anaconda->inicializar(anaconda);
-		listaObjetos.push_back({ Anaconda, 52, 21 });
+		listaObjetos.push_back({ Anaconda,52,21 });
 		break;
 	}
 	case gestorEscenas::MENU_PRINCIPAL:
@@ -77,7 +85,7 @@ void gestorEscenas::dibujarFondoSinLogo() {
 	fondo.dibujarMatriz(0, 0);
 }
 
-void gestorEscenas::restaurarFondo(int x, int y, int ancho, int alto) {
+void gestorEscenas::restaurarFondo(int x, int y, int ancho, int alto) { //...
 	auto aplicarColorYForma = [this](int fila, int columna) {
 		if (fila < 0 || fila >= 45 || columna < 0 || columna >= 130)return;
 		int valor = this->fondo.getDatos(fila, columna);

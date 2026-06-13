@@ -62,7 +62,7 @@ private:
         return texto;
     }
 
-    void ordenarHistorialPorMonto(std::vector<Venta>& historial) {
+    void ordenarHistorialPorMonto(std::vector<Venta>& historial) { //Ordenamiento por Inserccion
         int n = (int)historial.size();
         for (int i = 1; i < n; i++) {
             Venta llave = historial[i];
@@ -446,7 +446,7 @@ public:
         imprimirEnPanel(fila, "  TOTAL DE TRANSACCIONES HISTORICAS: " + std::to_string(totalVentas), 92);
     }
 
-    void mostrarHistorialClientePersonalizado(std::string dni) {
+    void mostrarHistorialClientePersonalizado(std::string dni) { 
         std::vector<Venta> misVentas = obtenerVentasPorCliente(dni);
 
         if (misVentas.empty()) {

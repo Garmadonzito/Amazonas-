@@ -128,7 +128,7 @@ public:
         return lam(total, precio);
     }
 
-    double CalcularTotalOferta(double& total) {
+    double CalcularTotalOferta(double& total) { //...
         auto lam = [](double& t) {return t = t * 0.85;};
         return lam(total);
     }
@@ -161,7 +161,7 @@ public:
         }
         if (comprasRealizadas == 0 && total > 0) {
             CalcularTotalOferta(total);
-            linea(fila++, "\033[93m  Descuento de bienvenida (15%) aplicado!\033[0m");
+            linea(fila++, "\033[93m  Descuento de bienvenida (15%) aplicado!\033[0m"); //
         }
 
         fila++;
