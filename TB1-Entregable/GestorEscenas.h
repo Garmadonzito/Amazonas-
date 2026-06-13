@@ -57,7 +57,7 @@ void gestorEscenas::configObjEscena() {
 
 		Matriz* Anaconda = new Matriz();
 		Anaconda->inicializar(anaconda);
-		listaObjetos.push_back({ Anaconda,52,21 });
+		listaObjetos.push_back({ Anaconda,47,6 });
 		break;
 	}
 	case gestorEscenas::MENU_PRINCIPAL:
