@@ -53,6 +53,10 @@ void Consola::configurarConsola() {
     // Redimensionamiento forzado moderno compatible con Windows Terminal
     cout << "\033[8;" << ALTO_TERMINAL << ";" << ANCHO_TERMINAL << "t";
     cout.flush();
+
+    // Establecer fondo verde (2) y texto negro (0) como predeterminado
+    SetConsoleTextAttribute(manejadorConsola, (2 * 16) + 0);
+    system("cls");  // Limpiar con el nuevo esquema de colores
 }
 
 void Consola::establecerColor(int letra, int fondo) {

@@ -15,18 +15,21 @@ int main() {
     do {
         system("cls");
         grafica.dibujarEscena(); 
-        consola.establecerColor(15, 0);
+        consola.establecerColor(0, 2);  
 
-        irA(2, 22);  cout << "\033[93m  ________ \033[92m     ___      __  ___    ___     ____   ___       _____     ___     ____\033[0m";
-        irA(3, 22);  cout << "\033[93m /       /|\033[92m    /   |    /  |/  /   /   |   /_  /  / _ \\     / |/ /    /   |   / __/\033[0m";
-        irA(4, 22);  cout << "\033[93m/_______/ |\033[92m   / /| |   / /|_/ /   / /| |    / /  / / / /   /    /    / /| |  \\__ \\ \033[0m";
-        irA(5, 22);  cout << "\033[93m|       | |\033[92m  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ / \033[0m";
-        irA(6, 22);  cout << "\033[93m|_______|/ \033[92m /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  \033[0m";
+        irA(2, 22);  cout << "  ________      ___      __  ___    ___     ____   ___       _____     ___     ____";
+        irA(3, 22);  cout << " /       /|    /   |    /  |/  /   /   |   /_  /  / _ \\     / |/ /    /   |   / __/";
+        irA(4, 22);  cout << "/_______/ |   / /| |   / /|_/ /   / /| |    / /  / / / /   /    /    / /| |  \\ __ \\ ";
+        irA(5, 22);  cout << "|       | |  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ / ";
+        irA(6, 22);  cout << "|_______|/  /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  ";
+
+        consola.establecerColor(0, 15);  // Cambiar a fondo blanco (15) con texto negro para el menú
 
         irA(20, 40); cout << "Que tipo de usuario eres?";
         irA(21, 40); cout << "1. Cliente";
         irA(22, 40); cout << "2. Vendedor (Empieza por aqui para anadir stock)";
         irA(23, 40); cout << "3. Salir";
+        consola.establecerColor(15, 0);
         irA(38, 53); cout << "Opcion: ";
         cin >> opcion;
 
