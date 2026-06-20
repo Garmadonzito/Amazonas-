@@ -19,7 +19,7 @@ private:
 public:
     bool login() {
         gestorEscenas grafica;
-        grafica.setEscena(gestorEscenas::CATALOGO);
+        grafica.setEscena(gestorEscenas::LOGIN);
 
         limpiarPantalla();
         grafica.dibujarFondoSinLogo();
@@ -124,8 +124,8 @@ public:
             linea(18, "    4. Eliminar Producto      11. Gestionar Cupones");
             linea(20, "    5. Alertas de Stock       12. Soporte al Cliente");
             linea(22, "    6. Historial de Ventas    13. Ver Resenas");
-            linea(24, "    7. Reporte de Almacen     ");
-            linea(28, "   \033[93m14. Cerrar Sesion de Administrador\033[0m");
+            linea(24, "    7. Reporte de Almacen     14. Ver Clientes registrados (Tabla Hash)");
+            linea(28, "   \033[93m15. Cerrar Sesion de Administrador\033[0m");
             linea(32, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
@@ -169,14 +169,16 @@ public:
                 inv.getSoporte()->listarTodos();
                 linea(38, "  Avanzar estado de ticket? Ingrese ID (0 para no): ");
                 int idT; irA(38, PANEL_COL + 50); cin >> idT;
+               
                 if (idT > 0) inv.getSoporte()->avanzarEstado(idT);
                 break;
             }
             case 13: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.getResenas()->listarResenas(); break;
+            case 14: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarClientesRegistrados(); break;
             }
 
-            if (op != 14) pausa();
+            if (op != 15) pausa();
 
-        } while (op != 14);
+        } while (op != 15);
     }
 };

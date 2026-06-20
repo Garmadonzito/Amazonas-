@@ -8,6 +8,7 @@
 #include "Cupon.h"
 #include "Resena.h"
 #include "Soporte.h"
+#include "TablaHash.h" // Estructura Hash para el TB2
 #include <string>
 #include <iostream>
 #include <vector>
@@ -22,6 +23,9 @@ private:
     GestorCupones* cupones;
     GestorResenas* resenas;
     GestorSoporte* soporte;
+
+    // Instancia privada de la Tabla Hash para optimizar accesos de clientes
+    TablaHash<RegistroCliente>* tablaClientesLogin;
 
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
         if (actual == nullptr) return nullptr;
@@ -62,7 +66,7 @@ private:
         return texto;
     }
 
-    void ordenarHistorialPorMonto(std::vector<Venta>& historial) { //Ordenamiento por Inserccion
+    void ordenarHistorialPorMonto(std::vector<Venta>& historial) {
         int n = (int)historial.size();
         for (int i = 1; i < n; i++) {
             Venta llave = historial[i];
@@ -107,6 +111,10 @@ public:
         cupones = new GestorCupones();
         resenas = new GestorResenas();
         soporte = new GestorSoporte();
+
+        // Se inicializa la tabla y se precargan los archivos binarios en memoria RAM
+        tablaClientesLogin = new TablaHash<RegistroCliente>(150);
+        cargarClientesEnTablaHash();
     }
 
     ~Inventario() {
@@ -115,11 +123,77 @@ public:
         delete cupones;
         delete resenas;
         delete soporte;
+        delete tablaClientesLogin;
     }
 
     GestorCupones* getCupones() { return cupones; }
     GestorResenas* getResenas() { return resenas; }
     GestorSoporte* getSoporte() { return soporte; }
+
+    // ====================================================================
+    // MÉTODOS DE INTEGRACIÓN PARA LA TABLA HASH (REQUISITOS DEL TB2)
+    // ====================================================================
+    void cargarClientesEnTablaHash() {
+        std::ifstream archivo("clientes.dat", std::ios::binary);
+        if (!archivo) return;
+
+        RegistroCliente reg;
+        while (archivo.read((char*)&reg, sizeof(RegistroCliente))) {
+            tablaClientesLogin->insertar(std::string(reg.dni), reg);
+        }
+        archivo.close();
+    }
+
+    RegistroCliente* buscarClienteHash(std::string dni) {
+        return tablaClientesLogin->buscar(dni);
+    }
+
+    void registrarNuevoCliente(std::string nombre, std::string correo, std::string dni) {
+        RegistroCliente nuevoReg;
+        strncpy_s(nuevoReg.nombre, sizeof(nuevoReg.nombre), nombre.c_str(), _TRUNCATE);
+        strncpy_s(nuevoReg.correo, sizeof(nuevoReg.correo), correo.c_str(), _TRUNCATE);
+        strncpy_s(nuevoReg.dni, sizeof(nuevoReg.dni), dni.c_str(), _TRUNCATE);
+
+        // Persistencia de los datos registrados de los clientes (Archivo Binario)
+        std::ofstream archivo("clientes.dat", std::ios::binary | std::ios::app);
+        if (archivo) {
+            archivo.write((char*)&nuevoReg, sizeof(RegistroCliente));
+            archivo.close();
+        }
+        
+        tablaClientesLogin->insertar(dni, nuevoReg);
+    }
+
+    void listarClientesRegistrados() {
+        limpiarZonaVerde();
+        imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[95m              LISTADO DE CLIENTES REGISTRADOS           \033[0m");
+        imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
+
+        int fila = 12;
+        int totalClientes = 0;
+
+        // Expresión Lambda para recorrer la estructura generica 
+        auto imprimirCliente = [&fila, &totalClientes](std::string clave, RegistroCliente& cliente) {
+            if (fila < 35) {
+                std::string item = "  [DNI: " + clave + "] " + std::string(cliente.nombre) + " | " + std::string(cliente.correo);
+                imprimirEnPanel(fila++, item);
+            }
+            totalClientes++;
+            };
+
+        tablaClientesLogin->recorrerEstructura(imprimirCliente);
+
+        fila++;
+        if (totalClientes == 0) {
+            imprimirEnPanel(fila, "  No hay clientes registrados en el sistema.", 91);
+        }
+        else {
+            imprimirEnPanel(fila++, "--------------------------------------------------------");
+            imprimirEnPanel(fila, "  TOTAL DE CLIENTES EN LA TABLA HASH: " + std::to_string(totalClientes), 92);
+        }
+    }
+    
 
     std::vector<Venta> obtenerVentasPorCliente(std::string dni) {
         std::vector<Venta> resultado;
@@ -446,7 +520,7 @@ public:
         imprimirEnPanel(fila, "  TOTAL DE TRANSACCIONES HISTORICAS: " + std::to_string(totalVentas), 92);
     }
 
-    void mostrarHistorialClientePersonalizado(std::string dni) { 
+    void mostrarHistorialClientePersonalizado(std::string dni) {
         std::vector<Venta> misVentas = obtenerVentasPorCliente(dni);
 
         if (misVentas.empty()) {

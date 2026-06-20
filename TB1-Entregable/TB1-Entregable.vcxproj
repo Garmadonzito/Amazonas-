@@ -127,6 +127,7 @@
     <ClInclude Include="Plantillas.h" />
     <ClInclude Include="Producto.h" />
     <ClInclude Include="Registro.h" />
+    <ClInclude Include="TablaHash.h" />
     <ClInclude Include="Usuario.h" />
     <ClInclude Include="Venta.h" />
     <ClInclude Include="Vendedor.h" />

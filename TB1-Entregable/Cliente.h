@@ -43,7 +43,8 @@ public:
     Cliente() { carrito = new ListaEnlazada<int>(); }
     ~Cliente() { delete carrito; }
 
-    void login() {
+    // NUEVO: Se paso 'Inventario& inv' como parametro para conectarlo a la Tabla Hash
+    void login(Inventario& inv) {
         gestorEscenas grafica;
         grafica.setEscena(gestorEscenas::CATALOGO);
 
@@ -54,37 +55,56 @@ public:
         irA(5, PANEL_COL); cout << "            \033[96m                    LOGIN DE CLIENTE                    \033[0m";
         irA(6, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
 
-        irA(14, PANEL_COL); cout << "Nombre: "; cin.ignore(); getline(cin, nombre);
-
-        auto validarCorreo = [](string email) -> bool {
-            return email.find('@') != string::npos && email.find(".com") != string::npos;
-            };
-
-        bool correoValido = false;
-        do {
-            irA(16, PANEL_COL); cout << string(50, ' ');
-            irA(16, PANEL_COL); cout << "Correo: ";
-            getline(cin, correo);
-            if (validarCorreo(correo)) correoValido = true;
-            else { irA(22, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0m"; }
-        } while (!correoValido);
-
-        if (correoValido) { irA(22, PANEL_COL); cout << string(60, ' '); }
-
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
             };
 
+        
         bool dniValido = false;
         do {
-            irA(18, PANEL_COL); cout << string(50, ' ');
-            irA(18, PANEL_COL); cout << "DNI: ";
+            irA(14, PANEL_COL); cout << string(50, ' ');
+            irA(14, PANEL_COL); cout << "DNI: ";
             getline(cin, dni);
             if (validarDNI(dni)) dniValido = true;
             else { irA(22, PANEL_COL); cout << "\033[91m>> Error: DNI invalido.\033[0m"; }
         } while (!dniValido);
+        irA(22, PANEL_COL); cout << string(60, ' '); 
 
-        irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido " << nombre << "!\033[0m";
+       
+        RegistroCliente* clienteEncontrado = inv.buscarClienteHash(dni);
+
+        if (clienteEncontrado != nullptr) {
+            // En caso de que el cliente ya existe
+            this->nombre = std::string(clienteEncontrado->nombre);
+            this->correo = std::string(clienteEncontrado->correo);
+
+            irA(16, PANEL_COL); cout << "Nombre: " << this->nombre << " (Cargado en memoria)";
+            irA(18, PANEL_COL); cout << "Correo: " << this->correo << " (Cargado en memoria)";
+            irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido nuevamente, " << this->nombre << "! (Acceso instantaneo)\033[0m";
+        }
+        else {
+            // ES UN CLIENTE NUEVO - REGISTRAMOS
+            irA(16, PANEL_COL); cout << "Nombre nuevo: "; getline(cin, nombre);
+
+            auto validarCorreo = [](string email) -> bool {
+                return email.find('@') != string::npos && email.find(".com") != string::npos;
+                };
+
+            bool correoValido = false;
+            do {
+                irA(18, PANEL_COL); cout << string(50, ' ');
+                irA(18, PANEL_COL); cout << "Correo: ";
+                getline(cin, correo);
+                if (validarCorreo(correo)) correoValido = true;
+                else { irA(22, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0m"; }
+            } while (!correoValido);
+
+            irA(22, PANEL_COL); cout << string(60, ' ');
+
+            // Nuevo cambio aqui guardamos en la Tabla y en el Archivo usando el Inventario
+            inv.registrarNuevoCliente(this->nombre, this->correo, this->dni);
+            irA(24, PANEL_COL); cout << "\033[92m>> Registro exitoso. Bienvenido " << this->nombre << "!\033[0m";
+        }
         pausa();
     }
 
@@ -128,7 +148,7 @@ public:
         return lam(total, precio);
     }
 
-    double CalcularTotalOferta(double& total) { //...
+    double CalcularTotalOferta(double& total) { 
         auto lam = [](double& t) {return t = t * 0.85;};
         return lam(total);
     }

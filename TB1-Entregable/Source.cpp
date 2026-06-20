@@ -14,8 +14,8 @@ int main() {
     int opcion;
     do {
         system("cls");
-        grafica.dibujarEscena(); 
-        consola.establecerColor(0, 2);  
+        grafica.dibujarEscena();
+        consola.establecerColor(0, 2);
 
         irA(2, 22);  cout << "  ________      ___      __  ___    ___     ____   ___       _____     ___     ____";
         irA(3, 22);  cout << " /       /|    /   |    /  |/  /   /   |   /_  /  / _ \\     / |/ /    /   |   / __/";
@@ -23,7 +23,7 @@ int main() {
         irA(5, 22);  cout << "|       | |  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ / ";
         irA(6, 22);  cout << "|_______|/  /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  ";
 
-        consola.establecerColor(0, 15);  // Cambiar a fondo blanco (15) con texto negro para el menú
+        consola.establecerColor(0, 15);  
 
         irA(20, 40); cout << "Que tipo de usuario eres?";
         irA(21, 40); cout << "1. Cliente";
@@ -43,7 +43,9 @@ int main() {
         switch (opcion) {
         case 1: {
             system("cls");
-            usuario->login();
+            // Estoy pasando miTienda por referencia para utilizar la Tabla Hash en memoria 
+            // lo dejo como anotacion si quieren referenciar tambien los arboles binarios xd
+            usuario->login(*miTienda);
             usuario->menu(*miTienda);
             break;
         }
