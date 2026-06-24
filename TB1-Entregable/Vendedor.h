@@ -125,6 +125,7 @@ public:
             linea(20, "    5. Alertas de Stock       12. Soporte al Cliente");
             linea(22, "    6. Historial de Ventas    13. Ver Resenas");
             linea(24, "    7. Reporte de Almacen     14. Ver Clientes registrados (Tabla Hash)");
+            linea(26, "   16. Buscar por ID (Arbol AVL)   17. Ordenar por Precio (Quick Sort)");
             linea(28, "   \033[93m15. Cerrar Sesion de Administrador\033[0m");
             linea(32, "    Seleccione una opcion: "); cin >> op;
 
@@ -175,6 +176,17 @@ public:
             }
             case 13: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.getResenas()->listarResenas(); break;
             case 14: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarClientesRegistrados(); break;
+            case 16: {
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                int idBuscar;
+                linea(10, "  ID de producto a buscar: "); irA(10, PANEL_COL + 27); cin >> idBuscar;
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                inv.buscarConArbolAVL(idBuscar);
+                break;
+            }
+            case 17: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarConQuickSort(); break;
             }
 
             if (op != 15) pausa();

@@ -9,6 +9,8 @@
 #include "Resena.h"
 #include "Soporte.h"
 #include "TablaHash.h" // Estructura Hash para el TB2
+#include "ArbolAVL.h"  // Arbol AVL (auto-balanceado) para el TB2
+#include "QuickSort.h" // Quick sort generico para el TB2
 #include <string>
 #include <iostream>
 #include <vector>
@@ -367,6 +369,69 @@ public:
             return a.precio > b.precio;
             };
         listaProductos->ordenar(comparador);
+    }
+
+    // Busca un producto por ID usando un Arbol AVL (auto-balanceado).
+    // Se arma el arbol con los IDs de los productos. Como el AVL se balancea
+    // solo, la busqueda es rapida y el inorden devuelve los IDs ordenados.
+    void buscarConArbolAVL(int idBuscado) {
+        ArbolAVL<int> arbol;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            arbol.insertar(actual->dato.id);
+            actual = actual->siguiente;
+        }
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m            BUSQUEDA POR ID (ARBOL AVL)                 \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        imprimirEnPanel(12, "  Altura del arbol: " + std::to_string(arbol.getAltura()) +
+            "   |   Total IDs: " + std::to_string(arbol.getCantidad()));
+
+        if (arbol.buscar(idBuscado)) {
+            Nodo<Producto>* p = buscarRecursivo(listaProductos->getCabeza(), idBuscado);
+            imprimirEnPanel(14, "  >> ID " + std::to_string(idBuscado) + " ENCONTRADO: " + p->dato.nombre, 92);
+        }
+        else {
+            imprimirEnPanel(14, "  >> ID " + std::to_string(idBuscado) + " NO existe en el inventario.", 91);
+        }
+
+        // El recorrido inorden de un AVL devuelve los IDs ordenados de menor a mayor
+        std::string ids = "  IDs ordenados (inorden): ";
+        arbol.recorrerInorden([&ids](int id) { ids += std::to_string(id) + " "; });
+        imprimirEnPanel(16, ids);
+    }
+
+    // Ordena una COPIA de los productos por precio usando Quick Sort.
+    // No modifica la lista enlazada original, solo muestra el resultado ordenado.
+    void ordenarConQuickSort() {
+        std::vector<Producto> copia;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            copia.push_back(actual->dato);
+            actual = actual->siguiente;
+        }
+
+        // Comparador lambda: ordena de menor a mayor precio
+        quickSort<Producto>(copia, [](Producto a, Producto b) { return a.precio < b.precio; });
+
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m       PRODUCTOS ORDENADOS POR PRECIO (QUICK SORT)      \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        if (copia.empty()) {
+            imprimirEnPanel(12, "  Inventario vacio.", 91);
+            return;
+        }
+
+        int fila = 12;
+        for (const Producto& p : copia) {
+            if (fila >= 38) break;
+            std::string item = "  [ID: " + std::to_string(p.id) + "] " + p.nombre +
+                " | S/. " + std::to_string((int)p.precio);
+            imprimirEnPanel(fila++, item);
+        }
     }
 
     void filtrarPorRangoPrecio(float minPrecio, float maxPrecio) {
