@@ -136,6 +136,14 @@ private:
         inordenRec(nodo->derecha, visitar);
     }
 
+    //Recorrido indorden Inverso: Derecha, Raiz, Izquierda(Sale ordenado de mayo a menor)
+    void inordenInversoRec(NodoAVL* nodo, function<void(T)> visitar) {
+        if (nodo == nullptr) return;
+        inordenInversoRec(nodo->derecha, visitar); // Primero visitamos los mayores
+        visitar(nodo->dato);                       // Procesamos el nodo actual
+        inordenInversoRec(nodo->izquierda, visitar); // Al final los menores
+    }
+
     // Liberar memoria recursivo (post-orden para borrar hijos primero)
     void liberarRec(NodoAVL* nodo) {
         if (nodo == nullptr) return;
@@ -165,6 +173,10 @@ public:
     // Recorre en orden y por cada dato llama a la funcion/lambda que le pases
     void recorrerInorden(function<void(T)> visitar) {
         inordenRec(raiz, visitar);
+    }
+
+    void recorrerInordenInverso(function<void(T)> visitar) {
+        inordenInversoRec(raiz, visitar);
     }
 
     int getCantidad() {

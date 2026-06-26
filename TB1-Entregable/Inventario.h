@@ -18,6 +18,18 @@
 #include <fstream>
 #include <ctime>
 
+struct ClienteFrecuente {
+    string dni;
+    string nombre;
+    string correo;
+    int cantidadCompras = 0;
+
+    //regla para comparar ClienteFrecuente&
+    bool operator<(const ClienteFrecuente& otro) const {
+        return this->cantidadCompras < otro.cantidadCompras;
+    }
+};
+
 class Inventario {
 private:
     ListaEnlazada<Producto>* listaProductos;
@@ -606,5 +618,93 @@ public:
             std::string linea = "Fecha: " + v.fechaTexto + " | " + v.producto + " | S/. " + std::to_string((int)v.precio);
             imprimirEnPanel(fila++, linea);
         }
+    }
+    void mostrarTopClientesAVL() {
+        //Primera Parte: INTERFAZ GRÁFICA Y CONTROL DE ERRORES
+        limpiarZonaVerde();
+
+        irA(4, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
+        irA(5, PANEL_COL); cout << "            \033[95m          TOP CLIENTES FRECUENTES (ARBOL AVL)           \033[0m";
+        irA(6, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
+
+        // Verifica si la cola de ventas está vacía o no inicializada, en tal caso arroja el cout
+        if (registroVentas == nullptr || registroVentas->estaVacia()) {
+            irA(12, PANEL_COL); cout << "  \033[91m>> No hay ventas registradas en el sistema.\033[0m";
+            return;
+        }
+
+        
+        // Segunda Parte: CONSOLIDACIÓN Y AGRUPACIÓN (acumula las compras de un usuario, verificandolo con su dni)
+        //Se utiliza vector temporal
+        vector<ClienteFrecuente> listaTemporal;
+
+        // Apuntamos al primer nodo de cola de ventas para empezar el recorrido
+        auto* actualVenta = registroVentas->getFrente();
+
+        while (actualVenta != nullptr) {
+            // Extraemos los datos del nodo de venta actual
+            string dniActual = actualVenta->dato.dniCliente;
+            string nombreActual = actualVenta->dato.cliente;
+            int cantidadActual = actualVenta->dato.cantidadRestada;
+
+            bool encontrado = false;
+
+            // Buscamos si el DNI de este cliente ya lo habíamos guardado previamente en el vector, en tal caso se le suma la cantidad de compra
+            for (size_t i = 0; i < listaTemporal.size(); i++) {
+                if (listaTemporal[i].dni == dniActual) {
+                    listaTemporal[i].cantidadCompras += cantidadActual;
+                    encontrado = true;
+                    break;
+                }
+            }
+
+            // Si el cliente NO existía en nuestro vector, es la primera vez que aparece
+            if (!encontrado) {
+                ClienteFrecuente nuevoCliente;
+                nuevoCliente.dni = dniActual;
+                nuevoCliente.nombre = nombreActual;
+                nuevoCliente.cantidadCompras = cantidadActual; // Inicializa con su primera compra
+
+                // Parte 2.1: Se utiliza el dni para buscar en la tabla hash el correo del cliente, caso contrario sale "sin correo"
+                auto* datosHash = buscarClienteHash(dniActual);
+                if (datosHash != nullptr) {//verifica que apunte diferente a nullptr
+                    nuevoCliente.correo = datosHash->correo;
+                }
+                else {
+                    nuevoCliente.correo = "Sin correo";
+                }
+
+                // Guardamos este nuevo registro limpio en nuestro vector acumulador
+                listaTemporal.push_back(nuevoCliente);
+            }
+
+            // Avanzamos al siguiente nodo de la cola de ventas hasta que apunte a null
+            actualVenta = actualVenta->siguiente;
+        }
+
+        // Parte 3: Se crea un arbol AVL y se imprime en consola
+        // Creamos árbol AVL local, guarda objetos del tipo ClienteFrecuente
+        ArbolAVL<ClienteFrecuente> arbolReporte;
+
+        // Insertamos los clientes dentro del AVL
+        for (size_t i = 0; i < listaTemporal.size(); i++) {
+            arbolReporte.insertar(listaTemporal[i]);
+            //Aquí el árbol ejecuta internamente su operador '<' usando 'cantidadCompras' para decidir si el cliente va a la izquierda o derecha.
+        }
+
+        // Nos ayuda a controlar de manera dinamica la posicion de los clientes en la consola
+        int filaDibujo = 10;
+
+        // Invocamos el recorrido Inorden Inverso para pintar de MAYOR a MENOR compras usando la Lambda
+        arbolReporte.recorrerInordenInverso([&filaDibujo](ClienteFrecuente cf) {
+            irA(filaDibujo, PANEL_COL);
+            cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0m "
+                << cf.nombre << " | Correo: " << cf.correo;
+
+            filaDibujo += 2; // Bajamos dos líneas en la consola para el próximo cliente(funcion dinamica)
+        });
+
+        irA(filaDibujo + 2, PANEL_COL);
+        cout << "\033[96m>> Reporte generado exitosamente mediante Arbol AVL balanceado.\033[0m";
     }
 };

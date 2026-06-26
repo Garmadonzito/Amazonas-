@@ -126,67 +126,74 @@ public:
             linea(22, "    6. Historial de Ventas    13. Ver Resenas");
             linea(24, "    7. Reporte de Almacen     14. Ver Clientes registrados (Tabla Hash)");
             linea(26, "   16. Buscar por ID (Arbol AVL)   17. Ordenar por Precio (Quick Sort)");
-            linea(28, "   \033[93m15. Cerrar Sesion de Administrador\033[0m");
+            linea(27, "   18. Mostrar Top Clientes (AVL)");
+            linea(29, "   \033[93m15. Cerrar Sesion de Administrador\033[0m");
             linea(32, "    Seleccione una opcion: "); cin >> op;
 
             switch (op) {
-            case 1:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarTodo(); break;
-            case 2:  grafica.dibujarFondoSinLogo(); gestionarProductos(inv); break;
-            case 3:  grafica.dibujarFondoSinLogo(); editarProducto(inv); break;
-            case 4:  grafica.dibujarFondoSinLogo(); eliminarProducto(inv); break;
-            case 5:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.mostrarStockBajo(10); break;
-            case 6:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.mostrarRegistroVentas(); break;
-            case 7:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.verStockGeneral(); break;
-            case 8:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarPorPrecio(); inv.listarTodo(); break;
-            case 9: {
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                float minP, maxP;
-                linea(12, "  Precio minimo: "); irA(12, PANEL_COL + 18); cin >> minP;
-                linea(14, "  Precio maximo: "); irA(14, PANEL_COL + 18); cin >> maxP;
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                inv.filtrarPorRangoPrecio(minP, maxP);
-                break;
-            }
-            case 10: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.calcularTotalInventario(); break;
-            case 11: {
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                inv.getCupones()->listarCupones();
-                linea(30, "  Agregar cupon? (S/N): ");
-                char r; cin >> r;
-                if (r == 'S' || r == 's') {
-                    string cod; float desc;
-                    linea(32, "  Codigo: "); irA(32, PANEL_COL + 10); cin >> cod;
-                    linea(33, "  Descuento %: "); irA(33, PANEL_COL + 14); cin >> desc;
-                    inv.getCupones()->agregarCupon(cod, desc);
+                case 1:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarTodo(); break;
+                case 2:  grafica.dibujarFondoSinLogo(); gestionarProductos(inv); break;
+                case 3:  grafica.dibujarFondoSinLogo(); editarProducto(inv); break;
+                case 4:  grafica.dibujarFondoSinLogo(); eliminarProducto(inv); break;
+                case 5:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.mostrarStockBajo(10); break;
+                case 6:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.mostrarRegistroVentas(); break;
+                case 7:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.verStockGeneral(); break;
+                case 8:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarPorPrecio(); inv.listarTodo(); break;
+                case 9: {
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    float minP, maxP;
+                    linea(12, "  Precio minimo: "); irA(12, PANEL_COL + 18); cin >> minP;
+                    linea(14, "  Precio maximo: "); irA(14, PANEL_COL + 18); cin >> maxP;
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    inv.filtrarPorRangoPrecio(minP, maxP);
+                    break;
                 }
-                break;
-            }
-            case 12: {
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                inv.getSoporte()->listarTodos();
-                linea(38, "  Avanzar estado de ticket? Ingrese ID (0 para no): ");
-                int idT; irA(38, PANEL_COL + 50); cin >> idT;
-               
-                if (idT > 0) inv.getSoporte()->avanzarEstado(idT);
-                break;
-            }
-            case 13: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.getResenas()->listarResenas(); break;
-            case 14: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarClientesRegistrados(); break;
-            case 16: {
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                int idBuscar;
-                linea(10, "  ID de producto a buscar: "); irA(10, PANEL_COL + 27); cin >> idBuscar;
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                inv.buscarConArbolAVL(idBuscar);
-                break;
-            }
-            case 17: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarConQuickSort(); break;
+                case 10: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.calcularTotalInventario(); break;
+                case 11: {
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    inv.getCupones()->listarCupones();
+                    linea(30, "  Agregar cupon? (S/N): ");
+                    char r; cin >> r;
+                    if (r == 'S' || r == 's') {
+                        string cod; float desc;
+                        linea(32, "  Codigo: "); irA(32, PANEL_COL + 10); cin >> cod;
+                        linea(33, "  Descuento %: "); irA(33, PANEL_COL + 14); cin >> desc;
+                        inv.getCupones()->agregarCupon(cod, desc);
+                    }
+                    break;
+                }
+                case 12: {
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    inv.getSoporte()->listarTodos();
+                    linea(38, "  Avanzar estado de ticket? Ingrese ID (0 para no): ");
+                    int idT; irA(38, PANEL_COL + 50); cin >> idT;
+
+                    if (idT > 0) inv.getSoporte()->avanzarEstado(idT);
+                    break;
+                }
+                case 13: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.getResenas()->listarResenas(); break;
+                case 14: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarClientesRegistrados(); break;
+                case 16: {
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    int idBuscar;
+                    linea(10, "  ID de producto a buscar: "); irA(10, PANEL_COL + 27); cin >> idBuscar;
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    inv.buscarConArbolAVL(idBuscar);
+                    break;
+                }
+                case 17: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarConQuickSort(); break;
+                case 18: {
+                    limpiarZonaVerde();
+                    grafica.dibujarFondoSinLogo();
+                    inv.mostrarTopClientesAVL(); // Llama a la función que acabamos de crear
+                    break;
+                }
             }
 
             if (op != 15) pausa();
