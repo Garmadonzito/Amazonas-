@@ -122,6 +122,7 @@
     <ClInclude Include="Inventario.h" />
     <ClInclude Include="ListaEnlazada.h" />
     <ClInclude Include="Matriz.h" />
+    <ClInclude Include="MergeSort.h" />
     <ClInclude Include="MetodoPago.h" />
     <ClInclude Include="Nodo.h" />
     <ClInclude Include="Pila.h" />

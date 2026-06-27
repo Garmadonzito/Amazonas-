@@ -1,4 +1,5 @@
 #pragma once
+
 #include "ListaEnlazada.h"
 #include "Cola.h"
 #include "Producto.h"
@@ -10,14 +11,16 @@
 #include "Soporte.h"
 #include "TablaHash.h" // Estructura Hash para el TB2
 #include "ArbolAVL.h"  // Arbol AVL (auto-balanceado) para el TB2
-#include "HeapSort.h" //HeapSort generico para el TB2
+#include "HeapSort.h"  // HeapSort generico para el TB2
 #include "QuickSort.h" // Quick sort generico para el TB2
+#include "MergeSort.h" // NUEVO: Merge Sort generico para el TB2
 #include <string>
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <fstream>
 #include <ctime>
+#include <conio.h>     // NUEVO: Permite usar _getch() para capturar la tecla 'C'
 
 struct ClienteFrecuente {
     string dni;
@@ -40,9 +43,6 @@ struct ProductoRanking {
     bool operator>(const ProductoRanking& otro) const {
         return this->promedio > otro.promedio;
     }
-    //bool operator<(const ProductoRanking& otro) const {
-    //    return this->promedio < otro.promedio;
-    //}
 };
 
 class Inventario {
@@ -189,40 +189,81 @@ public:
             archivo.write((char*)&nuevoReg, sizeof(RegistroCliente));
             archivo.close();
         }
-        
+
         tablaClientesLogin->insertar(dni, nuevoReg);
     }
 
+    // NUEVA FUNCIONALIDAD: LISTAR Y ORDENAR CON MERGE SORT AL PRESIONAR 'C'
     void listarClientesRegistrados() {
         limpiarZonaVerde();
         imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
         imprimirEnPanel(5, "            \033[95m              LISTADO DE CLIENTES REGISTRADOS           \033[0m");
         imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
 
-        int fila = 12;
-        int totalClientes = 0;
-
-        // Expresión Lambda para recorrer la estructura generica 
-        auto imprimirCliente = [&fila, &totalClientes](std::string clave, RegistroCliente& cliente) {
-            if (fila < 35) {
-                std::string item = "  [DNI: " + clave + "] " + std::string(cliente.nombre) + " | " + std::string(cliente.correo);
-                imprimirEnPanel(fila++, item);
-            }
-            totalClientes++;
+        // 1. Extraemos los clientes de la Tabla Hash a un vector
+        std::vector<RegistroCliente> clientesTemp;
+        auto recolector = [&clientesTemp](std::string clave, RegistroCliente& cliente) {
+            clientesTemp.push_back(cliente);
             };
+        tablaClientesLogin->recorrerEstructura(recolector);
 
-        tablaClientesLogin->recorrerEstructura(imprimirCliente);
+        int fila = 12;
+        if (clientesTemp.empty()) {
+            imprimirEnPanel(fila, "  No hay clientes registrados en el sistema.", 91);
+            return;
+        }
+
+        // 2. Imprimimos el listado inicial (Orden caotico de la Tabla Hash)
+        for (const auto& c : clientesTemp) {
+            if (fila >= 35) break;
+            std::string item = "  [DNI: " + std::string(c.dni) + "] " + std::string(c.nombre) + " | " + std::string(c.correo);
+            imprimirEnPanel(fila++, item);
+        }
 
         fila++;
-        if (totalClientes == 0) {
-            imprimirEnPanel(fila, "  No hay clientes registrados en el sistema.", 91);
-        }
-        else {
-            imprimirEnPanel(fila++, "--------------------------------------------------------");
-            imprimirEnPanel(fila, "  TOTAL DE CLIENTES EN LA TABLA HASH: " + std::to_string(totalClientes), 92);
+        imprimirEnPanel(fila++, "--------------------------------------------------------");
+        imprimirEnPanel(fila++, "  TOTAL DE CLIENTES EN LA TABLA HASH: " + std::to_string(clientesTemp.size()), 92);
+
+        // 3. Menú interactivo flotante (Usando irA y cout)
+        irA(fila + 1, PANEL_COL); cout << "\033[0m  \033[93m>> Presione 'C' para ordenar alfabeticamente (Merge Sort)\033[0m";
+        irA(fila + 2, PANEL_COL); cout << "\033[0m  \033[93m>> Presione cualquier otra tecla para volver al menu...\033[0m";
+
+        // 4. Logica de escucha de teclado
+        char tecla = _getch();
+        if (tecla == 'c' || tecla == 'C') {
+
+            // Funcion Lambda para ensenar al Merge Sort a ordenar de la A a la Z
+            auto comparadorAlfabetico = [](RegistroCliente a, RegistroCliente b) -> bool {
+                return std::string(a.nombre) < std::string(b.nombre);
+                };
+
+            // Ejecutamos el algoritmo O(N log N)
+            mergeSort<RegistroCliente>(clientesTemp, comparadorAlfabetico);
+
+            // Redibujamos la pantalla con los nuevos resultados
+            limpiarZonaVerde();
+            imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
+            imprimirEnPanel(5, "            \033[95m       DIRECTORIO DE CLIENTES (A-Z) - MERGE SORT        \033[0m");
+            imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
+
+            int filaNueva = 12;
+            for (const auto& c : clientesTemp) {
+                if (filaNueva >= 38) break; // Limite de altura de consola
+                std::string item = "  [DNI: " + std::string(c.dni) + "] " + std::string(c.nombre);
+                while (item.length() < 45) item += " "; // Espaciado perfecto
+                item += "| " + std::string(c.correo);
+                imprimirEnPanel(filaNueva++, item);
+            }
+            filaNueva++;
+            imprimirEnPanel(filaNueva++, "--------------------------------------------------------");
+            imprimirEnPanel(filaNueva, "  TOTAL: " + std::to_string(clientesTemp.size()) + " clientes ordenados exitosamente.", 92);
+
+            // Pausa obligatoria para que el administrador pueda ver los datos ordenados
+            irA(filaNueva + 2, PANEL_COL); cout << "\033[93m>> Presione cualquier tecla para continuar...\033[0m";
+            _getch();
         }
     }
-    
+
 
     std::vector<Venta> obtenerVentasPorCliente(std::string dni) {
         std::vector<Venta> resultado;
@@ -399,8 +440,6 @@ public:
     }
 
     // Busca un producto por ID usando un Arbol AVL (auto-balanceado).
-    // Se arma el arbol con los IDs de los productos. Como el AVL se balancea
-    // solo, la busqueda es rapida y el inorden devuelve los IDs ordenados.
     void buscarConArbolAVL(int idBuscado) {
         ArbolAVL<int> arbol;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -431,7 +470,6 @@ public:
     }
 
     // Ordena una COPIA de los productos por precio usando Quick Sort.
-    // No modifica la lista enlazada original, solo muestra el resultado ordenado.
     void ordenarConQuickSort() {
         std::vector<Producto> copia;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -635,36 +673,27 @@ public:
         }
     }
     void mostrarTopClientesAVL() {
-        //Primera Parte: INTERFAZ GRÁFICA Y CONTROL DE ERRORES
         limpiarZonaVerde();
 
         irA(4, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
         irA(5, PANEL_COL); cout << "            \033[95m          TOP CLIENTES FRECUENTES (ARBOL AVL)           \033[0m";
         irA(6, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
 
-        // Verifica si la cola de ventas está vacía o no inicializada, en tal caso arroja el cout
         if (registroVentas == nullptr || registroVentas->estaVacia()) {
             irA(12, PANEL_COL); cout << "  \033[91m>> No hay ventas registradas en el sistema.\033[0m";
             return;
         }
 
-        
-        // Segunda Parte: CONSOLIDACIÓN Y AGRUPACIÓN (acumula las compras de un usuario, verificandolo con su dni)
-        //Se utiliza vector temporal
         vector<ClienteFrecuente> listaTemporal;
-
-        // Apuntamos al primer nodo de cola de ventas para empezar el recorrido
         auto* actualVenta = registroVentas->getFrente();
 
         while (actualVenta != nullptr) {
-            // Extraemos los datos del nodo de venta actual
             string dniActual = actualVenta->dato.dniCliente;
             string nombreActual = actualVenta->dato.cliente;
             int cantidadActual = actualVenta->dato.cantidadRestada;
 
             bool encontrado = false;
 
-            // Buscamos si el DNI de este cliente ya lo habíamos guardado previamente en el vector, en tal caso se le suma la cantidad de compra
             for (size_t i = 0; i < listaTemporal.size(); i++) {
                 if (listaTemporal[i].dni == dniActual) {
                     listaTemporal[i].cantidadCompras += cantidadActual;
@@ -673,77 +702,62 @@ public:
                 }
             }
 
-            // Si el cliente NO existía en nuestro vector, es la primera vez que aparece
             if (!encontrado) {
                 ClienteFrecuente nuevoCliente;
                 nuevoCliente.dni = dniActual;
                 nuevoCliente.nombre = nombreActual;
-                nuevoCliente.cantidadCompras = cantidadActual; // Inicializa con su primera compra
+                nuevoCliente.cantidadCompras = cantidadActual;
 
-                // Parte 2.1: Se utiliza el dni para buscar en la tabla hash el correo del cliente, caso contrario sale "sin correo"
                 auto* datosHash = buscarClienteHash(dniActual);
-                if (datosHash != nullptr) {//verifica que apunte diferente a nullptr
+                if (datosHash != nullptr) {
                     nuevoCliente.correo = datosHash->correo;
                 }
                 else {
                     nuevoCliente.correo = "Sin correo";
                 }
 
-                // Guardamos este nuevo registro limpio en nuestro vector acumulador
                 listaTemporal.push_back(nuevoCliente);
             }
-
-            // Avanzamos al siguiente nodo de la cola de ventas hasta que apunte a null
             actualVenta = actualVenta->siguiente;
         }
 
-        // Parte 3: Se crea un arbol AVL y se imprime en consola
-        // Creamos árbol AVL local, guarda objetos del tipo ClienteFrecuente
         ArbolAVL<ClienteFrecuente> arbolReporte;
 
-        // Insertamos los clientes dentro del AVL
         for (size_t i = 0; i < listaTemporal.size(); i++) {
             arbolReporte.insertar(listaTemporal[i]);
-            //Aquí el árbol ejecuta internamente su operador '<' usando 'cantidadCompras' para decidir si el cliente va a la izquierda o derecha.
         }
 
-        // Nos ayuda a controlar de manera dinamica la posicion de los clientes en la consola
         int filaDibujo = 10;
 
-        // Invocamos el recorrido Inorden Inverso para pintar de MAYOR a MENOR compras usando la Lambda
         arbolReporte.recorrerInordenInverso([&filaDibujo](ClienteFrecuente cf) {
             irA(filaDibujo, PANEL_COL);
             cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0m "
                 << cf.nombre << " | Correo: " << cf.correo;
 
-            filaDibujo += 2; // Bajamos dos líneas en la consola para el próximo cliente(funcion dinamica)
-        });
+            filaDibujo += 2;
+            });
 
         irA(filaDibujo + 2, PANEL_COL);
         cout << "\033[96m>> Reporte generado exitosamente mediante Arbol AVL balanceado.\033[0m";
     }
 
     void mostrarInvResenasHeap() {
-        // Para empezar de verifica que hayan productos
         if (listaProductos->getCabeza() == nullptr) {
             imprimirEnPanel(12, "Inventario vacio. No hay productos para calificar.");
             return;
         }
 
-        // Se empieza el diseño del panel
         limpiarZonaVerde();
         imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
         imprimirEnPanel(5, "            \033[96m         TOP PRODUCTOS POR REPUTACION (HEAP SORT)       \033[0m");
         imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
 
-        // Empezamos a transferir los datos de una lista enlazada a un vector auxiliar
         vector<ProductoRanking> copiaRanking;
         Nodo<Producto>* actual = listaProductos->getCabeza();
 
         while (actual != nullptr) {
             ProductoRanking pr;
             pr.prod = actual->dato;
-            // Extraemos el promedio real de la lista de reseñas usando el ID del producto
             pr.promedio = resenas->obtenerPromedioProducto(actual->dato.id);
 
             copiaRanking.push_back(pr);
@@ -752,16 +766,14 @@ public:
 
         int n = (int)copiaRanking.size();
 
-        // Llamamos al HeapSort
         heapsort(copiaRanking.data(), (int)copiaRanking.size());
-       
-        // Se empieza a imprimir los datos
+
         int fila = 12;
         for (int i = n - 1; i >= 0; i--) {
-            if (fila >= 38) break; 
+            if (fila >= 38) break;
 
             float prom = copiaRanking[i].promedio;
-          
+
             string estrellas = (prom > 0) ? " [" + std::to_string(prom).substr(0, 3) + " \033[93m*\033[0m]" : " [Sin resenas]";
 
             string item = "  [ID: " + std::to_string(copiaRanking[i].prod.id) + "] " +
