@@ -10,10 +10,11 @@ int main() {
     Vendedor* administrador = new Vendedor();
     Cliente* usuario = new Cliente();
     gestorEscenas grafica;
-
+    
     int opcion;
     do {
         system("cls");
+        grafica.setEscena(gestorEscenas::PAGINA_PRINCIPAL);
         grafica.dibujarEscena();
         consola.establecerColor(0, 2);
 

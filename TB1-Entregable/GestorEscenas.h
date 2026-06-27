@@ -4,7 +4,7 @@
 
 class gestorEscenas {
 public:
-	enum Escena { LOGIN, MENU_PRINCIPAL, CATALOGO, CARRITO, PAGO };
+	enum Escena { PAGINA_PRINCIPAL,LOGIN, MENU_PRINCIPAL, CATALOGO, CARRITO, PAGO };
 
 	struct Elemento {
 		Matriz* obj;
@@ -46,7 +46,8 @@ void gestorEscenas::configObjEscena() {
 
 	switch (estado)
 	{
-	case gestorEscenas::LOGIN: {
+	case gestorEscenas::PAGINA_PRINCIPAL: {
+
 		Matriz* nubebig = new Matriz();
 		nubebig->inicializar(nubeBig);
 		listaObjetos.push_back({ nubebig ,35,15 });//Objeto, Ubicacion en X, Ubicacion en Y
@@ -60,14 +61,28 @@ void gestorEscenas::configObjEscena() {
 		listaObjetos.push_back({ Anaconda,47,6 });
 		break;
 	}
-	case gestorEscenas::MENU_PRINCIPAL:
+	case gestorEscenas::LOGIN: {
+		Matriz* nubebig = new Matriz();
+		nubebig->inicializar(nubeBig);
+		listaObjetos.push_back({ nubebig ,35,15 });//Objeto, Ubicacion en X, Ubicacion en Y
 		break;
-	case gestorEscenas::CATALOGO:
+	}
+	case gestorEscenas::MENU_PRINCIPAL: {
+		Matriz* pizarrabig = new Matriz();
+		pizarrabig->inicializar(pizarraBig);
+		listaObjetos.push_back({ pizarrabig,20,10 });
 		break;
-	case gestorEscenas::CARRITO:
+	}
+
+	case gestorEscenas::CATALOGO: {
 		break;
-	case gestorEscenas::PAGO:
+	}
+	case gestorEscenas::CARRITO: {
 		break;
+	}
+	case gestorEscenas::PAGO: {
+		break;
+	}
 	default:
 		break;
 	}

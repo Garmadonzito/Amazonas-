@@ -6,12 +6,17 @@
 
 using namespace std;
 
-
+//TITULOS
 const int PANEL_FILA = 8;
-const int PANEL_COL = 25;   
+const int PANEL_COL = 35;   
 const int PANEL_ANCHO = 80;
-const int PANEL_ALTO = 35;   
+const int PANEL_ALTO = 35;
 
+//Cuadro de texto
+const int TEXT_FILA = 20;
+const int TEXT_COL = 40;
+const int TEXT_ANCHO = 80;
+const int TEXT_ALTO = 35;
 inline void limpiarPantalla() {
     system("cls||clear");
 }

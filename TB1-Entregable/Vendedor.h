@@ -16,28 +16,32 @@ private:
         irA(fila, PANEL_COL); cout << "\033[0m" << texto;
     }
 
+    void lineatxt(int fila, const string& texto) {
+        irA(fila, TEXT_COL); cout << "\033[0m" << texto;
+    }
+
 public:
     bool login() {
         gestorEscenas grafica;
         grafica.setEscena(gestorEscenas::LOGIN);
 
         limpiarPantalla();
-        grafica.dibujarFondoSinLogo();
+        grafica.dibujarEscena();
 
-        irA(4, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
-        irA(5, PANEL_COL); cout << "            \033[96m                ACCESO DE ADMINISTRADOR                 \033[0m";
-        irA(6, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
+        irA(4, PANEL_COL); cout << "\033[96m========================================================\033[0m";
+        irA(5, PANEL_COL); cout << "\033[96m                ACCESO DE ADMINISTRADOR                 \033[0m";
+        irA(6, PANEL_COL); cout << "\033[96m========================================================\033[0m";
 
-        irA(14, PANEL_COL); cout << "Ingrese codigo de seguridad: ";
+        irA(TEXT_FILA, TEXT_COL); cout << "Ingrese codigo de seguridad: ";
         string pass; cin >> pass;
 
         if (pass == CODIGO_ACCESO) {
-            irA(17, PANEL_COL); cout << "\033[92m>> Acceso concedido. Cargando sistema...\033[0m";
+            irA(22, TEXT_COL); cout << "\033[92m>> Acceso concedido. Cargando sistema...\033[0m";
             pausa();
             return true;
         }
 
-        irA(17, PANEL_COL); cout << "\033[91m>> Codigo incorrecto. Acceso denegado.\033[0m";
+        irA(22, TEXT_COL); cout << "\033[91m>> Codigo incorrecto. Acceso denegado.\033[0m";
         pausa();
         return false;
     }
@@ -48,9 +52,9 @@ public:
         string nombre, categoria;
         float precio;
 
-        linea(4, "            \033[96m========================================================\033[0m");
-        linea(5, "            \033[96m           --- REGISTRO DE NUEVO PRODUCTO ---           \033[0m");
-        linea(6, "            \033[96m========================================================\033[0m");
+        linea(4, "\033[96m========================================================\033[0m");
+        linea(5, "\033[96m           --- REGISTRO DE NUEVO PRODUCTO ---           \033[0m");
+        linea(6, "\033[96m========================================================\033[0m");
 
         irA(12, PANEL_COL); cout << "ID: "; cin >> id;
         if (inv.existeProducto(id)) {
@@ -114,21 +118,21 @@ public:
             limpiarZonaVerde();
             grafica.dibujarFondoSinLogo();
 
-            linea(4, "            \033[96m========================================================\033[0m");
-            linea(5, "            \033[96m               PANEL DE CONTROL - LOGISTICA             \033[0m");
-            linea(6, "            \033[96m========================================================\033[0m");
+            linea(4, "\033[96m========================================================\033[0m");
+            linea(5, "\033[96m              PANEL DE CONTROL - LOGISTICA             \033[0m");
+            linea(6, "\033[96m========================================================\033[0m");
 
-            linea(12, "    1. Listar Catalogo         8. Ordenar por Precio");
-            linea(14, "    2. Registrar Producto      9. Filtrar por Rango");
-            linea(16, "    3. Editar Precio/Stock    10. Valor Total Inventario");
-            linea(18, "    4. Eliminar Producto      11. Gestionar Cupones");
-            linea(20, "    5. Alertas de Stock       12. Soporte al Cliente");
-            linea(22, "    6. Historial de Ventas    13. Ver Resenas");
-            linea(24, "    7. Reporte de Almacen     14. Ver Clientes registrados (Tabla Hash)");
-            linea(26, "   16. Buscar por ID (Arbol AVL)   17. Ordenar por Precio (Quick Sort)");
-            linea(27, "   18. Mostrar Top Clientes (AVL)");
-            linea(29, "   \033[93m15. Cerrar Sesion de Administrador\033[0m");
-            linea(32, "    Seleccione una opcion: "); cin >> op;
+            lineatxt(12, "1. Listar Catalogo         8. Ordenar por Precio");
+            lineatxt(14, "2. Registrar Producto      9. Filtrar por Rango");
+            lineatxt(16, "3. Editar Precio/Stock    10. Valor Total Inventario");
+            lineatxt(18, "4. Eliminar Producto      11. Gestionar Cupones");
+            lineatxt(20, "5. Alertas de Stock       12. Soporte al Cliente");
+            lineatxt(22, "6. Historial de Ventas    13. Ver Resenas");
+            lineatxt(24, "7. Reporte de Almacen     14. Ver Clientes registrados (Tabla Hash)");
+            lineatxt(26, "16. Buscar por ID (Arbol AVL)   17. Ordenar por Precio (Quick Sort)");
+            lineatxt(28, "18. Mostrar Top Clientes (AVL)");
+            lineatxt(30, "\033[93m15. Cerrar Sesion de Administrador\033[0m");
+            lineatxt(33, "Seleccione una opcion: "); cin >> op;
 
             switch (op) {
                 case 1:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarTodo(); break;
