@@ -289,10 +289,11 @@ public:
             linea(12, "    1. Ver Catalogo Completo (Agregar por ID)");
             linea(14, "    2. Buscar producto por nombre especifico");
             linea(16, "    3. Ver Catalogo ordenado por Precio");
-            linea(18, "    4. Registrar Direccion de Envio");
-            linea(20, "    5. Dejar Resena de un Producto");
-            linea(22, "    6. Soporte - Reportar problema con pedido");
-            linea(26, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
+            linea(18, "    4. Ver Catalogo ordenado por Resenas");
+            linea(20, "    5. Registrar Direccion de Envio");
+            linea(22, "    6. Dejar Resena de un Producto");
+            linea(24, "    7. Soporte - Reportar problema con pedido");
+            linea(28, "    \033[93m[ESC] Volver al Menu Principal\033[0m");
 
             int c = _getch();
             if (c == 27) break;
@@ -347,12 +348,18 @@ public:
             else if (c == '4') {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
+                inv.mostrarInvResenasHeap();
+                bucleAgregarRapido(inv, 38);
+            }
+            else if (c == '5') {
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
                 direccionEnvio.registrar(12);
                 if (direccionEnvio.esValida())
                     linea(24, "  \033[92m>> Direccion registrada correctamente.\033[0m");
                 pausaRetroceder(26);
             }
-            else if (c == '5') {
+            else if (c == '6') {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
                 linea(12, "  ID del producto a resenar: ");
@@ -378,7 +385,7 @@ public:
                 }
                 pausaRetroceder(22);
             }
-            else if (c == '6') {
+            else if (c == '7') {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
 

@@ -10,6 +10,7 @@
 #include "Soporte.h"
 #include "TablaHash.h" // Estructura Hash para el TB2
 #include "ArbolAVL.h"  // Arbol AVL (auto-balanceado) para el TB2
+#include "HeapSort.h" //HeapSort generico para el TB2
 #include "QuickSort.h" // Quick sort generico para el TB2
 #include <string>
 #include <iostream>
@@ -28,6 +29,20 @@ struct ClienteFrecuente {
     bool operator<(const ClienteFrecuente& otro) const {
         return this->cantidadCompras < otro.cantidadCompras;
     }
+};
+
+struct ProductoRanking {
+    Producto prod;
+    float promedio = 0.0f;
+
+    //Se realiza este operador de sobrecargar porque en el heap sort no hay un puntero funcion que le ayude a saber como comparar
+    //un objeto de tipo ProductoRanking, por eso la misma structura o clase debe enseñar al codigo como compararse a si misma
+    bool operator>(const ProductoRanking& otro) const {
+        return this->promedio > otro.promedio;
+    }
+    //bool operator<(const ProductoRanking& otro) const {
+    //    return this->promedio < otro.promedio;
+    //}
 };
 
 class Inventario {
@@ -706,5 +721,57 @@ public:
 
         irA(filaDibujo + 2, PANEL_COL);
         cout << "\033[96m>> Reporte generado exitosamente mediante Arbol AVL balanceado.\033[0m";
+    }
+
+    void mostrarInvResenasHeap() {
+        // Para empezar de verifica que hayan productos
+        if (listaProductos->getCabeza() == nullptr) {
+            imprimirEnPanel(12, "Inventario vacio. No hay productos para calificar.");
+            return;
+        }
+
+        // Se empieza el diseño del panel
+        limpiarZonaVerde();
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(5, "            \033[96m         TOP PRODUCTOS POR REPUTACION (HEAP SORT)       \033[0m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+
+        // Empezamos a transferir los datos de una lista enlazada a un vector auxiliar
+        vector<ProductoRanking> copiaRanking;
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+
+        while (actual != nullptr) {
+            ProductoRanking pr;
+            pr.prod = actual->dato;
+            // Extraemos el promedio real de la lista de reseñas usando el ID del producto
+            pr.promedio = resenas->obtenerPromedioProducto(actual->dato.id);
+
+            copiaRanking.push_back(pr);
+            actual = actual->siguiente;
+        }
+
+        int n = (int)copiaRanking.size();
+
+        // Llamamos al HeapSort
+        heapsort(copiaRanking.data(), (int)copiaRanking.size());
+       
+        // Se empieza a imprimir los datos
+        int fila = 12;
+        for (int i = n - 1; i >= 0; i--) {
+            if (fila >= 38) break; 
+
+            float prom = copiaRanking[i].promedio;
+          
+            string estrellas = (prom > 0) ? " [" + std::to_string(prom).substr(0, 3) + " \033[93m*\033[0m]" : " [Sin resenas]";
+
+            string item = "  [ID: " + std::to_string(copiaRanking[i].prod.id) + "] " +
+                copiaRanking[i].prod.nombre + estrellas +
+                " | S/. " + std::to_string((int)copiaRanking[i].prod.precio);
+
+            imprimirEnPanel(fila++, item);
+        }
+
+        fila++;
+        imprimirEnPanel(fila, "\033[92m>> Catalogo de reputacion ordenado mediante Max-Heap de manera exitosa.\033[0m");
     }
 };

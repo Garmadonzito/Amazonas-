@@ -118,6 +118,7 @@
     <ClInclude Include="Cola.h" />
     <ClInclude Include="Consola.h" />
     <ClInclude Include="GestorEscenas.h" />
+    <ClInclude Include="HeapSort.h" />
     <ClInclude Include="Inventario.h" />
     <ClInclude Include="ListaEnlazada.h" />
     <ClInclude Include="Matriz.h" />
