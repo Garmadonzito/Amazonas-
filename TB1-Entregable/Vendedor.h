@@ -2,9 +2,7 @@
 #include "Usuario.h"
 #include "Inventario.h"
 #include "GestorEscenas.h"
-#include <iostream>
-#include <string>
-#include <conio.h>
+#include "GeneradorDatos.h" // Generador de Data Aleatoria Masiva
 
 using namespace std;
 
@@ -103,7 +101,7 @@ public:
 
     void menu(Inventario& inv) {
         int op;
-        gestorEscenas grafica;
+        gestorEscenas grafica; // ¡Correccion E0020 aplicada!
         grafica.setEscena(gestorEscenas::CATALOGO);
 
         do {
@@ -122,7 +120,7 @@ public:
             irA(22, TEXT_COL); cout << "\033[0m    6. Historial de Ventas    13. Ver Resenas";
             irA(24, TEXT_COL); cout << "\033[0m    7. Reporte de Almacen     14. Ver Clientes (Tabla Hash)";
             irA(26, TEXT_COL); cout << "\033[0m   16. Buscar por ID (Arbol)  17. Ordenar por Precio (Quick Sort)";
-            irA(28, TEXT_COL); cout << "\033[0m   18. Mostrar Top Clientes (AVL)";
+            irA(28, TEXT_COL); cout << "\033[0m   18. Mostrar Top Clientes   19. Generar Dataset (100 Datos)";
             irA(30, TEXT_COL); cout << "\033[0m   \033[93m15. Cerrar Sesion de Administrador\033[0m";
             irA(33, TEXT_COL); cout << "\033[0m    Seleccione una opcion: "; cin >> op;
 
@@ -190,9 +188,26 @@ public:
                 inv.mostrarTopClientesAVL();
                 break;
             }
+            case 19: { // OPCION UNIFICADA PARA EL DATASET
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                int cant = 100;
+
+                irA(12, PANEL_COL); cout << "\033[0m  \033[93m>> Generando " << cant << " clientes aleatorios...\033[0m";
+                GeneradorDatos::generarClientesAleatorios(cant, inv);
+
+                irA(14, PANEL_COL); cout << "\033[0m  \033[93m>> Simulando " << cant << " ventas masivas...\033[0m";
+                GeneradorDatos::generarVentasAleatorias(cant, inv);
+
+                irA(16, PANEL_COL); cout << "\033[0m  \033[92m>> Dataset creado e insertado en O(1).\033[0m";
+                irA(18, PANEL_COL); cout << "\033[0m  \033[96m>> Tip: Usa la opcion 14 o 18 para probar la velocidad.\033[0m";
+                break;
+            }
             }
 
-            if (op != 15) pausa();
+            if (op != 15) {
+                pausa();
+            }
 
         } while (op != 15);
     }

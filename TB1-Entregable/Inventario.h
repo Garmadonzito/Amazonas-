@@ -9,18 +9,18 @@
 #include "Cupon.h"
 #include "Resena.h"
 #include "Soporte.h"
-#include "TablaHash.h" // Estructura Hash para el TB2
-#include "ArbolAVL.h"  // Arbol AVL (auto-balanceado) para el TB2
-#include "HeapSort.h"  // HeapSort generico para el TB2
-#include "QuickSort.h" // Quick sort generico para el TB2
-#include "MergeSort.h" // NUEVO: Merge Sort generico para el TB2
+#include "TablaHash.h" 
+#include "ArbolAVL.h"  
+#include "HeapSort.h"  
+#include "QuickSort.h" 
+#include "MergeSort.h" 
 #include <string>
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <fstream>
 #include <ctime>
-#include <conio.h>     // NUEVO: Permite usar _getch() para capturar la tecla 'C'
+#include <conio.h>     
 
 struct ClienteFrecuente {
     string dni;
@@ -28,7 +28,6 @@ struct ClienteFrecuente {
     string correo;
     int cantidadCompras = 0;
 
-    //regla para comparar ClienteFrecuente&
     bool operator<(const ClienteFrecuente& otro) const {
         return this->cantidadCompras < otro.cantidadCompras;
     }
@@ -38,8 +37,6 @@ struct ProductoRanking {
     Producto prod;
     float promedio = 0.0f;
 
-    //Se realiza este operador de sobrecargar porque en el heap sort no hay un puntero funcion que le ayude a saber como comparar
-    //un objeto de tipo ProductoRanking, por eso la misma structura o clase debe enseñar al codigo como compararse a si misma
     bool operator>(const ProductoRanking& otro) const {
         return this->promedio > otro.promedio;
     }
@@ -53,7 +50,6 @@ private:
     GestorResenas* resenas;
     GestorSoporte* soporte;
 
-    // Instancia privada de la Tabla Hash para optimizar accesos de clientes
     TablaHash<RegistroCliente>* tablaClientesLogin;
 
     Nodo<Producto>* buscarRecursivo(Nodo<Producto>* actual, int idBuscado) {
@@ -72,16 +68,12 @@ private:
         return actual->dato.stock + contarStockTotalRecursivo(actual->siguiente);
     }
 
+    // MEGA OPTIMIZACIÓN: Busca nombres al instante en RAM, evita leer el disco duro.
     std::string buscarNombreCliente(std::string dniBuscado) {
-        std::ifstream archivo("clientes.dat", std::ios::binary);
-        RegistroCliente reg;
-        while (archivo.read((char*)&reg, sizeof(RegistroCliente))) {
-            if (dniBuscado == reg.dni) {
-                archivo.close();
-                return reg.nombre;
-            }
+        RegistroCliente* clienteHash = buscarClienteHash(dniBuscado);
+        if (clienteHash != nullptr) {
+            return std::string(clienteHash->nombre);
         }
-        archivo.close();
         return "Cliente no encontrado";
     }
 
@@ -141,7 +133,6 @@ public:
         resenas = new GestorResenas();
         soporte = new GestorSoporte();
 
-        // Se inicializa la tabla y se precargan los archivos binarios en memoria RAM
         tablaClientesLogin = new TablaHash<RegistroCliente>(150);
         cargarClientesEnTablaHash();
     }
@@ -159,9 +150,16 @@ public:
     GestorResenas* getResenas() { return resenas; }
     GestorSoporte* getSoporte() { return soporte; }
 
-    // ====================================================================
-    // MÉTODOS DE INTEGRACIÓN PARA LA TABLA HASH (REQUISITOS DEL TB2)
-    // ====================================================================
+    // METODO NUEVO PARA EL GENERADOR: Retorna el pool real de clientes de la Hash
+    std::vector<RegistroCliente> obtenerListaClientes() {
+        std::vector<RegistroCliente> lista;
+        auto recolector = [&lista](std::string clave, RegistroCliente& cliente) {
+            lista.push_back(cliente);
+            };
+        tablaClientesLogin->recorrerEstructura(recolector);
+        return lista;
+    }
+
     void cargarClientesEnTablaHash() {
         std::ifstream archivo("clientes.dat", std::ios::binary);
         if (!archivo) return;
@@ -183,7 +181,6 @@ public:
         strncpy_s(nuevoReg.correo, sizeof(nuevoReg.correo), correo.c_str(), _TRUNCATE);
         strncpy_s(nuevoReg.dni, sizeof(nuevoReg.dni), dni.c_str(), _TRUNCATE);
 
-        // Persistencia de los datos registrados de los clientes (Archivo Binario)
         std::ofstream archivo("clientes.dat", std::ios::binary | std::ios::app);
         if (archivo) {
             archivo.write((char*)&nuevoReg, sizeof(RegistroCliente));
@@ -193,14 +190,36 @@ public:
         tablaClientesLogin->insertar(dni, nuevoReg);
     }
 
-    // NUEVA FUNCIONALIDAD: LISTAR Y ORDENAR CON MERGE SORT AL PRESIONAR 'C'
+    void registrarClientesMasivo(const std::vector<RegistroCliente>& lote) {
+        std::ofstream archivo("clientes.dat", std::ios::binary | std::ios::app);
+        if (archivo) {
+            for (const auto& reg : lote) {
+                archivo.write((char*)&reg, sizeof(RegistroCliente));
+                tablaClientesLogin->insertar(std::string(reg.dni), reg);
+            }
+            archivo.close();
+        }
+    }
+
+    void registrarVentasMasivas(const std::vector<RegistroVenta>& loteReg, const std::vector<Venta>& loteMemoria) {
+        std::ofstream archivo("ventas.dat", std::ios::binary | std::ios::app);
+        if (archivo) {
+            for (const auto& reg : loteReg) {
+                archivo.write((char*)&reg, sizeof(RegistroVenta));
+            }
+            archivo.close();
+        }
+        for (const auto& venta : loteMemoria) {
+            registroVentas->encolar(venta);
+        }
+    }
+
     void listarClientesRegistrados() {
         limpiarZonaVerde();
         imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
         imprimirEnPanel(5, "            \033[95m              LISTADO DE CLIENTES REGISTRADOS           \033[0m");
         imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
 
-        // 1. Extraemos los clientes de la Tabla Hash a un vector
         std::vector<RegistroCliente> clientesTemp;
         auto recolector = [&clientesTemp](std::string clave, RegistroCliente& cliente) {
             clientesTemp.push_back(cliente);
@@ -213,7 +232,6 @@ public:
             return;
         }
 
-        // 2. Imprimimos el listado inicial (Orden caotico de la Tabla Hash)
         for (const auto& c : clientesTemp) {
             if (fila >= 35) break;
             std::string item = "  [DNI: " + std::string(c.dni) + "] " + std::string(c.nombre) + " | " + std::string(c.correo);
@@ -224,23 +242,17 @@ public:
         imprimirEnPanel(fila++, "--------------------------------------------------------");
         imprimirEnPanel(fila++, "  TOTAL DE CLIENTES EN LA TABLA HASH: " + std::to_string(clientesTemp.size()), 92);
 
-        // 3. Menú interactivo flotante (Usando irA y cout)
         irA(fila + 1, PANEL_COL); cout << "\033[0m  \033[93m>> Presione 'C' para ordenar alfabeticamente (Merge Sort)\033[0m";
         irA(fila + 2, PANEL_COL); cout << "\033[0m  \033[93m>> Presione cualquier otra tecla para volver al menu...\033[0m";
 
-        // 4. Logica de escucha de teclado
         char tecla = _getch();
         if (tecla == 'c' || tecla == 'C') {
-
-            // Funcion Lambda para ensenar al Merge Sort a ordenar de la A a la Z
             auto comparadorAlfabetico = [](RegistroCliente a, RegistroCliente b) -> bool {
                 return std::string(a.nombre) < std::string(b.nombre);
                 };
 
-            // Ejecutamos el algoritmo O(N log N)
             mergeSort<RegistroCliente>(clientesTemp, comparadorAlfabetico);
 
-            // Redibujamos la pantalla con los nuevos resultados
             limpiarZonaVerde();
             imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
             imprimirEnPanel(5, "            \033[95m       DIRECTORIO DE CLIENTES (A-Z) - MERGE SORT        \033[0m");
@@ -248,9 +260,9 @@ public:
 
             int filaNueva = 12;
             for (const auto& c : clientesTemp) {
-                if (filaNueva >= 38) break; // Limite de altura de consola
+                if (filaNueva >= 38) break;
                 std::string item = "  [DNI: " + std::string(c.dni) + "] " + std::string(c.nombre);
-                while (item.length() < 45) item += " "; // Espaciado perfecto
+                while (item.length() < 45) item += " ";
                 item += "| " + std::string(c.correo);
                 imprimirEnPanel(filaNueva++, item);
             }
@@ -258,9 +270,8 @@ public:
             imprimirEnPanel(filaNueva++, "--------------------------------------------------------");
             imprimirEnPanel(filaNueva, "  TOTAL: " + std::to_string(clientesTemp.size()) + " clientes ordenados exitosamente.", 92);
 
-            // Pausa obligatoria para que el administrador pueda ver los datos ordenados
             irA(filaNueva + 2, PANEL_COL); cout << "\033[93m>> Presione cualquier tecla para continuar...\033[0m";
-            _getch();
+            (void)_getch();
         }
     }
 
@@ -439,7 +450,6 @@ public:
         listaProductos->ordenar(comparador);
     }
 
-    // Busca un producto por ID usando un Arbol AVL (auto-balanceado).
     void buscarConArbolAVL(int idBuscado) {
         ArbolAVL<int> arbol;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -463,13 +473,11 @@ public:
             imprimirEnPanel(14, "  >> ID " + std::to_string(idBuscado) + " NO existe en el inventario.", 91);
         }
 
-        // El recorrido inorden de un AVL devuelve los IDs ordenados de menor a mayor
         std::string ids = "  IDs ordenados (inorden): ";
         arbol.recorrerInorden([&ids](int id) { ids += std::to_string(id) + " "; });
         imprimirEnPanel(16, ids);
     }
 
-    // Ordena una COPIA de los productos por precio usando Quick Sort.
     void ordenarConQuickSort() {
         std::vector<Producto> copia;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -478,7 +486,6 @@ public:
             actual = actual->siguiente;
         }
 
-        // Comparador lambda: ordena de menor a mayor precio
         quickSort<Producto>(copia, [](Producto a, Producto b) { return a.precio < b.precio; });
 
         imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
@@ -609,7 +616,7 @@ public:
 
         int fila = 12;
         if (registroVentas->estaVacia()) {
-            imprimirEnPanel(fila, "  No hay ventas registradas en el sistema.", 91);
+            imprimirEnPanel(fila, "  No hay ventas registradas in el sistema.", 91);
             return;
         }
 
@@ -727,14 +734,15 @@ public:
             arbolReporte.insertar(listaTemporal[i]);
         }
 
-        int filaDibujo = 10;
+        int filaDibujo = 12;
 
         arbolReporte.recorrerInordenInverso([&filaDibujo](ClienteFrecuente cf) {
-            irA(filaDibujo, PANEL_COL);
-            cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0m "
-                << cf.nombre << " | Correo: " << cf.correo;
-
-            filaDibujo += 2;
+            if (filaDibujo < 36) {
+                irA(filaDibujo, PANEL_COL);
+                cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0m "
+                    << cf.nombre << " | Correo: " << cf.correo;
+                filaDibujo += 2;
+            }
             });
 
         irA(filaDibujo + 2, PANEL_COL);
