@@ -14,7 +14,7 @@ const int PANEL_ALTO = 35;
 
 //Cuadro de texto
 const int TEXT_FILA = 20;
-const int TEXT_COL = 40;
+const int TEXT_COL = 33;
 const int TEXT_ANCHO = 80;
 const int TEXT_ALTO = 35;
 inline void limpiarPantalla() {

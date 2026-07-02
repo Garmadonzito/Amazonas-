@@ -1,4 +1,6 @@
 #include "Consola.h"
+#include "Cliente.h"
+#include "Vendedor.h"
 
 int main() {
     Consola consola;
@@ -11,6 +13,12 @@ int main() {
     Cliente* usuario = new Cliente();
     gestorEscenas grafica;
     
+    /*
+    //BORRAR SOLO PARA PRUEBAS
+    administrador->menu(*miTienda);
+    //BORRAR SOLO PARA PRUEBAS
+    */
+
     int opcion;
     do {
         system("cls");
@@ -46,7 +54,7 @@ int main() {
             system("cls");
             // Estoy pasando miTienda por referencia para utilizar la Tabla Hash en memoria 
             // lo dejo como anotacion si quieren referenciar tambien los arboles binarios xd
-            usuario->login(*miTienda);
+            usuario->login(*miTienda,consola);
             usuario->menu(*miTienda);
             break;
         }
@@ -59,7 +67,7 @@ int main() {
         }
         }
     } while (opcion != 3);
-
+    
     delete miTienda;
     delete administrador;
     delete usuario;

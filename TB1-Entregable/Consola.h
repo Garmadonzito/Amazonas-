@@ -1,12 +1,11 @@
-
+#pragma once
 #include <iostream>
 #include <vector>
 #include <string>
 #include <windows.h>
 
 #include "Inventario.h"
-#include "Cliente.h"
-#include "Vendedor.h"
+
 #include"GestorEscenas.h"
 
 using namespace std;

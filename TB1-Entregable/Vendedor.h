@@ -106,23 +106,24 @@ public:
 
         do {
             limpiarZonaVerde();
-            grafica.dibujarFondoSinLogo();
+            grafica.setEscena(gestorEscenas::MENU_PRINCIPAL_VENDEDOR);
+            grafica.dibujarEscena();
 
-            irA(4, PANEL_COL); cout << "\033[0m            \033[96m========================================================\033[0m";
-            irA(5, PANEL_COL); cout << "\033[0m            \033[96m               PANEL DE CONTROL - LOGISTICA             \033[0m";
-            irA(6, PANEL_COL); cout << "\033[0m            \033[96m========================================================\033[0m";
+            irA(4, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
+            irA(5, PANEL_COL); cout << "\033[0m\033[96m               PANEL DE CONTROL - LOGISTICA             \033[0m";
+            irA(6, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
 
-            irA(12, TEXT_COL); cout << "\033[0m    1. Listar Catalogo         8. Ordenar por Precio";
-            irA(14, TEXT_COL); cout << "\033[0m    2. Registrar Producto      9. Filtrar por Rango";
-            irA(16, TEXT_COL); cout << "\033[0m    3. Editar Precio/Stock    10. Valor Total Inventario";
-            irA(18, TEXT_COL); cout << "\033[0m    4. Eliminar Producto      11. Gestionar Cupones";
-            irA(20, TEXT_COL); cout << "\033[0m    5. Alertas de Stock       12. Soporte al Cliente";
-            irA(22, TEXT_COL); cout << "\033[0m    6. Historial de Ventas    13. Ver Resenas";
-            irA(24, TEXT_COL); cout << "\033[0m    7. Reporte de Almacen     14. Ver Clientes (Tabla Hash)";
-            irA(26, TEXT_COL); cout << "\033[0m   16. Buscar por ID (Arbol)  17. Ordenar por Precio (Quick Sort)";
-            irA(28, TEXT_COL); cout << "\033[0m   18. Mostrar Top Clientes   19. Generar Dataset (100 Datos)";
-            irA(30, TEXT_COL); cout << "\033[0m   \033[93m15. Cerrar Sesion de Administrador\033[0m";
-            irA(33, TEXT_COL); cout << "\033[0m    Seleccione una opcion: "; cin >> op;
+            irA(13, TEXT_COL); cout << "\033[0m1. Listar Catalogo          8. Ordenar por Precio";
+            irA(15, TEXT_COL); cout << "\033[0m2. Registrar Producto       9. Filtrar por Rango";
+            irA(17, TEXT_COL); cout << "\033[0m3. Editar Precio/Stock     10. Valor Total Inventario";
+            irA(19, TEXT_COL); cout << "\033[0m4. Eliminar Producto       11. Gestionar Cupones";
+            irA(21, TEXT_COL); cout << "\033[0m5. Alertas de Stock        12. Soporte al Cliente";
+            irA(23, TEXT_COL); cout << "\033[0m6. Historial de Ventas     13. Ver Resenas";
+            irA(25, TEXT_COL); cout << "\033[0m7. Reporte de Almacen      14. Ver Clientes (Tabla Hash)";
+            irA(27, TEXT_COL); cout << "\033[0m16. Buscar por ID (Arbol)  17. Ordenar por Precio (Quick Sort)";
+            irA(29, TEXT_COL); cout << "\033[0m18. Mostrar Top Clientes   19. Generar Dataset (100 Datos)";
+            irA(31, TEXT_COL); cout << "\033[0m\033[93m15. Cerrar Sesion de Administrador\033[0m";
+            irA(38, 52); cout << "\033[0mSeleccione una opcion: "; cin >> op;
 
             switch (op) {
             case 1:  limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarTodo(); break;

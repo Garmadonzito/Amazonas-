@@ -9,6 +9,7 @@
 #include "GestorEscenas.h" 
 #include <conio.h>
 #include <fstream>
+#include "Consola.h"
 
 class Cliente : public Usuario {
 private:
@@ -39,20 +40,25 @@ public:
     Cliente() { carrito = new ListaEnlazada<int>(); }
     ~Cliente() { delete carrito; }
 
-    void login(Inventario& inv) {
+    void login(Inventario& inv, Consola& consola) {
         gestorEscenas grafica;
         grafica.setEscena(gestorEscenas::CATALOGO);
+        consola.establecerColor(0, 2);
 
         limpiarPantalla();
         grafica.dibujarFondoSinLogo();
+        consola.establecerColor(0, 2);
 
         irA(4, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
+        consola.establecerColor(0, 2);
         irA(5, PANEL_COL); cout << "            \033[96m                    LOGIN DE CLIENTE                    \033[0m";
+        consola.establecerColor(0, 2);
         irA(6, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
+        consola.establecerColor(0, 2);
 
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
-            };
+        };
 
         bool dniValido = false;
         do {
