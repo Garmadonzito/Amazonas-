@@ -3,6 +3,7 @@
 #include "Inventario.h"
 #include "GestorEscenas.h"
 #include "GeneradorDatos.h" // Generador de Data Aleatoria Masiva
+#include "Consola.h"
 
 using namespace std;
 

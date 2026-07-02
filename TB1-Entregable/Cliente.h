@@ -63,8 +63,10 @@ public:
         bool dniValido = false;
         do {
             irA(14, PANEL_COL); cout << string(50, ' ');
+            consola.establecerColor(0, 2);
             irA(14, PANEL_COL); cout << "DNI: ";
             getline(cin, dni);
+            consola.establecerColor(0, 2);
             if (validarDNI(dni)) dniValido = true;
             else { irA(22, PANEL_COL); cout << "\033[91m>> Error: DNI invalido.\033[0m"; }
         } while (!dniValido);
@@ -75,9 +77,11 @@ public:
         if (clienteEncontrado != nullptr) {
             this->nombre = std::string(clienteEncontrado->nombre);
             this->correo = std::string(clienteEncontrado->correo);
-
+            consola.establecerColor(0, 2);
             irA(16, PANEL_COL); cout << "Nombre: " << this->nombre << " (Cargado en memoria)";
+            consola.establecerColor(0, 2);
             irA(18, PANEL_COL); cout << "Correo: " << this->correo << " (Cargado en memoria)";
+            consola.establecerColor(0, 2);
             irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido nuevamente, " << this->nombre << "! (Acceso instantaneo)\033[0m";
         }
         else {
@@ -105,7 +109,9 @@ public:
     }
 
     void bucleAgregarRapido(Inventario& inv, int filaInicio) {
+      
         irA(filaInicio, PANEL_COL);
+        
         cout << "\033[0m>> Ingrese ID para agregar. [\033[93mESC\033[0m] para terminar.";
 
         int filaMsg = filaInicio + 2;
