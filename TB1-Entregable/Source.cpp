@@ -16,7 +16,7 @@ void borrarZona(int x, int y, int ancho, int alto) {
 // Barra de carga al iniciar el programa
 void barraDeCarga() {
     system("cls");
-    irA(20, 45); cout << "\033[93mCargando inventario...\033[0m";
+    irA(20, 45); cout << "\033[93mCargando Amazonas tu sitio de compras...\033[0m";
     irA(22, 45); cout << "\033[0m[";
     irA(22, 76); cout << "]";
     for (int i = 0; i < 30; i++) {
