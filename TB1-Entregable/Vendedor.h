@@ -11,6 +11,30 @@ class Vendedor : public Usuario {
 private:
     const string CODIGO_ACCESO = "UPC2026";
 
+    // Pinta un rectangulo con el verde del fondo (para borrar la mascota
+    // en cada paso de la animacion)
+    void borrarZonaMascota(int x, int y, int ancho, int alto) {
+        HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hCon, 2); // 2 = verde del fondo
+        for (int i = 0; i < alto; i++) {
+            gotoxy(x, y + i);
+            for (int j = 0; j < ancho; j++) cout << (char)219;
+        }
+    }
+
+    // Animacion: la llama entra caminando al panel de izquierda a derecha.
+    // El "rebote" se logra alternando la fila entre 18 y 17 segun el paso.
+    void animarLlamaCaminando(Matriz& llama) {
+        for (int x = 1; x <= 13; x++) {
+            int filaPaso = 18 - (x % 2); // un paso arriba, un paso abajo
+            llama.dibujarMatriz(x, filaPaso);
+            Sleep(70);
+            borrarZonaMascota(x, 17, 1, 19); // borra la columna que deja atras
+            if (x % 2 != 0) borrarZonaMascota(x, 17, 17, 1); // limpia la fila del rebote
+        }
+        llama.dibujarMatriz(13, 18); // posicion final
+    }
+
 public:
     bool login() {
         gestorEscenas grafica;
@@ -19,9 +43,10 @@ public:
         limpiarPantalla();
         grafica.dibujarEscena();
 
-        irA(4, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
-        irA(5, PANEL_COL); cout << "\033[0m\033[96m                ACCESO DE ADMINISTRADOR                 \033[0m";
-        irA(6, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
+        dibujarMarco(4, PANEL_COL, 56, 3, "96");
+        cout << "\033[96m";
+        imprimirLento(5, PANEL_COL + 16, "ACCESO DE ADMINISTRADOR", 20);
+        cout << "\033[0m";
 
         irA(TEXT_FILA, TEXT_COL); cout << "\033[0mIngrese codigo de seguridad: ";
         string pass; cin >> pass;
@@ -105,14 +130,27 @@ public:
         gestorEscenas grafica; // ¡Correccion E0020 aplicada!
         grafica.setEscena(gestorEscenas::CATALOGO);
 
+        // Mascota decorativa del panel del vendedor
+        Matriz llama;
+        llama.inicializar(mascotaLlama);
+        bool llamaYaEntro = false; // la animacion solo se ve al entrar al panel
+        transicionCortina();       // entrada con efecto de barrido
+
         do {
             limpiarZonaVerde();
             grafica.setEscena(gestorEscenas::MENU_PRINCIPAL_VENDEDOR);
             grafica.dibujarEscena();
 
-            irA(4, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
-            irA(5, PANEL_COL); cout << "\033[0m\033[96m               PANEL DE CONTROL - LOGISTICA             \033[0m";
-            irA(6, PANEL_COL); cout << "\033[0m\033[96m========================================================\033[0m";
+            if (!llamaYaEntro) {
+                animarLlamaCaminando(llama);
+                llamaYaEntro = true;
+            }
+            else {
+                llama.dibujarMatriz(13, 18);
+            }
+
+            dibujarMarco(4, PANEL_COL, 56, 3, "96");
+            irA(5, PANEL_COL + 14); cout << "\033[96mPANEL DE CONTROL - LOGISTICA\033[0m";
 
             irA(13, TEXT_COL); cout << "\033[0m1. Listar Catalogo          8. Ordenar por Precio";
             irA(15, TEXT_COL); cout << "\033[0m2. Registrar Producto       9. Filtrar por Rango";

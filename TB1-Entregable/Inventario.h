@@ -431,10 +431,16 @@ public:
             while (actual != nullptr && fila < 38) {
                 if (actual->dato.categoria == cat) {
                     float promedio = resenas->obtenerPromedioProducto(actual->dato.id);
-                    std::string estrellas = (promedio > 0) ? " [" + std::to_string(promedio).substr(0, 3) + " \033[93m*\033[0m]" : " [Sin resenas]";
+                    std::string estrellas = (promedio > 0) ? "[" + std::to_string(promedio).substr(0, 3) + " *]" : "[Sin resenas]";
 
-                    std::string item = "  [ID: " + std::to_string(actual->dato.id) + "] " + actual->dato.nombre + estrellas +
-                        " | S/. " + std::to_string((int)actual->dato.precio);
+                    // Columnas alineadas: nombre a 28 caracteres y precio a la derecha
+                    std::string nom = actual->dato.nombre;
+                    if (nom.length() > 28) nom = nom.substr(0, 28);
+                    while (nom.length() < 28) nom += " ";
+                    std::string precioTxt = std::to_string((int)actual->dato.precio);
+                    while (precioTxt.length() < 6) precioTxt = " " + precioTxt;
+
+                    std::string item = "  [" + std::to_string(actual->dato.id) + "] " + nom + " S/." + precioTxt + "  " + estrellas;
                     imprimirEnPanel(fila++, item);
                 }
                 actual = actual->siguiente;
@@ -522,8 +528,14 @@ public:
         int fila = 12;
         for (const Producto& p : copia) {
             if (fila >= 38) break;
-            std::string item = "  [ID: " + std::to_string(p.id) + "] " + p.nombre +
-                " | S/. " + std::to_string((int)p.precio);
+            // Columnas alineadas igual que en el catalogo
+            std::string nom = p.nombre;
+            if (nom.length() > 28) nom = nom.substr(0, 28);
+            while (nom.length() < 28) nom += " ";
+            std::string precioTxt = std::to_string((int)p.precio);
+            while (precioTxt.length() < 6) precioTxt = " " + precioTxt;
+
+            std::string item = "  [" + std::to_string(p.id) + "] " + nom + " S/." + precioTxt;
             imprimirEnPanel(fila++, item);
         }
     }

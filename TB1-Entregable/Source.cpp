@@ -2,6 +2,69 @@
 #include "Cliente.h"
 #include "Vendedor.h"
 
+// Pinta un rectangulo con el verde del fondo (sirve para "borrar" la mascota
+// en cada paso de la animacion sin redibujar todo el fondo)
+void borrarZona(int x, int y, int ancho, int alto) {
+    HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hCon, 2); // 2 = verde del fondo
+    for (int i = 0; i < alto; i++) {
+        gotoxy(x, y + i);
+        for (int j = 0; j < ancho; j++) cout << (char)219;
+    }
+}
+
+// Barra de carga al iniciar el programa
+void barraDeCarga() {
+    system("cls");
+    irA(20, 45); cout << "\033[93mCargando inventario...\033[0m";
+    irA(22, 45); cout << "\033[0m[";
+    irA(22, 76); cout << "]";
+    for (int i = 0; i < 30; i++) {
+        irA(22, 46 + i); cout << "\033[92m" << (char)219 << "\033[0m";
+        Sleep(35);
+    }
+    irA(24, 45); cout << "\033[92mListo!\033[0m";
+    Sleep(400);
+}
+
+// Pantalla de despedida: las 4 mascotas se despiden
+void despedida(gestorEscenas& grafica) {
+    system("cls");
+    grafica.dibujarFondoSinLogo();
+
+    Matriz m1, m2, m3, m4;
+    m1.inicializar(mascotaPollitoCara);
+    m2.inicializar(mascotaTucan);
+    m3.inicializar(mascotaLlama);
+    m4.inicializar(mascotaPollitoCuerpo);
+
+    m1.dibujarMatriz(20, 12);
+    m2.dibujarMatriz(43, 12);
+    m3.dibujarMatriz(66, 12);
+    m4.dibujarMatriz(89, 12);
+
+    cout << "\033[93m";
+    imprimirLento(33, 46, "GRACIAS POR TU VISITA. HASTA PRONTO!", 30);
+    cout << "\033[0m";
+    Sleep(2200);
+}
+
+// Animacion de bienvenida: el tucan cruza la pantalla volando de izquierda a derecha
+void animarIntroTucan(gestorEscenas& grafica) {
+    system("cls");
+    grafica.dibujarFondoSinLogo();
+
+    Matriz tucan;
+    tucan.inicializar(mascotaTucan);
+
+    for (int x = 14; x <= 92; x += 2) {
+        tucan.dibujarMatriz(x, 15);
+        Sleep(25);
+        borrarZona(x, 15, 2, 17); // borra la franja que va dejando atras
+    }
+    borrarZona(92, 15, 17, 17); // limpia el tucan al final
+}
+
 int main() {
     Consola consola;
     consola.configurarConsola();
@@ -19,6 +82,13 @@ int main() {
     //BORRAR SOLO PARA PRUEBAS
     */
 
+    barraDeCarga();            // barra de carga al iniciar
+    animarIntroTucan(grafica); // el tucan da la bienvenida una sola vez
+
+    // Sonrisa de Amazon que va debajo del logo
+    Matriz sonrisa;
+    sonrisa.inicializar(sonrisaAmazon);
+
     int opcion;
     do {
         system("cls");
@@ -32,7 +102,9 @@ int main() {
         irA(5, 22);  cout << "|       | |  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ / ";
         irA(6, 22);  cout << "|_______|/  /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  ";
 
-        consola.establecerColor(0, 15);  
+        sonrisa.dibujarMatriz(40, 7); // la flecha-sonrisa de Amazon bajo el logo
+
+        consola.establecerColor(0, 15);
 
         irA(20, 40); cout << "Que tipo de usuario eres?";
         irA(21, 40); cout << "1. Cliente";
@@ -72,6 +144,6 @@ int main() {
     delete administrador;
     delete usuario;
 
-    irA(15, 12); cout << "Hasta pronto!\n";
+    despedida(grafica);
     return 0;
 }

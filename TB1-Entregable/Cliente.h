@@ -50,11 +50,10 @@ public:
         grafica.dibujarFondoSinLogo();
         consola.establecerColor(0, 2);
 
-        irA(4, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
-        consola.establecerColor(0, 2);
-        irA(5, PANEL_COL); cout << "            \033[96m                    LOGIN DE CLIENTE                    \033[0m";
-        consola.establecerColor(0, 2);
-        irA(6, PANEL_COL); cout << "            \033[96m========================================================\033[0m";
+        dibujarMarco(4, PANEL_COL + 12, 56, 3, "96");
+        cout << "\033[96m";
+        imprimirLento(5, PANEL_COL + 12 + 20, "LOGIN DE CLIENTE", 20);
+        cout << "\033[0m";
         consola.establecerColor(0, 2);
 
         auto validarDNI = [](string d) -> bool {
@@ -271,7 +270,23 @@ public:
         limpiarZonaVerde();
         grafica.dibujarFondoSinLogo();
         comprasRealizadas++;
-        irA(20, PANEL_COL); cout << "\033[0m  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m";
+
+        // Check gigante dibujado con bloques + mensaje parpadeante
+        cout << "\033[92m";
+        irA(14, PANEL_COL + 34); cout << (char)219 << (char)219;
+        irA(15, PANEL_COL + 32); cout << (char)219 << (char)219;
+        irA(16, PANEL_COL + 22); cout << (char)219 << (char)219; irA(16, PANEL_COL + 30); cout << (char)219 << (char)219;
+        irA(17, PANEL_COL + 24); cout << (char)219 << (char)219 << (char)219 << (char)219 << (char)219 << (char)219;
+        irA(18, PANEL_COL + 26); cout << (char)219 << (char)219;
+        cout << "\033[0m";
+
+        for (int i = 0; i < 3; i++) {
+            irA(21, PANEL_COL + 10); cout << "\033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m";
+            Sleep(250);
+            irA(21, PANEL_COL + 10); cout << string(56, ' ');
+            Sleep(150);
+        }
+        irA(21, PANEL_COL + 10); cout << "\033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0m";
         pausaRetroceder(24);
     }
 
@@ -528,6 +543,11 @@ public:
 
         gestorEscenas grafica;
         grafica.setEscena(gestorEscenas::CATALOGO);
+        transicionCortina(); // entrada con efecto de barrido
+
+        // Mascota decorativa del menu del cliente
+        Matriz mascota;
+        mascota.inicializar(mascotaPollitoCuerpo);
 
         while (!historialNavegacion.estaVacia()) {
             int pantallaActual = historialNavegacion.obtenerTope();
@@ -535,18 +555,33 @@ public:
             grafica.dibujarFondoSinLogo();
 
             if (pantallaActual == MENU_PRINCIPAL) {
-                irA(4, PANEL_COL); cout << "\033[0m            \033[94m========================================================\033[0m";
-
-                string saludo = "             BIENVENIDO AL MARKETPLACE, " + nombre;
-                while (saludo.length() < 56) saludo += " ";
-                irA(5, PANEL_COL); cout << "\033[0m            \033[94m" << saludo << "\033[0m";
-                irA(6, PANEL_COL); cout << "\033[0m            \033[94m========================================================\033[0m";
+                mascota.dibujarMatriz(88, 12);
+                dibujarMarco(4, PANEL_COL + 12, 56, 3, "94");
+                string saludo = "BIENVENIDO AL MARKETPLACE, " + nombre;
+                irA(5, PANEL_COL + 12 + 2); cout << "\033[94m" << saludo << "\033[0m";
 
                 irA(12, PANEL_COL); cout << "\033[0m    1. Entrar a la Tienda (Catalogo y Busqueda)";
                 irA(14, PANEL_COL); cout << "\033[0m    2. Gestionar mi Carrito de Compras";
                 irA(16, PANEL_COL); cout << "\033[0m    3. Que me alcanza? (Asistente de Presupuesto)";
                 irA(20, PANEL_COL); cout << "\033[0m    \033[93m[ESC] Salir del Sistema de Cliente\033[0m";
 
+                // El pollito parpadea mientras esperamos que el usuario elija.
+                // Su ojo es la celda de la columna 6, filas 1 y 2 de la matriz
+                // (dibujada en la posicion 88,12 de la pantalla).
+                int tiempo = 0;
+                bool ojoCerrado = false;
+                HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+                while (!_kbhit()) {
+                    Sleep(50);
+                    tiempo += 50;
+                    if (tiempo >= 700) {
+                        tiempo = 0;
+                        ojoCerrado = !ojoCerrado;
+                        SetConsoleTextAttribute(hCon, ojoCerrado ? 14 : 0);
+                        gotoxy(88 + 6, 12 + 1); cout << (char)219;
+                        gotoxy(88 + 6, 12 + 2); cout << (char)219;
+                    }
+                }
                 int c = _getch();
                 if (c == '1') historialNavegacion.apilar(MENU_BUSQUEDA);
                 else if (c == '2') historialNavegacion.apilar(MENU_CARRITO);
