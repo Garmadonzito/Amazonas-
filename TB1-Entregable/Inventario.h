@@ -450,32 +450,54 @@ public:
         listaProductos->ordenar(comparador);
     }
 
-    void buscarConArbolAVL(int idBuscado) {
-        ArbolAVL<int> arbol;
+    // ASISTENTE DE PRESUPUESTO (Arbol AVL por PRECIO)
+    // El cliente indica cuanto dinero tiene y el arbol encuentra el "piso":
+    // el producto mas caro que SI le alcanza, bajando un solo camino O(log n),
+    // en vez de recorrer toda la lista como hace el filtro por rango.
+    void asistentePresupuesto(float presupuesto) {
+        ArbolAVL<float> arbolPrecios;
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
-            arbol.insertar(actual->dato.id);
+            arbolPrecios.insertar(actual->dato.precio);
             actual = actual->siguiente;
         }
 
         imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m            BUSQUEDA POR ID (ARBOL AVL)                 \033[0m");
+        imprimirEnPanel(5, "            \033[96m          ASISTENTE DE PRESUPUESTO (ARBOL AVL)          \033[0m");
         imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
 
-        imprimirEnPanel(12, "  Altura del arbol: " + std::to_string(arbol.getAltura()) +
-            "   |   Total IDs: " + std::to_string(arbol.getCantidad()));
+        if (arbolPrecios.estaVacio()) {
+            imprimirEnPanel(12, "  Inventario vacio.", 91);
+            return;
+        }
 
-        if (arbol.buscar(idBuscado)) {
-            Nodo<Producto>* p = buscarRecursivo(listaProductos->getCabeza(), idBuscado);
-            imprimirEnPanel(14, "  >> ID " + std::to_string(idBuscado) + " ENCONTRADO: " + p->dato.nombre, 92);
+        imprimirEnPanel(10, "  Presupuesto ingresado: S/. " + std::to_string((int)presupuesto));
+        imprimirEnPanel(11, "  Altura del arbol: " + std::to_string(arbolPrecios.getAltura()) +
+            "   |   Precios distintos: " + std::to_string(arbolPrecios.getCantidad()));
+
+        float pisoPrecio;
+        if (arbolPrecios.buscarPiso(presupuesto, pisoPrecio)) {
+            // Con el precio "piso" ubico el producto en la lista para mostrar sus datos
+            actual = listaProductos->getCabeza();
+            while (actual != nullptr) {
+                if (actual->dato.precio == pisoPrecio) break;
+                actual = actual->siguiente;
+            }
+            if (actual != nullptr) {
+                imprimirEnPanel(13, "  >> Lo maximo que te alcanza:", 92);
+                imprimirEnPanel(14, "     [ID: " + std::to_string(actual->dato.id) + "] " + actual->dato.nombre +
+                    " | S/. " + std::to_string((int)actual->dato.precio), 92);
+            }
         }
         else {
-            imprimirEnPanel(14, "  >> ID " + std::to_string(idBuscado) + " NO existe en el inventario.", 91);
+            imprimirEnPanel(13, "  >> Ningun producto entra en tu presupuesto.", 91);
         }
 
-        std::string ids = "  IDs ordenados (inorden): ";
-        arbol.recorrerInorden([&ids](int id) { ids += std::to_string(id) + " "; });
-        imprimirEnPanel(16, ids);
+        float masBarato, masCaro;
+        arbolPrecios.getMinimo(masBarato);
+        arbolPrecios.getMaximo(masCaro);
+        imprimirEnPanel(16, "  Mas barato del catalogo: S/. " + std::to_string((int)masBarato));
+        imprimirEnPanel(17, "  Mas caro del catalogo:   S/. " + std::to_string((int)masCaro));
     }
 
     void ordenarConQuickSort() {

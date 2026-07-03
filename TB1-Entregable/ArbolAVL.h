@@ -170,6 +170,44 @@ public:
         return buscarRec(raiz, valor);
     }
 
+    // Busca el "piso": el valor MAS GRANDE del arbol que no se pasa del limite.
+    // Si un nodo se pasa, bajo a la izquierda; si me alcanza, lo guardo como
+    // candidato y sigo a la derecha por si hay uno mejor. Recorro un solo
+    // camino del arbol, por eso es O(log n).
+    bool buscarPiso(T limite, T& resultado) {
+        NodoAVL* actual = raiz;
+        bool encontrado = false;
+        while (actual != nullptr) {
+            if (limite < actual->dato) {
+                actual = actual->izquierda; // se pasa, busco algo mas chico
+            }
+            else {
+                resultado = actual->dato;   // me alcanza, lo guardo de candidato
+                encontrado = true;
+                actual = actual->derecha;   // pruebo si hay uno mejor
+            }
+        }
+        return encontrado;
+    }
+
+    // El menor valor del arbol = caminar siempre a la izquierda hasta el final
+    bool getMinimo(T& resultado) {
+        if (raiz == nullptr) return false;
+        NodoAVL* actual = raiz;
+        while (actual->izquierda != nullptr) actual = actual->izquierda;
+        resultado = actual->dato;
+        return true;
+    }
+
+    // El mayor valor del arbol = caminar siempre a la derecha hasta el final
+    bool getMaximo(T& resultado) {
+        if (raiz == nullptr) return false;
+        NodoAVL* actual = raiz;
+        while (actual->derecha != nullptr) actual = actual->derecha;
+        resultado = actual->dato;
+        return true;
+    }
+
     // Recorre en orden y por cada dato llama a la funcion/lambda que le pases
     void recorrerInorden(function<void(T)> visitar) {
         inordenRec(raiz, visitar);

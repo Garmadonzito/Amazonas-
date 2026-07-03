@@ -121,7 +121,7 @@ public:
             irA(21, TEXT_COL); cout << "\033[0m5. Alertas de Stock        12. Soporte al Cliente";
             irA(23, TEXT_COL); cout << "\033[0m6. Historial de Ventas     13. Ver Resenas";
             irA(25, TEXT_COL); cout << "\033[0m7. Reporte de Almacen      14. Ver Clientes (Tabla Hash)";
-            irA(27, TEXT_COL); cout << "\033[0m16. Buscar por ID (Arbol)  17. Ordenar por Precio (Quick Sort)";
+            irA(27, TEXT_COL); cout << "\033[0m16. Que me alcanza? (AVL)  17. Ordenar por Precio (Quick Sort)";
             irA(29, TEXT_COL); cout << "\033[0m18. Mostrar Top Clientes   19. Generar Dataset (100 Datos)";
             irA(31, TEXT_COL); cout << "\033[0m\033[93m15. Cerrar Sesion de Administrador\033[0m";
             irA(38, 52); cout << "\033[0mSeleccione una opcion: "; cin >> op;
@@ -176,11 +176,11 @@ public:
             case 16: {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
-                int idBuscar;
-                irA(10, PANEL_COL); cout << "\033[0m  ID de producto a buscar: "; irA(10, PANEL_COL + 27); cin >> idBuscar;
+                float presupuesto;
+                irA(10, PANEL_COL); cout << "\033[0m  Cuanto dinero tienes? S/. "; irA(10, PANEL_COL + 29); cin >> presupuesto;
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
-                inv.buscarConArbolAVL(idBuscar);
+                inv.asistentePresupuesto(presupuesto);
                 break;
             }
             case 17: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarConQuickSort(); break;
