@@ -20,6 +20,7 @@ private:
     const int MENU_PRINCIPAL = 1;
     const int MENU_BUSQUEDA = 2;
     const int MENU_CARRITO = 3;
+    const int MENU_PRESUPUESTO = 4;
 
     int comprasRealizadas = 0;
 
@@ -543,11 +544,13 @@ public:
 
                 irA(12, PANEL_COL); cout << "\033[0m    1. Entrar a la Tienda (Catalogo y Busqueda)";
                 irA(14, PANEL_COL); cout << "\033[0m    2. Gestionar mi Carrito de Compras";
+                irA(16, PANEL_COL); cout << "\033[0m    3. Que me alcanza? (Asistente de Presupuesto)";
                 irA(20, PANEL_COL); cout << "\033[0m    \033[93m[ESC] Salir del Sistema de Cliente\033[0m";
 
                 int c = _getch();
                 if (c == '1') historialNavegacion.apilar(MENU_BUSQUEDA);
                 else if (c == '2') historialNavegacion.apilar(MENU_CARRITO);
+                else if (c == '3') historialNavegacion.apilar(MENU_PRESUPUESTO);
                 else if (c == 27) historialNavegacion.desapilar();
             }
             else if (pantallaActual == MENU_BUSQUEDA) {
@@ -556,6 +559,16 @@ public:
             }
             else if (pantallaActual == MENU_CARRITO) {
                 menuCarrito(inv);
+                historialNavegacion.desapilar();
+            }
+            else if (pantallaActual == MENU_PRESUPUESTO) {
+                float presupuesto;
+                irA(10, PANEL_COL); cout << "\033[0m  Cuanto dinero tienes? S/. "; cin >> presupuesto;
+                if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); presupuesto = 0; }
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                inv.asistentePresupuesto(presupuesto);
+                pausaRetroceder(38);
                 historialNavegacion.desapilar();
             }
         }

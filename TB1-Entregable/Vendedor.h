@@ -121,7 +121,7 @@ public:
             irA(21, TEXT_COL); cout << "\033[0m5. Alertas de Stock        12. Soporte al Cliente";
             irA(23, TEXT_COL); cout << "\033[0m6. Historial de Ventas     13. Ver Resenas";
             irA(25, TEXT_COL); cout << "\033[0m7. Reporte de Almacen      14. Ver Clientes (Tabla Hash)";
-            irA(27, TEXT_COL); cout << "\033[0m16. Que me alcanza? (AVL)  17. Ordenar por Precio (Quick Sort)";
+            irA(27, TEXT_COL); cout << "\033[0m17. Ordenar por Precio (Quick Sort)";
             irA(29, TEXT_COL); cout << "\033[0m18. Mostrar Top Clientes   19. Generar Dataset (100 Datos)";
             irA(31, TEXT_COL); cout << "\033[0m\033[93m15. Cerrar Sesion de Administrador\033[0m";
             irA(38, 52); cout << "\033[0mSeleccione una opcion: "; cin >> op;
@@ -173,16 +173,6 @@ public:
             }
             case 13: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.getResenas()->listarResenas(); break;
             case 14: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.listarClientesRegistrados(); break;
-            case 16: {
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                float presupuesto;
-                irA(10, PANEL_COL); cout << "\033[0m  Cuanto dinero tienes? S/. "; irA(10, PANEL_COL + 29); cin >> presupuesto;
-                limpiarZonaVerde();
-                grafica.dibujarFondoSinLogo();
-                inv.asistentePresupuesto(presupuesto);
-                break;
-            }
             case 17: limpiarZonaVerde(); grafica.dibujarFondoSinLogo(); inv.ordenarConQuickSort(); break;
             case 18: {
                 limpiarZonaVerde();
