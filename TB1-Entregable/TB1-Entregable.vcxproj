@@ -119,6 +119,7 @@
     <ClInclude Include="Consola.h" />
     <ClInclude Include="GeneradorDatos.h" />
     <ClInclude Include="GestorEscenas.h" />
+    <ClInclude Include="Grafo.h" />
     <ClInclude Include="HeapSort.h" />
     <ClInclude Include="Inventario.h" />
     <ClInclude Include="ListaEnlazada.h" />

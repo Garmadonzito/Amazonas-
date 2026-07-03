@@ -126,7 +126,7 @@ int main() {
             system("cls");
             // Estoy pasando miTienda por referencia para utilizar la Tabla Hash en memoria 
             // lo dejo como anotacion si quieren referenciar tambien los arboles binarios xd
-            usuario->login(*miTienda,consola);
+            usuario->login(*miTienda);
             usuario->menu(*miTienda);
             break;
         }

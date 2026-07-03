@@ -14,6 +14,7 @@
 #include "HeapSort.h"  
 #include "QuickSort.h" 
 #include "MergeSort.h" 
+#include "Grafo.h"       // <--- INCLUSION DEL MOTOR DE RECOMENDACIONES
 #include <string>
 #include <iostream>
 #include <vector>
@@ -433,7 +434,6 @@ public:
                     float promedio = resenas->obtenerPromedioProducto(actual->dato.id);
                     std::string estrellas = (promedio > 0) ? "[" + std::to_string(promedio).substr(0, 3) + " *]" : "[Sin resenas]";
 
-                    // Columnas alineadas: nombre a 28 caracteres y precio a la derecha
                     std::string nom = actual->dato.nombre;
                     if (nom.length() > 28) nom = nom.substr(0, 28);
                     while (nom.length() < 28) nom += " ";
@@ -456,10 +456,6 @@ public:
         listaProductos->ordenar(comparador);
     }
 
-    // ASISTENTE DE PRESUPUESTO (Arbol AVL por PRECIO)
-    // El cliente indica cuanto dinero tiene y el arbol encuentra el "piso":
-    // el producto mas caro que SI le alcanza, bajando un solo camino O(log n),
-    // en vez de recorrer toda la lista como hace el filtro por rango.
     void asistentePresupuesto(float presupuesto) {
         ArbolAVL<float> arbolPrecios;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -483,7 +479,6 @@ public:
 
         float pisoPrecio;
         if (arbolPrecios.buscarPiso(presupuesto, pisoPrecio)) {
-            // Con el precio "piso" ubico el producto en la lista para mostrar sus datos
             actual = listaProductos->getCabeza();
             while (actual != nullptr) {
                 if (actual->dato.precio == pisoPrecio) break;
@@ -528,7 +523,6 @@ public:
         int fila = 12;
         for (const Producto& p : copia) {
             if (fila >= 38) break;
-            // Columnas alineadas igual que en el catalogo
             std::string nom = p.nombre;
             if (nom.length() > 28) nom = nom.substr(0, 28);
             while (nom.length() < 28) nom += " ";
@@ -827,5 +821,80 @@ public:
 
         fila++;
         imprimirEnPanel(fila, "\033[92m>> Catalogo de reputacion ordenado mediante Max-Heap de manera exitosa.\033[0m");
+    }
+
+    // =========================================================
+    // NUEVA FUNCIONALIDAD: RECOMENDACION INTELIGENTE CON GRAFO
+    // =========================================================
+    Producto* obtenerRecomendacionDelGrafo(int& maxVentas) {
+        // Creamos el grafo (T = int para guardar el ID del producto)
+        CGrafo<int>* grafo = new CGrafo<int>();
+
+        // 1. Añadimos el Vértice 0: El "Nodo Central" (El Motor de la Tienda)
+        grafo->adicionarVertice(0);
+
+        vector<int> idProductos;
+        vector<int> ventasProductos;
+
+        // 2. Extraemos todos los productos como Vértices
+        Nodo<Producto>* actual = listaProductos->getCabeza();
+        while (actual != nullptr) {
+            idProductos.push_back(actual->dato.id);
+            ventasProductos.push_back(0); // Iniciamos contador en 0
+
+            // Añadir el producto como vértice (los índices serán 1, 2, 3...)
+            grafo->adicionarVertice(actual->dato.id);
+            actual = actual->siguiente;
+        }
+
+        if (idProductos.empty()) {
+            delete grafo;
+            return nullptr; // No hay catálogo para recomendar
+        }
+
+        // 3. Recorremos el historial binario de ventas para pesar las conexiones
+        ifstream archivo("ventas.dat", ios::binary);
+        if (archivo.is_open()) {
+            RegistroVenta reg;
+            while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
+                for (size_t j = 0; j < idProductos.size(); j++) {
+                    if (reg.idProducto == idProductos[j]) {
+                        ventasProductos[j]++; // Sumamos 1 venta como peso
+                        break;
+                    }
+                }
+            }
+            archivo.close();
+        }
+
+        // 4. Creamos los ARCOS desde el Nodo Central hacia cada Producto
+        for (size_t j = 0; j < idProductos.size(); j++) {
+            grafo->adicionarArco(0, j + 1);
+            // El peso del arco es la cantidad de ventas históricas
+            grafo->modificarArco(0, j, ventasProductos[j]);
+        }
+
+        // 5. Analizamos los Arcos del Nodo Central para buscar el de mayor peso
+        int maxV = -1;
+        int mejorIndiceVertice = -1;
+
+        for (int j = 0; j < grafo->cantidadArcos(0); j++) {
+            int ventas = grafo->obtenerArco(0, j);
+            if (ventas > maxV) {
+                maxV = ventas;
+                mejorIndiceVertice = grafo->obtenerVerticeLlegada(0, j);
+            }
+        }
+
+        Producto* recomendado = nullptr;
+        // Si el mejor producto tiene al menos 1 venta, lo extraemos
+        if (mejorIndiceVertice != -1 && maxV > 0) {
+            int idRecomendado = grafo->obtenerVertice(mejorIndiceVertice);
+            recomendado = obtenerProducto(idRecomendado);
+            maxVentas = maxV;
+        }
+
+        delete grafo; // Liberamos memoria de la RAM
+        return recomendado;
     }
 };
