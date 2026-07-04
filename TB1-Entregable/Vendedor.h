@@ -48,16 +48,19 @@ public:
         imprimirLento(5, PANEL_COL + 16, "ACCESO DE ADMINISTRADOR", 20);
         cout << "\033[0;42m";
 
-        irA(TEXT_FILA, TEXT_COL); cout << "\033[0;42mIngrese codigo de seguridad: ";
+        // Texto centrado DENTRO de la nube (la nube ocupa columnas 35-91, filas 16-36)
+        // y con fondo blanco (47) para que se funda con ella
+        irA(24, 45); cout << "\033[30;47mIngrese codigo de seguridad: ";
         string pass; cin >> pass;
+        cout << "\033[0;42m";
 
         if (pass == CODIGO_ACCESO) {
-            irA(22, TEXT_COL); cout << "\033[0;42m\033[92m>> Acceso concedido. Cargando sistema...\033[0;42m";
+            irA(28, 44); cout << "\033[32;47m>> Acceso concedido. Cargando sistema...\033[0;42m";
             pausa();
             return true;
         }
 
-        irA(22, TEXT_COL); cout << "\033[0;42m\033[91m>> Codigo incorrecto. Acceso denegado.\033[0;42m";
+        irA(28, 44); cout << "\033[31;47m>> Codigo incorrecto. Acceso denegado.\033[0;42m";
         pausa();
         return false;
     }
