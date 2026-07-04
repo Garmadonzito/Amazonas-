@@ -29,7 +29,7 @@ inline void irA(int fila, int col) {
 
 inline void pausa() {
     irA(43, PANEL_COL);
-    cout << "\033[93m>> Presione ENTER para continuar...\033[0;42m";
+    cout << "\033[93m>> Presione ENTER para continuar...\033[0;42;97m";
     cin.clear();
     cin.ignore(10000, '\n');
     cin.get();
@@ -40,7 +40,7 @@ inline void pausa() {
 }
 
 inline void limpiarZonaVerde() {
-    cout << "\033[0;42m";
+    cout << "\033[0;42;97m";
     for (int i = 0; i < PANEL_ALTO; i++) {
         irA(PANEL_FILA + i, PANEL_COL);
         cout << string(PANEL_ANCHO, ' ');
@@ -51,8 +51,8 @@ inline void limpiarZonaVerde() {
 inline void imprimirEnPanel(int fila, const string& texto, int color = 0) {
     irA(fila, PANEL_COL);
     if (color != 0) cout << "\033[" << color << "m";
-    else cout << "\033[0;42m";
-    cout << texto << "\033[0;42m";
+    else cout << "\033[0;42;97m";
+    cout << texto << "\033[0;42;97m";
 }
 
 // Efecto maquina de escribir: imprime el texto letra por letra
@@ -81,7 +81,7 @@ inline void dibujarMarco(int fila, int col, int ancho, int alto, const string& c
     cout << (char)200;
     for (int j = 0; j < ancho - 2; j++) cout << (char)205;
     cout << (char)188;
-    cout << "\033[0;42m";
+    cout << "\033[0;42;97m";
 }
 
 // Transicion tipo cortina: barre la pantalla con columnas verdes
@@ -94,7 +94,7 @@ inline void transicionCortina() {
         }
         Sleep(4);
     }
-    cout << "\033[0;42m";
+    cout << "\033[0;42;97m";
 }
 
 class Usuario {

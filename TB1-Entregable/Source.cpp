@@ -16,14 +16,14 @@ void borrarZona(int x, int y, int ancho, int alto) {
 // Barra de carga al iniciar el programa
 void barraDeCarga() {
     system("cls");
-    irA(20, 45); cout << "\033[93mCargando Amazonas tu sitio de compras...\033[0;42m";
-    irA(22, 45); cout << "\033[0;42m[";
+    irA(20, 45); cout << "\033[93mCargando Amazonas tu sitio de compras...\033[0;42;97m";
+    irA(22, 45); cout << "\033[0;42;97m[";
     irA(22, 76); cout << "]";
     for (int i = 0; i < 30; i++) {
-        irA(22, 46 + i); cout << "\033[92m" << (char)219 << "\033[0;42m";
+        irA(22, 46 + i); cout << "\033[92m" << (char)219 << "\033[0;42;97m";
         Sleep(35);
     }
-    irA(24, 45); cout << "\033[92mListo!\033[0;42m";
+    irA(24, 45); cout << "\033[92mListo!\033[0;42;97m";
     Sleep(400);
 }
 
@@ -45,7 +45,7 @@ void despedida(gestorEscenas& grafica) {
 
     cout << "\033[93m";
     imprimirLento(33, 46, "GRACIAS POR TU VISITA. HASTA PRONTO!", 30);
-    cout << "\033[0;42m";
+    cout << "\033[0;42;97m";
     Sleep(2200);
 }
 

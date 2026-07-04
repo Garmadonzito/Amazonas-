@@ -94,9 +94,9 @@ public:
     }
 
     void listarResenas() {
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
-        imprimirEnPanel(5, "            \033[96m                 RESENAS DE CLIENTES                    \033[0;42m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42;97m");
+        imprimirEnPanel(5, "            \033[96m                 RESENAS DE CLIENTES                    \033[0;42;97m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42;97m");
 
         int fila = 12;
         if (listaResenas->getCabeza() == nullptr) {
