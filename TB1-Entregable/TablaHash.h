@@ -4,7 +4,7 @@
 #include <vector>
 #include <functional>
 
-// Estructura para almacenar los elementos dentro de las listas de colision
+
 template <class T>
 struct ElementoHash {
     std::string clave;
@@ -18,12 +18,10 @@ template <class T>
 class TablaHash {
 private:
     int capacidad;
-    // Este es el Arreglo de punteros a Listas Enlazadas para el encadenamiento 
-    //Nota si quieren usar algo que anteriormente estaba en una estrucutra de datos
-    // encadenenlo xd 
+    
     ListaEnlazada<ElementoHash<T>>** buckets;
 
-    // Funcion has propia 
+    
     int calcularHash(const std::string& clave) {
         unsigned long hashValue = 5381;
         for (char c : clave) {
