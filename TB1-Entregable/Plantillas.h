@@ -194,10 +194,7 @@ static const int obj_anaconda[9][35] = {
 
 
 
-//MASCOTAS (dibujos pixel art convertidos a matrices)
-//Colores: -1 transparente, 14 amarillo, 6 naranja, 0 oscuro, 15 blanco, 12 rojo, 9 azul
 
-//Pollito colgando (cara)
 static const int obj_mascotaPollitoCara[17][17] = {
     {-1,-1,-1,-1,14,14,14,14,14,14,14,14,14,14,14,-1,-1},
     {-1,-1,-1,-1,14, 6, 6, 6, 6, 6, 6, 6, 6, 6,14,-1,-1},
@@ -218,7 +215,6 @@ static const int obj_mascotaPollitoCara[17][17] = {
     {-1,-1,-1,14,14, 6, 6, 6, 6, 6, 6, 6, 6, 6,14,14,14}
 };
 
-//Tucan
 static const int obj_mascotaTucan[17][17] = {
     {-1,-1,-1,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,-1,-1},
     {-1,-1,-1,-1, 0, 0,14,14,14,14, 6, 6, 6, 0,-1,-1,-1},
@@ -239,7 +235,6 @@ static const int obj_mascotaTucan[17][17] = {
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
 };
 
-//Llama peruana
 static const int obj_mascotaLlama[17][17] = {
     {-1, 6, 6, 6, 6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     {14,14, 0, 6, 6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
@@ -260,7 +255,6 @@ static const int obj_mascotaLlama[17][17] = {
     {-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1}
 };
 
-//Pollito (cuerpo completo)
 static const int obj_mascotaPollitoCuerpo[17][17] = {
     {-1,-1,-1,-1,14,14,14,14,14,-1,-1,-1,-1,-1,-1,-1,-1},
     {-1, 6, 6, 6,14,14, 0,14,14,14,-1,-1,-1,-1,-1,-1,-1},
@@ -281,7 +275,6 @@ static const int obj_mascotaPollitoCuerpo[17][17] = {
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
 };
 
-//Sonrisa/flecha de Amazon (va debajo del logo)
 static const int obj_sonrisaAmazon[4][44] = {
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 6, 6,-1,-1},
     { 6, 6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 6, 6, 6, 6, 6,-1},

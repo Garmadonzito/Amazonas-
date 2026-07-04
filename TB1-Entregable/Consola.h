@@ -55,9 +55,9 @@ void Consola::configurarConsola() {
 
     // Establecer fondo verde (2) y texto negro (0) como predeterminado
     SetConsoleTextAttribute(manejadorConsola, (2 * 16) + 0);
-    system("mode con: cols=130 lines=45"); // fuerza el tamano de la ventana
+    system("mode con: cols=130 lines=45");
     system("cls");  // Limpiar con el nuevo esquema de colores
-    cout << "[0;1;42;97m[2J"; // pinta toda la ventana de verde
+    cout << "[0;1;42;97m[2J";
 }
 
 void Consola::establecerColor(int letra, int fondo) {

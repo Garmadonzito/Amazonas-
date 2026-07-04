@@ -4,14 +4,9 @@
 
 using namespace std;
 
-// Arbol Binario de Busqueda AUTO-BALANCEADO (AVL)
-// Se balancea solo con rotaciones para que la altura no se descontrole
-// y las busquedas sigan siendo rapidas. Hecho con template para que sirva
-// con cualquier tipo (int, string, etc).
 template <class T>
 class ArbolAVL {
 private:
-    // Nodo propio del arbol (guarda su altura para calcular el balance)
     struct NodoAVL {
         T dato;
         NodoAVL* izquierda;
@@ -22,14 +17,13 @@ private:
             dato = valor;
             izquierda = nullptr;
             derecha = nullptr;
-            altura = 1; // un nodo nuevo (hoja) tiene altura 1
+            altura = 1;
         }
     };
 
     NodoAVL* raiz;
     int cantidad;
 
-    // Altura de un nodo (si es nullptr cuenta como 0)
     int alturaDe(NodoAVL* nodo) {
         if (nodo == nullptr) return 0;
         return nodo->altura;
@@ -39,14 +33,11 @@ private:
         return (a > b) ? a : b;
     }
 
-    // Factor de balance = altura izquierda - altura derecha
-    // Si esta entre -1 y 1 esta balanceado, sino hay que rotar
     int factorBalance(NodoAVL* nodo) {
         if (nodo == nullptr) return 0;
         return alturaDe(nodo->izquierda) - alturaDe(nodo->derecha);
     }
 
-    // Rotacion simple a la derecha
     NodoAVL* rotarDerecha(NodoAVL* y) {
         NodoAVL* x = y->izquierda;
         NodoAVL* aux = x->derecha;
@@ -54,14 +45,12 @@ private:
         x->derecha = y;
         y->izquierda = aux;
 
-        // recalcular alturas (primero el de abajo)
         y->altura = maximo(alturaDe(y->izquierda), alturaDe(y->derecha)) + 1;
         x->altura = maximo(alturaDe(x->izquierda), alturaDe(x->derecha)) + 1;
 
-        return x; // x queda como nueva raiz de este sub-arbol
+        return x;
     }
 
-    // Rotacion simple a la izquierda
     NodoAVL* rotarIzquierda(NodoAVL* x) {
         NodoAVL* y = x->derecha;
         NodoAVL* aux = y->izquierda;
@@ -75,9 +64,7 @@ private:
         return y;
     }
 
-    // Insertar recursivo: baja, inserta y al regresar balancea
     NodoAVL* insertarRec(NodoAVL* nodo, T valor) {
-        // 1. Insercion normal de un ABB
         if (nodo == nullptr) {
             cantidad++;
             return new NodoAVL(valor);
@@ -89,46 +76,38 @@ private:
             nodo->derecha = insertarRec(nodo->derecha, valor);
         }
         else {
-            return nodo; // dato repetido, no se inserta
+            return nodo;
         }
 
-        // 2. Actualizar altura de este nodo
         nodo->altura = maximo(alturaDe(nodo->izquierda), alturaDe(nodo->derecha)) + 1;
 
-        // 3. Revisar el balance y rotar si hace falta (los 4 casos)
         int balance = factorBalance(nodo);
 
-        // Caso Izquierda-Izquierda
         if (balance > 1 && valor < nodo->izquierda->dato) {
             return rotarDerecha(nodo);
         }
-        // Caso Derecha-Derecha
         if (balance < -1 && nodo->derecha->dato < valor) {
             return rotarIzquierda(nodo);
         }
-        // Caso Izquierda-Derecha
         if (balance > 1 && nodo->izquierda->dato < valor) {
             nodo->izquierda = rotarIzquierda(nodo->izquierda);
             return rotarDerecha(nodo);
         }
-        // Caso Derecha-Izquierda
         if (balance < -1 && valor < nodo->derecha->dato) {
             nodo->derecha = rotarDerecha(nodo->derecha);
             return rotarIzquierda(nodo);
         }
 
-        return nodo; // ya estaba balanceado
+        return nodo;
     }
 
-    // Buscar recursivo
     bool buscarRec(NodoAVL* nodo, T valor) {
         if (nodo == nullptr) return false;
         if (valor < nodo->dato) return buscarRec(nodo->izquierda, valor);
         if (nodo->dato < valor) return buscarRec(nodo->derecha, valor);
-        return true; // son iguales
+        return true;
     }
 
-    // Recorrido inorden: izquierda - raiz - derecha (sale ORDENADO)
     void inordenRec(NodoAVL* nodo, function<void(T)> visitar) {
         if (nodo == nullptr) return;
         inordenRec(nodo->izquierda, visitar);
@@ -144,7 +123,6 @@ private:
         inordenInversoRec(nodo->izquierda, visitar); // Al final los menores
     }
 
-    // Liberar memoria recursivo (post-orden para borrar hijos primero)
     void liberarRec(NodoAVL* nodo) {
         if (nodo == nullptr) return;
         liberarRec(nodo->izquierda);
@@ -170,27 +148,22 @@ public:
         return buscarRec(raiz, valor);
     }
 
-    // Busca el "piso": el valor MAS GRANDE del arbol que no se pasa del limite.
-    // Si un nodo se pasa, bajo a la izquierda; si me alcanza, lo guardo como
-    // candidato y sigo a la derecha por si hay uno mejor. Recorro un solo
-    // camino del arbol, por eso es O(log n).
     bool buscarPiso(T limite, T& resultado) {
         NodoAVL* actual = raiz;
         bool encontrado = false;
         while (actual != nullptr) {
             if (limite < actual->dato) {
-                actual = actual->izquierda; // se pasa, busco algo mas chico
+                actual = actual->izquierda;
             }
             else {
-                resultado = actual->dato;   // me alcanza, lo guardo de candidato
+                resultado = actual->dato;
                 encontrado = true;
-                actual = actual->derecha;   // pruebo si hay uno mejor
+                actual = actual->derecha;
             }
         }
         return encontrado;
     }
 
-    // El menor valor del arbol = caminar siempre a la izquierda hasta el final
     bool getMinimo(T& resultado) {
         if (raiz == nullptr) return false;
         NodoAVL* actual = raiz;
@@ -199,7 +172,6 @@ public:
         return true;
     }
 
-    // El mayor valor del arbol = caminar siempre a la derecha hasta el final
     bool getMaximo(T& resultado) {
         if (raiz == nullptr) return false;
         NodoAVL* actual = raiz;
@@ -208,7 +180,6 @@ public:
         return true;
     }
 
-    // Recorre en orden y por cada dato llama a la funcion/lambda que le pases
     void recorrerInorden(function<void(T)> visitar) {
         inordenRec(raiz, visitar);
     }
@@ -221,7 +192,6 @@ public:
         return cantidad;
     }
 
-    // Altura total del arbol (sirve para comprobar que esta balanceado)
     int getAltura() {
         return alturaDe(raiz);
     }

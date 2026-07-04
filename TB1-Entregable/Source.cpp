@@ -2,18 +2,15 @@
 #include "Cliente.h"
 #include "Vendedor.h"
 
-// Pinta un rectangulo con el verde del fondo (sirve para "borrar" la mascota
-// en cada paso de la animacion sin redibujar todo el fondo)
 void borrarZona(int x, int y, int ancho, int alto) {
     HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hCon, 2); // 2 = verde del fondo
+    SetConsoleTextAttribute(hCon, 2);
     for (int i = 0; i < alto; i++) {
         gotoxy(x, y + i);
         for (int j = 0; j < ancho; j++) cout << (char)219;
     }
 }
 
-// Barra de carga al iniciar el programa
 void barraDeCarga() {
     limpiarPantalla();
     irA(20, 45); cout << "\033[93mCargando Amazonas tu sitio de compras...\033[0;1;42;97m";
@@ -27,7 +24,6 @@ void barraDeCarga() {
     Sleep(400);
 }
 
-// Pantalla de despedida: las 4 mascotas se despiden
 void despedida(gestorEscenas& grafica) {
     limpiarPantalla();
     grafica.dibujarFondoSinLogo();
@@ -49,7 +45,6 @@ void despedida(gestorEscenas& grafica) {
     Sleep(2200);
 }
 
-// Animacion de bienvenida: el tucan cruza la pantalla volando de izquierda a derecha
 void animarIntroTucan(gestorEscenas& grafica) {
     limpiarPantalla();
     grafica.dibujarFondoSinLogo();
@@ -60,9 +55,9 @@ void animarIntroTucan(gestorEscenas& grafica) {
     for (int x = 14; x <= 92; x += 2) {
         tucan.dibujarMatriz(x, 15);
         Sleep(25);
-        borrarZona(x, 15, 2, 17); // borra la franja que va dejando atras
+        borrarZona(x, 15, 2, 17);
     }
-    borrarZona(92, 15, 17, 17); // limpia el tucan al final
+    borrarZona(92, 15, 17, 17);
 }
 
 int main() {
@@ -82,8 +77,8 @@ int main() {
     //BORRAR SOLO PARA PRUEBAS
     */
 
-    barraDeCarga();            // barra de carga al iniciar
-    animarIntroTucan(grafica); // el tucan da la bienvenida una sola vez
+    barraDeCarga();
+    animarIntroTucan(grafica);
 
     int opcion;
     do {

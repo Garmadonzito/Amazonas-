@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include <Windows.h> // para Sleep en los efectos visuales
+#include <Windows.h>
 
 using namespace std;
 
@@ -20,8 +20,6 @@ const int TEXT_ANCHO = 80;
 const int TEXT_ALTO = 35;
 inline void limpiarPantalla() {
     system("cls||clear");
-    // Pinta toda la ventana de verde (sin importar su tamano) para que
-    // no queden zonas negras si la terminal es mas grande que el fondo
     cout << "[0;1;42;97m[2J";
 }
 
@@ -58,7 +56,6 @@ inline void imprimirEnPanel(int fila, const string& texto, int color = 0) {
     cout << texto << "\033[0;1;42;97m";
 }
 
-// Efecto maquina de escribir: imprime el texto letra por letra
 inline void imprimirLento(int fila, int col, const string& texto, int retardo = 15) {
     irA(fila, col);
     for (char letra : texto) {
@@ -68,7 +65,6 @@ inline void imprimirLento(int fila, int col, const string& texto, int retardo = 
     }
 }
 
-// Dibuja un marco con caracteres de caja (201=esquina sup izq, 205=linea
 // horizontal, 187=sup der, 186=linea vertical, 200=inf izq, 188=inf der)
 inline void dibujarMarco(int fila, int col, int ancho, int alto, const string& colorAnsi = "96") {
     cout << "\033[" << colorAnsi << "m";
@@ -87,9 +83,8 @@ inline void dibujarMarco(int fila, int col, int ancho, int alto, const string& c
     cout << "\033[0;1;42;97m";
 }
 
-// Transicion tipo cortina: barre la pantalla con columnas verdes
 inline void transicionCortina() {
-    cout << "\033[42m"; // fondo verde
+    cout << "\033[42m";
     for (int col = 1; col <= 124; col += 3) {
         for (int fila = 1; fila <= 44; fila++) {
             irA(fila, col);

@@ -62,8 +62,6 @@ public:
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
             };
 
-        // El cin >> opcion del menu principal deja un Enter pendiente en el buffer;
-        // si no se limpia, getline lo lee como DNI vacio y sale "DNI invalido" sin escribir nada
         cin.ignore(10000, '\n');
 
         bool primeraVez = true;

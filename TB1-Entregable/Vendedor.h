@@ -11,28 +11,24 @@ class Vendedor : public Usuario {
 private:
     const string CODIGO_ACCESO = "UPC2026";
 
-    // Pinta un rectangulo con el verde del fondo (para borrar la mascota
-    // en cada paso de la animacion)
     void borrarZonaMascota(int x, int y, int ancho, int alto) {
         HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(hCon, 2); // 2 = verde del fondo
+        SetConsoleTextAttribute(hCon, 2);
         for (int i = 0; i < alto; i++) {
             gotoxy(x, y + i);
             for (int j = 0; j < ancho; j++) cout << (char)219;
         }
     }
 
-    // Animacion: la llama entra caminando al panel de izquierda a derecha.
-    // El "rebote" se logra alternando la fila entre 18 y 17 segun el paso.
     void animarLlamaCaminando(Matriz& llama) {
         for (int x = 1; x <= 13; x++) {
-            int filaPaso = 18 - (x % 2); // un paso arriba, un paso abajo
+            int filaPaso = 18 - (x % 2);
             llama.dibujarMatriz(x, filaPaso);
             Sleep(70);
-            borrarZonaMascota(x, 17, 1, 19); // borra la columna que deja atras
-            if (x % 2 != 0) borrarZonaMascota(x, 17, 17, 1); // limpia la fila del rebote
+            borrarZonaMascota(x, 17, 1, 19);
+            if (x % 2 != 0) borrarZonaMascota(x, 17, 17, 1);
         }
-        llama.dibujarMatriz(13, 18); // posicion final
+        llama.dibujarMatriz(13, 18);
     }
 
 public:
@@ -48,8 +44,6 @@ public:
         imprimirLento(5, PANEL_COL + 16, "ACCESO DE ADMINISTRADOR", 20);
         cout << "\033[0;1;42;97m";
 
-        // Texto centrado DENTRO de la nube (la nube ocupa columnas 35-91, filas 16-36)
-        // y con fondo blanco (47) para que se funda con ella
         irA(24, 45); cout << "\033[30;107mIngrese codigo de seguridad: ";
         string pass; cin >> pass;
         cout << "\033[0;1;42;97m";
@@ -133,11 +127,10 @@ public:
         gestorEscenas grafica; // ¡Correccion E0020 aplicada!
         grafica.setEscena(gestorEscenas::CATALOGO);
 
-        // Mascota decorativa del panel del vendedor
         Matriz llama;
         llama.inicializar(mascotaLlama);
-        bool llamaYaEntro = false; // la animacion solo se ve al entrar al panel
-        transicionCortina();       // entrada con efecto de barrido
+        bool llamaYaEntro = false;
+        transicionCortina();
 
         do {
             limpiarZonaVerde();

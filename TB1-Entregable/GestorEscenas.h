@@ -60,7 +60,6 @@ void gestorEscenas::configObjEscena() {
 		Anaconda->inicializar(anaconda);
 		listaObjetos.push_back({ Anaconda,47,6 });
 
-		//Mascota decorativa del menu principal
 		Matriz* pollito = new Matriz();
 		pollito->inicializar(mascotaPollitoCara);
 		listaObjetos.push_back({ pollito,12,20 });
@@ -72,7 +71,6 @@ void gestorEscenas::configObjEscena() {
 		nubebig->inicializar(nubeBig);
 		listaObjetos.push_back({ nubebig ,35,15 });//Objeto, Ubicacion en X, Ubicacion en Y
 
-		//Mascotas decorativas a los costados (no chocan con el texto del menu)
 		Matriz* pollito = new Matriz();
 		pollito->inicializar(mascotaPollitoCara);
 		listaObjetos.push_back({ pollito,12,20 });
