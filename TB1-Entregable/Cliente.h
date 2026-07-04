@@ -649,9 +649,10 @@ public:
                 irA(10, PANEL_COL); cout << "\033[0;1;42;97m  Cuanto dinero tienes? S/. "; cin >> presupuesto;
                 if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); presupuesto = 0; }
 
-                // Aquí podrías listar cosas que alcancen con ese presupuesto...
-                irA(12, PANEL_COL); cout << "\033[92m  >> Procesando opciones para S/." << presupuesto << "...\033[0;1;42;97m";
-                pausaRetroceder(15);
+                limpiarZonaVerde();
+                grafica.dibujarFondoSinLogo();
+                inv.asistentePresupuesto(presupuesto);
+                pausaRetroceder(38);
                 historialNavegacion.desapilar();
             }
         }
