@@ -217,9 +217,9 @@ public:
 
     void listarClientesRegistrados() {
         limpiarZonaVerde();
-        imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[95m              LISTADO DE CLIENTES REGISTRADOS           \033[0m");
-        imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[95m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[95m              LISTADO DE CLIENTES REGISTRADOS           \033[0;42m");
+        imprimirEnPanel(6, "            \033[95m========================================================\033[0;42m");
 
         std::vector<RegistroCliente> clientesTemp;
         auto recolector = [&clientesTemp](std::string clave, RegistroCliente& cliente) {
@@ -243,8 +243,8 @@ public:
         imprimirEnPanel(fila++, "--------------------------------------------------------");
         imprimirEnPanel(fila++, "  TOTAL DE CLIENTES EN LA TABLA HASH: " + std::to_string(clientesTemp.size()), 92);
 
-        irA(fila + 1, PANEL_COL); cout << "\033[0m  \033[93m>> Presione 'C' para ordenar alfabeticamente (Merge Sort)\033[0m";
-        irA(fila + 2, PANEL_COL); cout << "\033[0m  \033[93m>> Presione cualquier otra tecla para volver al menu...\033[0m";
+        irA(fila + 1, PANEL_COL); cout << "\033[0;42m  \033[93m>> Presione 'C' para ordenar alfabeticamente (Merge Sort)\033[0;42m";
+        irA(fila + 2, PANEL_COL); cout << "\033[0;42m  \033[93m>> Presione cualquier otra tecla para volver al menu...\033[0;42m";
 
         char tecla = _getch();
         if (tecla == 'c' || tecla == 'C') {
@@ -255,9 +255,9 @@ public:
             mergeSort<RegistroCliente>(clientesTemp, comparadorAlfabetico);
 
             limpiarZonaVerde();
-            imprimirEnPanel(4, "            \033[95m========================================================\033[0m");
-            imprimirEnPanel(5, "            \033[95m       DIRECTORIO DE CLIENTES (A-Z) - MERGE SORT        \033[0m");
-            imprimirEnPanel(6, "            \033[95m========================================================\033[0m");
+            imprimirEnPanel(4, "            \033[95m========================================================\033[0;42m");
+            imprimirEnPanel(5, "            \033[95m       DIRECTORIO DE CLIENTES (A-Z) - MERGE SORT        \033[0;42m");
+            imprimirEnPanel(6, "            \033[95m========================================================\033[0;42m");
 
             int filaNueva = 12;
             for (const auto& c : clientesTemp) {
@@ -271,7 +271,7 @@ public:
             imprimirEnPanel(filaNueva++, "--------------------------------------------------------");
             imprimirEnPanel(filaNueva, "  TOTAL: " + std::to_string(clientesTemp.size()) + " clientes ordenados exitosamente.", 92);
 
-            irA(filaNueva + 2, PANEL_COL); cout << "\033[93m>> Presione cualquier tecla para continuar...\033[0m";
+            irA(filaNueva + 2, PANEL_COL); cout << "\033[93m>> Presione cualquier tecla para continuar...\033[0;42m";
             (void)_getch();
         }
     }
@@ -294,9 +294,9 @@ public:
             return;
         }
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m                REPORTE DE STOCK GENERAL                \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m                REPORTE DE STOCK GENERAL                \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         int fila = 12;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -389,7 +389,7 @@ public:
 
     void mostrarStockBajo(int limite) {
         limpiarZonaVerde();
-        imprimirEnPanel(4, "            \033[91m========== ALERTAS DE STOCK CRITICO ==========\033[0m");
+        imprimirEnPanel(4, "            \033[91m========== ALERTAS DE STOCK CRITICO ==========\033[0;42m");
         int fila = 12;
 
         auto esCritico = [limite](Producto p) -> bool { return p.stock < limite; };
@@ -412,9 +412,9 @@ public:
             return;
         }
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m                  CATALOGO AMAZONAS                     \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m                  CATALOGO AMAZONAS                     \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         int fila = 12;
         std::vector<std::string> categorias;
@@ -464,9 +464,9 @@ public:
             actual = actual->siguiente;
         }
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m          ASISTENTE DE PRESUPUESTO (ARBOL AVL)          \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m          ASISTENTE DE PRESUPUESTO (ARBOL AVL)          \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         if (arbolPrecios.estaVacio()) {
             imprimirEnPanel(12, "  Inventario vacio.", 91);
@@ -511,9 +511,9 @@ public:
 
         quickSort<Producto>(copia, [](Producto a, Producto b) { return a.precio < b.precio; });
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m       PRODUCTOS ORDENADOS POR PRECIO (QUICK SORT)      \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m       PRODUCTOS ORDENADOS POR PRECIO (QUICK SORT)      \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         if (copia.empty()) {
             imprimirEnPanel(12, "  Inventario vacio.", 91);
@@ -539,9 +539,9 @@ public:
             return p.precio >= minPrecio && p.precio <= maxPrecio;
             };
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m          PRODUCTOS FILTRADOS POR RANGO DE PRECIO       \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m          PRODUCTOS FILTRADOS POR RANGO DE PRECIO       \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         int fila = 12;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -569,18 +569,18 @@ public:
             actual = actual->siguiente;
         }
 
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m            VALOR TOTAL DEL INVENTARIO                  \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m            VALOR TOTAL DEL INVENTARIO                  \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         imprimirEnPanel(12, "  Valor total en stock: S/. " + std::to_string((int)total), 92);
     }
 
     void buscarPorNombre(std::string nom) {
         Nodo<Producto>* actual = listaProductos->getCabeza();
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m                 --- RESULTADOS ---                     \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m                 --- RESULTADOS ---                     \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         int fila = 12;
         bool encontrado = false;
@@ -638,9 +638,9 @@ public:
         limpiarZonaVerde();
         cargarVentasDesdeArchivo();
 
-        imprimirEnPanel(4, "    \033[96m=======================================================================\033[0m");
-        imprimirEnPanel(5, "    \033[96m                 HISTORIAL DE VENTAS (LOGISTICA)                       \033[0m");
-        imprimirEnPanel(6, "    \033[96m=======================================================================\033[0m");
+        imprimirEnPanel(4, "    \033[96m=======================================================================\033[0;42m");
+        imprimirEnPanel(5, "    \033[96m                 HISTORIAL DE VENTAS (LOGISTICA)                       \033[0;42m");
+        imprimirEnPanel(6, "    \033[96m=======================================================================\033[0;42m");
 
         int fila = 12;
         if (registroVentas->estaVacia()) {
@@ -696,9 +696,9 @@ public:
         ordenarHistorialPorMonto(misVentas);
 
         limpiarZonaVerde();
-        imprimirEnPanel(4, "            \033[93m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[93m        MIS COMPRAS (ORDENADAS POR MONTO)               \033[0m");
-        imprimirEnPanel(6, "            \033[93m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[93m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[93m        MIS COMPRAS (ORDENADAS POR MONTO)               \033[0;42m");
+        imprimirEnPanel(6, "            \033[93m========================================================\033[0;42m");
 
         int fila = 12;
         for (const auto& v : misVentas) {
@@ -710,12 +710,12 @@ public:
     void mostrarTopClientesAVL() {
         limpiarZonaVerde();
 
-        irA(4, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
-        irA(5, PANEL_COL); cout << "            \033[95m          TOP CLIENTES FRECUENTES (ARBOL AVL)           \033[0m";
-        irA(6, PANEL_COL); cout << "            \033[95m========================================================\033[0m";
+        irA(4, PANEL_COL); cout << "            \033[95m========================================================\033[0;42m";
+        irA(5, PANEL_COL); cout << "            \033[95m          TOP CLIENTES FRECUENTES (ARBOL AVL)           \033[0;42m";
+        irA(6, PANEL_COL); cout << "            \033[95m========================================================\033[0;42m";
 
         if (registroVentas == nullptr || registroVentas->estaVacia()) {
-            irA(12, PANEL_COL); cout << "  \033[91m>> No hay ventas registradas en el sistema.\033[0m";
+            irA(12, PANEL_COL); cout << "  \033[91m>> No hay ventas registradas en el sistema.\033[0;42m";
             return;
         }
 
@@ -767,14 +767,14 @@ public:
         arbolReporte.recorrerInordenInverso([&filaDibujo](ClienteFrecuente cf) {
             if (filaDibujo < 36) {
                 irA(filaDibujo, PANEL_COL);
-                cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0m "
+                cout << "  \033[92m[" << cf.cantidadCompras << " unds]\033[0;42m "
                     << cf.nombre << " | Correo: " << cf.correo;
                 filaDibujo += 2;
             }
             });
 
         irA(filaDibujo + 2, PANEL_COL);
-        cout << "\033[96m>> Reporte generado exitosamente mediante Arbol AVL balanceado.\033[0m";
+        cout << "\033[96m>> Reporte generado exitosamente mediante Arbol AVL balanceado.\033[0;42m";
     }
 
     void mostrarInvResenasHeap() {
@@ -784,9 +784,9 @@ public:
         }
 
         limpiarZonaVerde();
-        imprimirEnPanel(4, "            \033[96m========================================================\033[0m");
-        imprimirEnPanel(5, "            \033[96m         TOP PRODUCTOS POR REPUTACION (HEAP SORT)       \033[0m");
-        imprimirEnPanel(6, "            \033[96m========================================================\033[0m");
+        imprimirEnPanel(4, "            \033[96m========================================================\033[0;42m");
+        imprimirEnPanel(5, "            \033[96m         TOP PRODUCTOS POR REPUTACION (HEAP SORT)       \033[0;42m");
+        imprimirEnPanel(6, "            \033[96m========================================================\033[0;42m");
 
         vector<ProductoRanking> copiaRanking;
         Nodo<Producto>* actual = listaProductos->getCabeza();
@@ -810,7 +810,7 @@ public:
 
             float prom = copiaRanking[i].promedio;
 
-            string estrellas = (prom > 0) ? " [" + std::to_string(prom).substr(0, 3) + " \033[93m*\033[0m]" : " [Sin resenas]";
+            string estrellas = (prom > 0) ? " [" + std::to_string(prom).substr(0, 3) + " \033[93m*\033[0;42m]" : " [Sin resenas]";
 
             string item = "  [ID: " + std::to_string(copiaRanking[i].prod.id) + "] " +
                 copiaRanking[i].prod.nombre + estrellas +
@@ -820,7 +820,7 @@ public:
         }
 
         fila++;
-        imprimirEnPanel(fila, "\033[92m>> Catalogo de reputacion ordenado mediante Max-Heap de manera exitosa.\033[0m");
+        imprimirEnPanel(fila, "\033[92m>> Catalogo de reputacion ordenado mediante Max-Heap de manera exitosa.\033[0;42m");
     }
 
     // =========================================================
