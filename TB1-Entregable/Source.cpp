@@ -85,10 +85,6 @@ int main() {
     barraDeCarga();            // barra de carga al iniciar
     animarIntroTucan(grafica); // el tucan da la bienvenida una sola vez
 
-    // Sonrisa de Amazon que va debajo del logo
-    Matriz sonrisa;
-    sonrisa.inicializar(sonrisaAmazon);
-
     int opcion;
     do {
         limpiarPantalla();
@@ -101,8 +97,6 @@ int main() {
         irA(4, 22);  cout << "/_______/ |   / /| |   / /|_/ /   / /| |    / /  / / / /   /    /    / /| |  \\ __ \\ ";
         irA(5, 22);  cout << "|       | |  / ___ |  / /  / /   / ___ |   / /_ / /_/ /   / /|  /   / ___ | ___/ / ";
         irA(6, 22);  cout << "|_______|/  /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/   /_/ |_/   /_/  |_|/____/  ";
-
-        sonrisa.dibujarMatriz(40, 7); // la flecha-sonrisa de Amazon bajo el logo
 
         consola.establecerColor(0, 15);
 
