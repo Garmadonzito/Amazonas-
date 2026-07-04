@@ -15,7 +15,7 @@ void borrarZona(int x, int y, int ancho, int alto) {
 
 // Barra de carga al iniciar el programa
 void barraDeCarga() {
-    system("cls");
+    limpiarPantalla();
     irA(20, 45); cout << "\033[93mCargando Amazonas tu sitio de compras...\033[0;1;42;97m";
     irA(22, 45); cout << "\033[0;1;42;97m[";
     irA(22, 76); cout << "]";
@@ -29,7 +29,7 @@ void barraDeCarga() {
 
 // Pantalla de despedida: las 4 mascotas se despiden
 void despedida(gestorEscenas& grafica) {
-    system("cls");
+    limpiarPantalla();
     grafica.dibujarFondoSinLogo();
 
     Matriz m1, m2, m3, m4;
@@ -51,7 +51,7 @@ void despedida(gestorEscenas& grafica) {
 
 // Animacion de bienvenida: el tucan cruza la pantalla volando de izquierda a derecha
 void animarIntroTucan(gestorEscenas& grafica) {
-    system("cls");
+    limpiarPantalla();
     grafica.dibujarFondoSinLogo();
 
     Matriz tucan;
@@ -91,7 +91,7 @@ int main() {
 
     int opcion;
     do {
-        system("cls");
+        limpiarPantalla();
         grafica.setEscena(gestorEscenas::PAGINA_PRINCIPAL);
         grafica.dibujarEscena();
         consola.establecerColor(0, 2);
@@ -123,7 +123,7 @@ int main() {
 
         switch (opcion) {
         case 1: {
-            system("cls");
+            limpiarPantalla();
             // Estoy pasando miTienda por referencia para utilizar la Tabla Hash en memoria 
             // lo dejo como anotacion si quieren referenciar tambien los arboles binarios xd
             usuario->login(*miTienda);
@@ -131,7 +131,7 @@ int main() {
             break;
         }
         case 2: {
-            system("cls");
+            limpiarPantalla();
             if (administrador->login()) {
                 administrador->menu(*miTienda);
             }

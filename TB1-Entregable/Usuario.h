@@ -20,6 +20,9 @@ const int TEXT_ANCHO = 80;
 const int TEXT_ALTO = 35;
 inline void limpiarPantalla() {
     system("cls||clear");
+    // Pinta toda la ventana de verde (sin importar su tamano) para que
+    // no queden zonas negras si la terminal es mas grande que el fondo
+    cout << "[0;1;42;97m[2J";
 }
 
 inline void irA(int fila, int col) {
