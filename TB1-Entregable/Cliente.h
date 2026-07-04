@@ -27,7 +27,7 @@ private:
 
     void pausaRetroceder(int fila = 40) {
         irA(fila, PANEL_COL);
-        cout << "\033[93m>> Presione ESC para volver atras...\033[0;42;97m";
+        cout << "\033[42;93m>> Presione ESC para volver atras...\033[0;1;42;97m";
         while (true) {
             if (_kbhit()) {
                 int c = _getch();
@@ -54,9 +54,9 @@ public:
         limpiarPantalla();
         grafica.dibujarFondoSinLogo();
 
-        irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[96m========================================================\033[0;42;97m";
-        irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[96m                    LOGIN DE CLIENTE                    \033[0;42;97m";
-        irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[96m========================================================\033[0;42;97m";
+        irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m========================================================\033[0;1;42;97m";
+        irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m                    LOGIN DE CLIENTE                    \033[0;1;42;97m";
+        irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m========================================================\033[0;1;42;97m";
 
         auto validarDNI = [](string d) -> bool {
             return d.length() == 8 && d.find_first_not_of("0123456789") == string::npos;
@@ -70,12 +70,12 @@ public:
         bool dniValido = false;
         do {
             if (!primeraVez) {
-                irA(22, PANEL_COL); cout << "\033[91m>> Error: DNI invalido. Debe tener exactamente 8 digitos numericos.\033[0;42;97m";
+                irA(22, PANEL_COL); cout << "\033[91m>> Error: DNI invalido. Debe tener exactamente 8 digitos numericos.\033[0;1;42;97m";
             }
             primeraVez = false;
 
             irA(14, PANEL_COL); cout << string(60, ' ');
-            irA(14, PANEL_COL); cout << "\033[0;42;97mDNI: ";
+            irA(14, PANEL_COL); cout << "\033[0;1;42;97mDNI: ";
             getline(cin, dni);
             if (validarDNI(dni)) dniValido = true;
         } while (!dniValido);
@@ -88,12 +88,12 @@ public:
             this->nombre = std::string(clienteEncontrado->nombre);
             this->correo = std::string(clienteEncontrado->correo);
 
-            irA(16, PANEL_COL); cout << "\033[0;42;97mNombre: " << this->nombre << " (Cargado en memoria)";
-            irA(18, PANEL_COL); cout << "\033[0;42;97mCorreo: " << this->correo << " (Cargado en memoria)";
-            irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido nuevamente, " << this->nombre << "! (Acceso instantaneo)\033[0;42;97m";
+            irA(16, PANEL_COL); cout << "\033[0;1;42;97mNombre: " << this->nombre << " (Cargado en memoria)";
+            irA(18, PANEL_COL); cout << "\033[0;1;42;97mCorreo: " << this->correo << " (Cargado en memoria)";
+            irA(24, PANEL_COL); cout << "\033[92m>> Bienvenido nuevamente, " << this->nombre << "! (Acceso instantaneo)\033[0;1;42;97m";
         }
         else {
-            irA(16, PANEL_COL); cout << "\033[0;42;97mNombre nuevo: "; getline(cin, nombre);
+            irA(16, PANEL_COL); cout << "\033[0;1;42;97mNombre nuevo: "; getline(cin, nombre);
 
             auto validarCorreo = [](string email) -> bool {
                 return email.find('@') != string::npos && email.find(".com") != string::npos;
@@ -103,12 +103,12 @@ public:
             bool correoValido = false;
             do {
                 if (!primeraVezCorreo) {
-                    irA(22, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0;42;97m";
+                    irA(22, PANEL_COL); cout << "\033[91m>> Error: Formato de correo invalido.\033[0;1;42;97m";
                 }
                 primeraVezCorreo = false;
 
                 irA(18, PANEL_COL); cout << string(60, ' ');
-                irA(18, PANEL_COL); cout << "\033[0;42;97mCorreo: ";
+                irA(18, PANEL_COL); cout << "\033[0;1;42;97mCorreo: ";
                 getline(cin, correo);
                 if (validarCorreo(correo)) correoValido = true;
             } while (!correoValido);
@@ -116,19 +116,19 @@ public:
             irA(22, PANEL_COL); cout << string(60, ' ');
 
             inv.registrarNuevoCliente(this->nombre, this->correo, this->dni);
-            irA(24, PANEL_COL); cout << "\033[92m>> Registro masivo exitoso. Bienvenido " << this->nombre << "!\033[0;42;97m";
+            irA(24, PANEL_COL); cout << "\033[92m>> Registro masivo exitoso. Bienvenido " << this->nombre << "!\033[0;1;42;97m";
         }
         pausa();
     }
 
     void bucleAgregarRapido(Inventario& inv, int filaInicio) {
         irA(filaInicio, PANEL_COL);
-        cout << "\033[0;42;97m>> Ingrese ID para agregar. [\033[93mESC\033[0;42;97m] para terminar.";
+        cout << "\033[0;1;42;97m>> Ingrese ID para agregar. [\033[93mESC\033[0;1;42;97m] para terminar.";
 
         int filaMsg = filaInicio + 2;
         while (true) {
             irA(filaMsg, PANEL_COL); cout << string(50, ' ');
-            irA(filaMsg, PANEL_COL); cout << "\033[0;42;97mID: ";
+            irA(filaMsg, PANEL_COL); cout << "\033[0;1;42;97mID: ";
             string buf;
             bool terminar = false;
 
@@ -148,10 +148,10 @@ public:
             irA(filaMsg + 1, PANEL_COL);
             if (p != nullptr && p->stock > 0) {
                 carrito->agregar(id);
-                cout << "\033[92m>> '" << p->nombre << "' agregado! Stock: " << p->stock << "          \033[0;42;97m";
+                cout << "\033[92m>> '" << p->nombre << "' agregado! Stock: " << p->stock << "          \033[0;1;42;97m";
             }
             else {
-                cout << "\033[91m>> ID invalido o sin stock.                         \033[0;42;97m";
+                cout << "\033[91m>> ID invalido o sin stock.                         \033[0;1;42;97m";
             }
         }
     }
@@ -167,13 +167,13 @@ public:
     }
 
     void verCarrito(Inventario& inv) {
-        irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
-        irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[93m                   TU CARRITO ACTUAL                    \033[0;42;97m";
-        irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
+        irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
+        irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m                   TU CARRITO ACTUAL                    \033[0;1;42;97m";
+        irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
 
         int fila = 12;
         if (carrito->getCabeza() == nullptr) {
-            irA(fila, PANEL_COL); cout << "\033[0;42;97m  El carrito esta vacio.";
+            irA(fila, PANEL_COL); cout << "\033[0;1;42;97m  El carrito esta vacio.";
             return;
         }
 
@@ -187,31 +187,31 @@ public:
         while (actual != nullptr) {
             Producto* p = inv.obtenerProducto(actual->dato);
             if (p != nullptr) {
-                irA(fila++, PANEL_COL); cout << "\033[0;42;97m  " << i++ << ". " << p->nombre << " - S/. " << (int)p->precio;
+                irA(fila++, PANEL_COL); cout << "\033[0;1;42;97m  " << i++ << ". " << p->nombre << " - S/. " << (int)p->precio;
                 CalcularTotal(total, p->precio);
             }
             actual = actual->siguiente;
         }
         if (comprasRealizadas == 0 && total > 0) {
             CalcularTotalOferta(total);
-            irA(fila++, PANEL_COL); cout << "\033[93m  Descuento de bienvenida (15%) aplicado!\033[0;42;97m";
+            irA(fila++, PANEL_COL); cout << "\033[42;93m  Descuento de bienvenida (15%) aplicado!\033[0;1;42;97m";
         }
 
         fila++;
         if (direccionEnvio.esValida()) {
-            irA(fila++, PANEL_COL); cout << "\033[96mDATOS DE ENTREGA:\033[0;42;97m";
+            irA(fila++, PANEL_COL); cout << "\033[96mDATOS DE ENTREGA:\033[0;1;42;97m";
             direccionEnvio.mostrar(fila);
             fila += 4;
         }
         else {
-            irA(fila++, PANEL_COL); cout << "\033[91m[!] Direccion no registrada. Se usara recojo en tienda.\033[0;42;97m";
+            irA(fila++, PANEL_COL); cout << "\033[91m[!] Direccion no registrada. Se usara recojo en tienda.\033[0;1;42;97m";
         }
 
-        irA(fila++, PANEL_COL); cout << "\033[0;42;97m--------------------------------------------------------";
+        irA(fila++, PANEL_COL); cout << "\033[0;1;42;97m--------------------------------------------------------";
         double montoIGV = calcularIGV(total);
-        irA(fila++, PANEL_COL); cout << "\033[0;42;97m  Subtotal (sin IGV): S/. " << (int)(total - montoIGV);
-        irA(fila++, PANEL_COL); cout << "\033[0;42;97m  IGV (18%):          S/. " << (int)montoIGV;
-        irA(fila, PANEL_COL); cout << "\033[92m  TOTAL A PAGAR:      S/. " << (int)total << "\033[0;42;97m";
+        irA(fila++, PANEL_COL); cout << "\033[0;1;42;97m  Subtotal (sin IGV): S/. " << (int)(total - montoIGV);
+        irA(fila++, PANEL_COL); cout << "\033[0;1;42;97m  IGV (18%):          S/. " << (int)montoIGV;
+        irA(fila, PANEL_COL); cout << "\033[92m  TOTAL A PAGAR:      S/. " << (int)total << "\033[0;1;42;97m";
     }
 
     void seleccionarMetodoPago(double total) {
@@ -219,13 +219,13 @@ public:
         limpiarZonaVerde();
         grafica.dibujarFondoSinLogo();
 
-        irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[95m========================================================\033[0;42;97m";
-        irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[95m                SELECCIONA METODO DE PAGO               \033[0;42;97m";
-        irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[95m========================================================\033[0;42;97m";
+        irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[95m========================================================\033[0;1;42;97m";
+        irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[95m                SELECCIONA METODO DE PAGO               \033[0;1;42;97m";
+        irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[95m========================================================\033[0;1;42;97m";
 
-        irA(14, PANEL_COL); cout << "\033[0;42;97m    1. Tarjeta de Credito / Debito";
-        irA(16, PANEL_COL); cout << "\033[0;42;97m    2. Yape / Plin (Codigo QR)";
-        irA(20, PANEL_COL); cout << "\033[0;42;97m    Opcion: ";
+        irA(14, PANEL_COL); cout << "\033[0;1;42;97m    1. Tarjeta de Credito / Debito";
+        irA(16, PANEL_COL); cout << "\033[0;1;42;97m    2. Yape / Plin (Codigo QR)";
+        irA(20, PANEL_COL); cout << "\033[0;1;42;97m    Opcion: ";
         int op; cin >> op;
 
         if (op == 1) {
@@ -247,7 +247,7 @@ public:
         grafica.dibujarFondoSinLogo();
 
         if (carrito->getCabeza() == nullptr) {
-            irA(18, PANEL_COL); cout << "\033[0;42;97m  El carrito esta vacio. Agrega productos primero.";
+            irA(18, PANEL_COL); cout << "\033[0;1;42;97m  El carrito esta vacio. Agrega productos primero.";
             pausaRetroceder();
             return;
         }
@@ -281,7 +281,7 @@ public:
         limpiarZonaVerde();
         grafica.dibujarFondoSinLogo();
         comprasRealizadas++;
-        irA(20, PANEL_COL); cout << "  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0;42;97m";
+        irA(20, PANEL_COL); cout << "  \033[92m>> Compra procesada con exito. Gracias por preferirnos!\033[0;1;42;97m";
         pausaRetroceder(24);
     }
 
@@ -293,21 +293,21 @@ public:
             limpiarZonaVerde();
             grafica.dibujarFondoSinLogo();
 
-            irA(2, PANEL_COL); cout << "\033[93m   ______ \033[92m   ___      __  ___    ___     ____   ___     _  __     ___     ____ \033[0;42;97m";
-            irA(3, PANEL_COL); cout << "\033[93m  /     /|\033[92m  /   |    /  |/  /   /   |   /_  /  / _ \\   / |/ /    /   |   / __/ \033[0;42;97m";
-            irA(4, PANEL_COL); cout << "\033[93m /_____/ |\033[92m / /| |   / /|_/ /   / /| |    / /  / / / / /    /    / /| |  \\__ \\ \033[0;42;97m";
-            irA(5, PANEL_COL); cout << "\033[93m |     | |\033[92m / ___ |  / /  / /   / ___ |   / /_/ /_/ / / /|  /   / ___ | ___/ /  \033[0;42;97m";
-            irA(6, PANEL_COL); cout << "\033[93m |_____|/ \033[92m /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/ /_/ |_/   /_/  |_|/____/  \033[0;42;97m";
+            irA(2, PANEL_COL); cout << "\033[42;93m   ______ \033[1;97m   ___      __  ___    ___     ____   ___     _  __     ___     ____ \033[0;1;42;97m";
+            irA(3, PANEL_COL); cout << "\033[42;93m  /     /|\033[1;97m  /   |    /  |/  /   /   |   /_  /  / _ \\   / |/ /    /   |   / __/ \033[0;1;42;97m";
+            irA(4, PANEL_COL); cout << "\033[42;93m /_____/ |\033[1;97m / /| |   / /|_/ /   / /| |    / /  / / / / /    /    / /| |  \\__ \\ \033[0;1;42;97m";
+            irA(5, PANEL_COL); cout << "\033[42;93m |     | |\033[1;97m / ___ |  / /  / /   / ___ |   / /_/ /_/ / / /|  /   / ___ | ___/ /  \033[0;1;42;97m";
+            irA(6, PANEL_COL); cout << "\033[42;93m |_____|/ \033[1;97m /_/  |_| /_/  /_/   /_/  |_|  /___/ \\____/ /_/ |_/   /_/  |_|/____/  \033[0;1;42;97m";
 
-            irA(12, PANEL_COL); cout << "\033[0;42;97m    1. Ver Catalogo Completo (Agregar por ID)";
-            irA(14, PANEL_COL); cout << "\033[0;42;97m    2. Buscar producto por nombre especifico";
-            irA(16, PANEL_COL); cout << "\033[0;42;97m    3. Ver Catalogo ordenado por Precio";
-            irA(18, PANEL_COL); cout << "\033[0;42;97m    4. Registrar Direccion de Envio";
-            irA(20, PANEL_COL); cout << "\033[0;42;97m    5. Dejar Resena de un Producto";
-            irA(22, PANEL_COL); cout << "\033[0;42;97m    6. Soporte - Reportar problema con pedido";
+            irA(12, PANEL_COL); cout << "\033[0;1;42;97m    1. Ver Catalogo Completo (Agregar por ID)";
+            irA(14, PANEL_COL); cout << "\033[0;1;42;97m    2. Buscar producto por nombre especifico";
+            irA(16, PANEL_COL); cout << "\033[0;1;42;97m    3. Ver Catalogo ordenado por Precio";
+            irA(18, PANEL_COL); cout << "\033[0;1;42;97m    4. Registrar Direccion de Envio";
+            irA(20, PANEL_COL); cout << "\033[0;1;42;97m    5. Dejar Resena de un Producto";
+            irA(22, PANEL_COL); cout << "\033[0;1;42;97m    6. Soporte - Reportar problema con pedido";
 
             // NUEVO: Opción 7 con resaltado interactivo
-            irA(24, PANEL_COL); cout << "    \033[0;42;97m7. ";
+            irA(24, PANEL_COL); cout << "    \033[0;1;42;97m7. ";
             aplicarColorBasico(14 + (2 * 16)); cout << "Deseas que te recomiende un producto?"; aplicarColorBasico(0 + (2 * 16));
 
             irA(28, PANEL_COL); cout << "    ";
@@ -325,14 +325,14 @@ public:
             else if (c == '2') {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
-                irA(14, PANEL_COL); cout << "\033[0;42;97m  Ingrese nombre del producto: ";
+                irA(14, PANEL_COL); cout << "\033[0;1;42;97m  Ingrese nombre del producto: ";
                 string nom; cin.ignore(); getline(cin, nom);
 
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
                 inv.buscarPorNombre(nom);
 
-                irA(32, PANEL_COL); cout << "\033[0;42;97m  >> Ingrese el ID del producto que desea: ";
+                irA(32, PANEL_COL); cout << "\033[0;1;42;97m  >> Ingrese el ID del producto que desea: ";
                 string idStr; cin >> idStr;
 
                 if (idStr.find_first_not_of("0123456789") == string::npos) {
@@ -340,18 +340,18 @@ public:
                     Producto* p = inv.obtenerProducto(idBuscado);
 
                     if (p != nullptr && p->stock > 0) {
-                        irA(34, PANEL_COL); cout << "\033[0;42;97m  Desea agregar '" << p->nombre << "' al carrito? (S/N): ";
+                        irA(34, PANEL_COL); cout << "\033[0;1;42;97m  Desea agregar '" << p->nombre << "' al carrito? (S/N): ";
                         char confirma = _getch();
                         if (confirma == 's' || confirma == 'S') {
                             carrito->agregar(idBuscado);
-                            irA(36, PANEL_COL); cout << "  \033[92m>> Agregado con exito!\033[0;42;97m";
+                            irA(36, PANEL_COL); cout << "  \033[92m>> Agregado con exito!\033[0;1;42;97m";
                         }
                         else {
-                            irA(36, PANEL_COL); cout << "  \033[91m>> Operacion cancelada.\033[0;42;97m";
+                            irA(36, PANEL_COL); cout << "  \033[91m>> Operacion cancelada.\033[0;1;42;97m";
                         }
                     }
                     else {
-                        irA(34, PANEL_COL); cout << "  \033[91m>> Producto no encontrado o sin stock.\033[0;42;97m";
+                        irA(34, PANEL_COL); cout << "  \033[91m>> Producto no encontrado o sin stock.\033[0;1;42;97m";
                     }
                 }
                 pausaRetroceder(39);
@@ -368,14 +368,14 @@ public:
                 grafica.dibujarFondoSinLogo();
                 direccionEnvio.registrar(12);
                 if (direccionEnvio.esValida()) {
-                    irA(24, PANEL_COL); cout << "  \033[92m>> Direccion registrada correctamente.\033[0;42;97m";
+                    irA(24, PANEL_COL); cout << "  \033[92m>> Direccion registrada correctamente.\033[0;1;42;97m";
                 }
                 pausaRetroceder(26);
             }
             else if (c == '5') {
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
-                irA(12, PANEL_COL); cout << "\033[0;42;97m  ID del producto a resenar: ";
+                irA(12, PANEL_COL); cout << "\033[0;1;42;97m  ID del producto a resenar: ";
                 string idStr; cin.ignore(); cin >> idStr;
                 if (idStr.find_first_not_of("0123456789") == string::npos) {
                     int idProd = stoi(idStr);
@@ -383,17 +383,17 @@ public:
                     if (p != nullptr) {
                         limpiarZonaVerde();
                         grafica.dibujarFondoSinLogo();
-                        irA(12, PANEL_COL); cout << "\033[0;42;97m  Producto: " << p->nombre;
-                        irA(14, PANEL_COL); cout << "\033[0;42;97m  Puntuacion (1-5): ";
+                        irA(12, PANEL_COL); cout << "\033[0;1;42;97m  Producto: " << p->nombre;
+                        irA(14, PANEL_COL); cout << "\033[0;1;42;97m  Puntuacion (1-5): ";
                         int punt; irA(14, PANEL_COL + 20); cin >> punt;
-                        irA(16, PANEL_COL); cout << "\033[0;42;97m  Comentario: ";
+                        irA(16, PANEL_COL); cout << "\033[0;1;42;97m  Comentario: ";
                         string comentario; cin.ignore(); irA(16, PANEL_COL + 14);
                         getline(cin, comentario);
                         inv.getResenas()->agregarResena(idProd, p->nombre, dni, comentario, punt);
-                        irA(19, PANEL_COL); cout << "  \033[92m>> Resena registrada. Gracias!\033[0;42;97m";
+                        irA(19, PANEL_COL); cout << "  \033[92m>> Resena registrada. Gracias!\033[0;1;42;97m";
                     }
                     else {
-                        irA(14, PANEL_COL); cout << "  \033[91m>> Producto no encontrado.\033[0;42;97m";
+                        irA(14, PANEL_COL); cout << "  \033[91m>> Producto no encontrado.\033[0;1;42;97m";
                     }
                 }
                 pausaRetroceder(22);
@@ -402,25 +402,25 @@ public:
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
 
-                irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[91m========================================================\033[0;42;97m";
-                irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[91m                  SOPORTE AL CLIENTE                    \033[0;42;97m";
-                irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[91m========================================================\033[0;42;97m";
+                irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[91m========================================================\033[0;1;42;97m";
+                irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[91m                  SOPORTE AL CLIENTE                    \033[0;1;42;97m";
+                irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[91m========================================================\033[0;1;42;97m";
 
-                irA(12, PANEL_COL); cout << "\033[0;42;97m    1. Reportar un problema";
-                irA(14, PANEL_COL); cout << "\033[0;42;97m    2. Solicitar devolucion de ultima compra";
-                irA(16, PANEL_COL); cout << "\033[0;42;97m    3. Ver mis tickets";
-                irA(20, PANEL_COL); cout << "\033[0;42;97m    Opcion: ";
+                irA(12, PANEL_COL); cout << "\033[0;1;42;97m    1. Reportar un problema";
+                irA(14, PANEL_COL); cout << "\033[0;1;42;97m    2. Solicitar devolucion de ultima compra";
+                irA(16, PANEL_COL); cout << "\033[0;1;42;97m    3. Ver mis tickets";
+                irA(20, PANEL_COL); cout << "\033[0;1;42;97m    Opcion: ";
                 char op2 = _getch();
 
                 if (op2 == '1') {
                     limpiarZonaVerde();
                     grafica.dibujarFondoSinLogo();
-                    irA(12, PANEL_COL); cout << "\033[0;42;97m  Asunto: ";
+                    irA(12, PANEL_COL); cout << "\033[0;1;42;97m  Asunto: ";
                     string asunto; cin.ignore(); irA(12, PANEL_COL + 10); getline(cin, asunto);
-                    irA(14, PANEL_COL); cout << "\033[0;42;97m  Descripcion del problema: ";
+                    irA(14, PANEL_COL); cout << "\033[0;1;42;97m  Descripcion del problema: ";
                     string desc; irA(14, PANEL_COL + 28); getline(cin, desc);
                     inv.getSoporte()->abrirTicket(dni, nombre, asunto, desc);
-                    irA(17, PANEL_COL); cout << "  \033[92m>> Ticket abierto. Un agente lo revisara pronto.\033[0;42;97m";
+                    irA(17, PANEL_COL); cout << "  \033[92m>> Ticket abierto. Un agente lo revisara pronto.\033[0;1;42;97m";
                 }
                 else if (op2 == '2') {
                     limpiarZonaVerde();
@@ -432,19 +432,19 @@ public:
                             correoIngresado == correo;
                         };
 
-                    irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
-                    irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[93m          VERIFICACION DE IDENTIDAD - REEMBOLSO         \033[0;42;97m";
-                    irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
+                    irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
+                    irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m          VERIFICACION DE IDENTIDAD - REEMBOLSO         \033[0;1;42;97m";
+                    irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
 
-                    irA(12, PANEL_COL); cout << "\033[0;42;97m  Confirme sus datos para continuar:";
-                    irA(14, PANEL_COL); cout << "\033[0;42;97m  Nombre : "; string nomV; cin.ignore(); irA(14, PANEL_COL + 11); getline(cin, nomV);
-                    irA(15, PANEL_COL); cout << "\033[0;42;97m  Correo : "; string correoV;           irA(15, PANEL_COL + 11); getline(cin, correoV);
-                    irA(16, PANEL_COL); cout << "\033[0;42;97m  DNI    : "; string dniV;              irA(16, PANEL_COL + 11); getline(cin, dniV);
+                    irA(12, PANEL_COL); cout << "\033[0;1;42;97m  Confirme sus datos para continuar:";
+                    irA(14, PANEL_COL); cout << "\033[0;1;42;97m  Nombre : "; string nomV; cin.ignore(); irA(14, PANEL_COL + 11); getline(cin, nomV);
+                    irA(15, PANEL_COL); cout << "\033[0;1;42;97m  Correo : "; string correoV;           irA(15, PANEL_COL + 11); getline(cin, correoV);
+                    irA(16, PANEL_COL); cout << "\033[0;1;42;97m  DNI    : "; string dniV;              irA(16, PANEL_COL + 11); getline(cin, dniV);
 
                     if (!validarIdentidad(nomV, correoV, dniV)) {
                         limpiarZonaVerde();
                         grafica.dibujarFondoSinLogo();
-                        irA(16, PANEL_COL); cout << "  \033[91m>> Datos incorrectos. No se puede procesar el reembolso.\033[0;42;97m";
+                        irA(16, PANEL_COL); cout << "  \033[91m>> Datos incorrectos. No se puede procesar el reembolso.\033[0;1;42;97m";
                         pausaRetroceder(19);
                     }
                     else {
@@ -452,12 +452,12 @@ public:
                         grafica.dibujarFondoSinLogo();
                         vector<Venta> misCompras = inv.obtenerVentasPorCliente(dni);
                         if (misCompras.empty()) {
-                            irA(14, PANEL_COL); cout << "  \033[91m>> No tienes compras registradas aun.\033[0;42;97m";
+                            irA(14, PANEL_COL); cout << "  \033[91m>> No tienes compras registradas aun.\033[0;1;42;97m";
                         }
                         else {
-                            irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[96m========================================================\033[0;42;97m";
-                            irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[96m               TUS COMPRAS REGISTRADAS                  \033[0;42;97m";
-                            irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[96m========================================================\033[0;42;97m";
+                            irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m========================================================\033[0;1;42;97m";
+                            irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m               TUS COMPRAS REGISTRADAS                  \033[0;1;42;97m";
+                            irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[96m========================================================\033[0;1;42;97m";
 
                             int fila = 12;
                             for (int i = 0; i < (int)misCompras.size() && fila < 35; i++) {
@@ -467,7 +467,7 @@ public:
                                     " | " + misCompras[i].fechaTexto;
                                 imprimirEnPanel(fila++, item);
                             }
-                            irA(36, PANEL_COL); cout << "\033[0;42;97m  Ingrese numeros de compras a devolver (ej: 1 2 3), 0 para cancelar: ";
+                            irA(36, PANEL_COL); cout << "\033[0;1;42;97m  Ingrese numeros de compras a devolver (ej: 1 2 3), 0 para cancelar: ";
                             irA(37, PANEL_COL);
                             int sel;
                             bool huboDevolucion = false;
@@ -481,11 +481,11 @@ public:
                             limpiarZonaVerde();
                             grafica.dibujarFondoSinLogo();
                             if (huboDevolucion) {
-                                irA(14, PANEL_COL); cout << "  \033[92m>> Reembolso solicitado correctamente.\033[0;42;97m";
-                                irA(15, PANEL_COL); cout << "  \033[92m>> Un agente revisara y confirmara cada devolucion.\033[0;42;97m";
+                                irA(14, PANEL_COL); cout << "  \033[92m>> Reembolso solicitado correctamente.\033[0;1;42;97m";
+                                irA(15, PANEL_COL); cout << "  \033[92m>> Un agente revisara y confirmara cada devolucion.\033[0;1;42;97m";
                             }
                             else {
-                                irA(14, PANEL_COL); cout << "  \033[91m>> No se selecciono ninguna compra.\033[0;42;97m";
+                                irA(14, PANEL_COL); cout << "  \033[91m>> No se selecciono ninguna compra.\033[0;1;42;97m";
                             }
                         }
                     }
@@ -559,14 +559,14 @@ public:
             limpiarZonaVerde();
             grafica.dibujarFondoSinLogo();
 
-            irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
-            irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[93m               --- MI CARRITO DE COMPRAS ---            \033[0;42;97m";
-            irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[93m========================================================\033[0;42;97m";
+            irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
+            irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m               --- MI CARRITO DE COMPRAS ---            \033[0;1;42;97m";
+            irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[93m========================================================\033[0;1;42;97m";
 
-            irA(12, PANEL_COL); cout << "\033[0;42;97m    1. Ver lista de productos anadidos";
-            irA(14, PANEL_COL); cout << "\033[0;42;97m    2. Proceder al pago final";
-            irA(16, PANEL_COL); cout << "\033[0;42;97m    3. Historial de pedidos - Orden por Monto";
-            irA(20, PANEL_COL); cout << "    \033[93m[ESC] Volver al Menu Principal\033[0;42;97m";
+            irA(12, PANEL_COL); cout << "\033[0;1;42;97m    1. Ver lista de productos anadidos";
+            irA(14, PANEL_COL); cout << "\033[0;1;42;97m    2. Proceder al pago final";
+            irA(16, PANEL_COL); cout << "\033[0;1;42;97m    3. Historial de pedidos - Orden por Monto";
+            irA(20, PANEL_COL); cout << "    \033[93m[ESC] Volver al Menu Principal\033[0;1;42;97m";
 
             int c = _getch();
             if (c == 27) break;
@@ -604,17 +604,17 @@ public:
             grafica.dibujarFondoSinLogo();
 
             if (pantallaActual == MENU_PRINCIPAL) {
-                irA(4, PANEL_COL); cout << "\033[0;42;97m            \033[94m========================================================\033[0;42;97m";
+                irA(4, PANEL_COL); cout << "\033[0;1;42;97m            \033[94m========================================================\033[0;1;42;97m";
 
                 string saludo = "             BIENVENIDO AL MARKETPLACE, " + nombre;
                 while (saludo.length() < 56) saludo += " ";
-                irA(5, PANEL_COL); cout << "\033[0;42;97m            \033[94m" << saludo << "\033[0;42;97m";
-                irA(6, PANEL_COL); cout << "\033[0;42;97m            \033[94m========================================================\033[0;42;97m";
+                irA(5, PANEL_COL); cout << "\033[0;1;42;97m            \033[94m" << saludo << "\033[0;1;42;97m";
+                irA(6, PANEL_COL); cout << "\033[0;1;42;97m            \033[94m========================================================\033[0;1;42;97m";
 
-                irA(12, PANEL_COL); cout << "\033[0;42;97m    1. Entrar a la Tienda (Catalogo y Busqueda)";
-                irA(14, PANEL_COL); cout << "\033[0;42;97m    2. Gestionar mi Carrito de Compras";
-                irA(16, PANEL_COL); cout << "\033[0;42;97m    3. Mi Presupuesto y Filtros Inteligentes";
-                irA(20, PANEL_COL); cout << "\033[0;42;97m    \033[93m[ESC] Salir del Sistema de Cliente\033[0;42;97m";
+                irA(12, PANEL_COL); cout << "\033[0;1;42;97m    1. Entrar a la Tienda (Catalogo y Busqueda)";
+                irA(14, PANEL_COL); cout << "\033[0;1;42;97m    2. Gestionar mi Carrito de Compras";
+                irA(16, PANEL_COL); cout << "\033[0;1;42;97m    3. Mi Presupuesto y Filtros Inteligentes";
+                irA(20, PANEL_COL); cout << "\033[0;1;42;97m    \033[93m[ESC] Salir del Sistema de Cliente\033[0;1;42;97m";
 
                 // EASTER EGG: Interaccion con el ojito del fondo
                 if (_kbhit()) {
@@ -648,11 +648,11 @@ public:
                 float presupuesto;
                 limpiarZonaVerde();
                 grafica.dibujarFondoSinLogo();
-                irA(10, PANEL_COL); cout << "\033[0;42;97m  Cuanto dinero tienes? S/. "; cin >> presupuesto;
+                irA(10, PANEL_COL); cout << "\033[0;1;42;97m  Cuanto dinero tienes? S/. "; cin >> presupuesto;
                 if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); presupuesto = 0; }
 
                 // Aquí podrías listar cosas que alcancen con ese presupuesto...
-                irA(12, PANEL_COL); cout << "\033[92m  >> Procesando opciones para S/." << presupuesto << "...\033[0;42;97m";
+                irA(12, PANEL_COL); cout << "\033[92m  >> Procesando opciones para S/." << presupuesto << "...\033[0;1;42;97m";
                 pausaRetroceder(15);
                 historialNavegacion.desapilar();
             }
