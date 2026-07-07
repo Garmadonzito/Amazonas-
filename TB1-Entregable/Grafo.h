@@ -7,7 +7,7 @@ using namespace std;
 template<class T, T vacio = -1>
 class CGrafo {
 private:
-    // Creando class CArco con el T info e indice v
+    
     class CArco {
     public:
         T info;
@@ -18,29 +18,29 @@ private:
         }
     };
 
-    // es el nodo
+    
     class CVertice {
     public:
-        T info; // contiene su informacion
-        vector<CArco*>* ady; // Lista de adyacencia de class CArco, puntero vector
+        T info; 
+        vector<CArco*>* ady; 
         CVertice() {
             info = vacio;
             ady = new vector<CArco*>();
         }
-        ~CVertice() { // NUEVO: Destructor para evitar fugas de memoria
+        ~CVertice() { 
             for (CArco* arco : *ady) delete arco;
             delete ady;
         }
     };
 
     
-    vector<CVertice*>* vertices; // creamos un vector de tipo puntero
+    vector<CVertice*>* vertices; 
 
 public:
     CGrafo() {
         vertices = new vector<CVertice*>(); 
     }
-    ~CGrafo() { // NUEVO: Destructor del grafo completo
+    ~CGrafo() {
         for (CVertice* vertice : *vertices) delete vertice;
         delete vertices;
     }

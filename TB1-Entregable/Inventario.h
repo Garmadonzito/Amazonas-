@@ -838,16 +838,16 @@ public:
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
             idProductos.push_back(actual->dato.id);
-            ventasProductos.push_back(0); // Iniciamos contador en 0
+            ventasProductos.push_back(0); 
 
-            // Añadir el producto como vértice (los índices serán 1, 2, 3...)
+            
             grafo->adicionarVertice(actual->dato.id);
             actual = actual->siguiente;
         }
 
         if (idProductos.empty()) {
             delete grafo;
-            return nullptr; // No hay catálogo para recomendar
+            return nullptr; 
         }
 
         // 3. Recorremos el historial binario de ventas para pesar las conexiones
@@ -857,7 +857,7 @@ public:
             while (archivo.read((char*)&reg, sizeof(RegistroVenta))) {
                 for (size_t j = 0; j < idProductos.size(); j++) {
                     if (reg.idProducto == idProductos[j]) {
-                        ventasProductos[j]++; // Sumamos 1 venta como peso
+                        ventasProductos[j]++;
                         break;
                     }
                 }
@@ -885,7 +885,7 @@ public:
         }
 
         Producto* recomendado = nullptr;
-        // Si el mejor producto tiene al menos 1 venta, lo extraemos
+       
         if (mejorIndiceVertice != -1 && maxV > 0) {
             int idRecomendado = grafo->obtenerVertice(mejorIndiceVertice);
             recomendado = obtenerProducto(idRecomendado);
