@@ -14,7 +14,7 @@
 #include "HeapSort.h"  
 #include "QuickSort.h" 
 #include "MergeSort.h" 
-#include "Grafo.h"       // <--- INCLUSION DEL MOTOR DE RECOMENDACIONES
+#include "Grafo.h"      
 #include <string>
 #include <iostream>
 #include <vector>
@@ -823,20 +823,18 @@ public:
         imprimirEnPanel(fila, "\033[92m>> Catalogo de reputacion ordenado mediante Max-Heap de manera exitosa.\033[0;1;42;97m");
     }
 
-    // =========================================================
-    // NUEVA FUNCIONALIDAD: RECOMENDACION INTELIGENTE CON GRAFO
-    // =========================================================
+    
     Producto* obtenerRecomendacionDelGrafo(int& maxVentas) {
-        // Creamos el grafo (T = int para guardar el ID del producto)
+        
         CGrafo<int>* grafo = new CGrafo<int>();
 
-        // 1. Añadimos el Vértice 0: El "Nodo Central" (El Motor de la Tienda)
+        
         grafo->adicionarVertice(0);
 
         vector<int> idProductos;
         vector<int> ventasProductos;
 
-        // 2. Extraemos todos los productos como Vértices
+
         Nodo<Producto>* actual = listaProductos->getCabeza();
         while (actual != nullptr) {
             idProductos.push_back(actual->dato.id);
@@ -870,7 +868,7 @@ public:
         // 4. Creamos los ARCOS desde el Nodo Central hacia cada Producto
         for (size_t j = 0; j < idProductos.size(); j++) {
             grafo->adicionarArco(0, j + 1);
-            // El peso del arco es la cantidad de ventas históricas
+          
             grafo->modificarArco(0, j, ventasProductos[j]);
         }
 
@@ -894,7 +892,7 @@ public:
             maxVentas = maxV;
         }
 
-        delete grafo; // Liberamos memoria de la RAM
+        delete grafo; 
         return recomendado;
     }
 };

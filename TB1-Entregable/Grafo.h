@@ -12,9 +12,9 @@ private:
     public:
         T info;
         int v; // indice del vertice de llegada
-        CArco(int vLlegada) { // Constructor
+        CArco(int vLlegada) { 
             info = vacio;
-            v = vLlegada; // a donde llegara
+            v = vLlegada; 
         }
     };
 
@@ -33,19 +33,19 @@ private:
         }
     };
 
-    // Lista de vertices
+    
     vector<CVertice*>* vertices; // creamos un vector de tipo puntero
 
 public:
     CGrafo() {
-        vertices = new vector<CVertice*>(); // constructor de CGrafo
+        vertices = new vector<CVertice*>(); 
     }
     ~CGrafo() { // NUEVO: Destructor del grafo completo
         for (CVertice* vertice : *vertices) delete vertice;
         delete vertices;
     }
 
-    // Operaciones del Grafo
+    
     void adicionarVertice(T info) {
         CVertice* vert = new CVertice();
         vert->info = info;
@@ -64,7 +64,7 @@ public:
         (vertices->at(v))->info = info;
     }
 
-    // Operaciones del arco
+   
     void adicionarArco(int v, int vLlegada) {
         CVertice* ver = vertices->at(v);
         CArco* arc = new CArco(vLlegada);

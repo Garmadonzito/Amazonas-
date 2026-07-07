@@ -25,7 +25,7 @@ private:
     int calcularHash(const std::string& clave) {
         unsigned long hashValue = 5381;
         for (char c : clave) {
-            hashValue = ((hashValue << 5) + hashValue) ^ c;
+            hashValue = ((hashValue << 5) + hashValue) + c;
         }
         return hashValue % capacidad;
     }

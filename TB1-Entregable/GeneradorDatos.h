@@ -41,10 +41,10 @@ public:
 
         vector<int> idsProductos = { 101, 102, 103, 104, 105, 201, 202, 203 };
 
-        // CORRECCIÓN: Obtenemos el pool de clientes REALES desde la Tabla Hash
+        
         vector<RegistroCliente> clientesReales = inv.obtenerListaClientes();
 
-        // Seguro por si se ejecuta ventas antes que clientes
+        
         if (clientesReales.empty()) {
             generarClientesAleatorios(20, inv);
             clientesReales = inv.obtenerListaClientes();
@@ -56,7 +56,7 @@ public:
         long long tiempoActual = (long long)time(0);
 
         for (int i = 0; i < cantidad; i++) {
-            // CORRECCIÓN: Elegimos un cliente aleatorio del pool generado, no inventado.
+            
             int idxCliente = rand() % clientesReales.size();
             RegistroCliente clienteElegido = clientesReales[idxCliente];
 
@@ -77,10 +77,10 @@ public:
 
             strncpy_s(reg.fechaTexto, sizeof(reg.fechaTexto), fechaT, _TRUNCATE);
             strncpy_s(reg.nombreProducto, sizeof(reg.nombreProducto), p->nombre.c_str(), _TRUNCATE);
-            // Emparejamos el DNI real
+            
             strncpy_s(reg.dniCliente, sizeof(reg.dniCliente), clienteElegido.dni, _TRUNCATE);
 
-            // Almacenamos el nombre y DNI real en la memoria
+            
             Venta nuevaVenta(p->id, clienteElegido.dni, clienteElegido.nombre, p->nombre, p->precio, 1, p->stock, false, reg.fechaHora, fechaT);
 
             loteRegistros.push_back(reg);
